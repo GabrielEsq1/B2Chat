@@ -1,0 +1,40 @@
+
+> b2bchat@1.0.0 build
+> next build
+
+   ▲ Next.js 16.0.4 (Turbopack)
+   - Environments: .env.local, .env
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+Error: Cannot find module 'caniuse-lite/data/features/css-featurequeries.js'
+Require stack:
+- D:\B2BChat\node_modules\autoprefixer\lib\supports.js
+- D:\B2BChat\node_modules\autoprefixer\lib\prefixes.js
+- D:\B2BChat\node_modules\autoprefixer\lib\autoprefixer.js
+- D:\B2BChat\.next\build\chunks\[root-of-the-server]__6d51cb5d._.js
+- D:\B2BChat\.next\build\chunks\[turbopack]_runtime.js
+- D:\B2BChat\.next\build\postcss.js
+    [at Function._resolveFilename (node:internal/modules/cjs/loader:1383:15)]
+    [at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)]
+    [at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)]
+    [at Function._load (node:internal/modules/cjs/loader:1192:37)]
+    [at TracingChannel.traceSync (node:diagnostics_channel:322:14)]
+    [at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)]
+    [at Module.require (node:internal/modules/cjs/loader:1463:12)]
+    [at require (node:internal/modules/helpers:147:16)]
+    [at Object.<anonymous> (D:\B2BChat\node_modules\autoprefixer\lib\supports.js:1:22)]
+    [at Module._compile (node:internal/modules/cjs/loader:1706:14)]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at ignore-listed frames

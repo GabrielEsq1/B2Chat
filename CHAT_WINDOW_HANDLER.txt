@@ -1,0 +1,74 @@
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    
+    // Validation
+    if (!newMessage.trim()) {
+      console.log('[ChatWindow] No message to send');
+      return;
+    }
+    
+    if (!session?.user?.id) {
+      console.error('[ChatWindow] No session');
+      alert('Debes iniciar sesión para enviar mensajes');
+      return;
+    }
+    
+    if (!conversation?.id) {
+      console.error('[ChatWindow] No conversation');
+      alert('No hay conversación activa');
+      return;
+    }
+
+    const messageText = newMessage.trim();
+    console.log('[ChatWindow] Sending:', messageText);
+    
+    // Clear input immediately for better UX
+    setNewMessage("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/messages/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationId: conversation.id,
+          text: messageText
+        }),
+      });
+
+      console.log('[ChatWindow] Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('[ChatWindow] Error:', errorData);
+        throw new Error(errorData.error || 'Error al enviar mensaje');
+      }
+
+      const data = await response.json();
+      console.log('[ChatWindow] Success:', data);
+
+      if (data.success && data.message) {
+        // Add message to local state
+        setMessages((prev) => [...prev, {
+          id: data.message.id,
+          text: data.message.text,
+          senderId: data.message.senderUserId,
+          conversationId: data.message.conversationId,
+          createdAt: new Date(data.message.createdAt),
+          read: false,
+          attachmentUrl: data.message.attachmentUrl
+        }]);
+        console.log('[ChatWindow] Message added to UI');
+      } else {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+    } catch (error: any) {
+      console.error("[ChatWindow] Send error:", error);
+      alert(`Error: ${error.message}`);
+      // Restore message if failed
+      setNewMessage(messageText);
+    } finally {
+      setLoading(false);
+    }
+  };

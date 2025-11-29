@@ -1,0 +1,511 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Upload, Play, Image as ImageIcon, Check, DollarSign, Users, Target } from "lucide-react";
+import { WHATSAPP_CONFIG } from "@/config/whatsapp";
+
+export default function CreateCampaignPage() {
+    const router = useRouter();
+    const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        objective: "SALES",
+        industry: "",
+        sector: "",
+        roles: "",
+        dailyBudget: 100000,
+        totalBudget: 700000,
+        creativeType: "IMAGE",
+        creativeUrl: "",
+        creativeText: "",
+        // New fields for segmentation and ad details
+        ageRange: "",
+        gender: "",
+        location: "",
+        description: "",
+        destinationUrl: "",
+        uploading: false,
+    });
+
+    // Calculate duration automatically
+    const durationDays = Math.ceil(formData.totalBudget / formData.dailyBudget);
+
+    const handleNext = () => setStep(step + 1);
+    const handleBack = () => setStep(step - 1);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setFormData({ ...formData, uploading: true });
+        try {
+            const uploadData = new FormData();
+            uploadData.append('file', file);
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: uploadData,
+            });
+            const data = await response.json();
+            if (data.success) {
+                setFormData({ ...formData, creativeUrl: data.url, uploading: false });
+            } else {
+                alert(data.error || 'Error al subir archivo');
+                setFormData({ ...formData, uploading: false });
+            }
+        } catch (error) {
+            alert('Error al subir archivo');
+            setFormData({ ...formData, uploading: false });
+        }
+    };
+
+    const handleCreateCampaign = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/campaigns/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    objective: formData.objective,
+                    industry: formData.industry,
+                    sector: formData.sector,
+                    targetRoles: formData.roles.split(',').map(r => r.trim()).filter(Boolean),
+                    dailyBudget: formData.dailyBudget,
+                    totalBudget: formData.totalBudget,
+                    creativeType: formData.creativeType,
+                    creativeUrl: formData.creativeUrl,
+                    creativeText: formData.creativeText,
+                    description: formData.description,
+                    destinationUrl: formData.destinationUrl,
+                    ageRange: formData.ageRange,
+                    gender: formData.gender,
+                    location: formData.location,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Prepare WhatsApp message with campaign details
+                const whatsappMessage = `🎯 *Nueva Campaña Creada*%0A%0A` +
+                    `📋 *Campaña:* ${formData.name}%0A` +
+                    `🎯 *Objetivo:* ${formData.objective}%0A` +
+                    `🏢 *Industria:* ${formData.industry} - ${formData.sector}%0A` +
+                    `💰 *Presupuesto Total:* $${formData.totalBudget.toLocaleString('es-CO')} COP%0A` +
+                    `📅 *Duración:* ${durationDays} días%0A` +
+                    `💵 *Presupuesto Diario:* $${formData.dailyBudget.toLocaleString('es-CO')} COP%0A%0A` +
+                    `👤 *Segmentación:*%0A` +
+                    `- Edad: ${formData.ageRange}%0A` +
+                    `- Género: ${formData.gender}%0A` +
+                    `- Ubicación: ${formData.location}%0A%0A` +
+                    `🔗 *URL Destino:* ${formData.destinationUrl}%0A%0A` +
+                    `✅ *Campaña creada exitosamente*%0A%0A` +
+                    `Por favor, envía el link de pago al cliente.`;
+
+                // Redirect to WhatsApp (configured in src/config/whatsapp.ts)
+                const whatsappNumber = WHATSAPP_CONFIG.phoneNumber;
+                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+
+                // Open WhatsApp in new tab
+                window.open(whatsappUrl, '_blank');
+
+                // Redirect to ads manager after a short delay
+                setTimeout(() => {
+                    router.push('/ads-manager');
+                }, 1000);
+            } else {
+                alert(data.error || 'Error al crear la campaña');
+            }
+        } catch (error) {
+            alert('Error al crear la campaña');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Header */}
+            <div className="bg-white shadow-sm">
+                <div className="mx-auto max-w-5xl px-4 py-4">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+                            <ArrowLeft className="h-6 w-6" />
+                        </button>
+                        <h1 className="text-xl font-semibold text-gray-900">Crear Nueva Campaña</h1>
+                    </div>
+                    {/* Progress Steps */}
+                    <div className="mt-6 flex items-center justify-between px-10">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                            <div key={s} className="flex flex-col items-center">
+                                <div
+                                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${step >= s ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"}`}
+                                >
+                                    {s}
+                                </div>
+                                <span className="mt-2 text-xs text-gray-500">
+                                    {s === 1 && "Detalles"}
+                                    {s === 2 && "Segmentación"}
+                                    {s === 3 && "Presupuesto"}
+                                    {s === 4 && "Creativo"}
+                                    {s === 5 && "Revisar"}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="mx-auto mt-8 max-w-3xl px-4">
+                {/* Step 1: Details */}
+                {step === 1 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Detalles de la Campaña</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Nombre de la Campaña</label>
+                                <input
+                                    type="text"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Ej: Promoción Verano 2025"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Objetivo</label>
+                                <div className="mt-2 grid grid-cols-3 gap-4">
+                                    {[{ id: "TRAFFIC", label: "Tráfico", icon: Target }, { id: "SALES", label: "Ventas", icon: DollarSign }, { id: "AWARENESS", label: "Reconocimiento", icon: Users }].map((obj) => (
+                                        <button
+                                            key={obj.id}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, objective: obj.id })}
+                                            className={`flex flex-col items-center justify-center rounded-lg border p-4 text-center hover:bg-gray-50 ${formData.objective === obj.id ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"}`}
+                                        >
+                                            <obj.icon className="mb-2 h-6 w-6" />
+                                            <span className="text-sm font-medium">{obj.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 2: Segmentation */}
+                {step === 2 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Segmentación B2B</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Industria</label>
+                                <select
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    value={formData.industry}
+                                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Seleccionar Industria</option>
+                                    <option value="Tecnología">Tecnología</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Manufactura">Manufactura</option>
+                                    <option value="Servicios">Servicios</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Sector</label>
+                                <select
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    value={formData.sector}
+                                    onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Seleccionar Sector</option>
+                                    <option value="B2B">B2B</option>
+                                    <option value="B2C">B2C</option>
+                                    <option value="SaaS">SaaS</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Cargos (Roles)</label>
+                                <input
+                                    type="text"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Ej: CEO, Gerente de Compras, Director TI"
+                                    value={formData.roles}
+                                    onChange={(e) => setFormData({ ...formData, roles: e.target.value })}
+                                    required
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Separa los cargos con comas</p>
+                            </div>
+                            {/* New segmentation fields */}
+                            <div className="space-y-4 mt-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Rango de Edad</label>
+                                    <select
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        value={formData.ageRange}
+                                        onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
+                                        required
+                                    >
+                                        <option value="">Seleccionar Rango</option>
+                                        <option value="18-25">18-25</option>
+                                        <option value="26-35">26-35</option>
+                                        <option value="36-45">36-45</option>
+                                        <option value="46+">46+</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Género</label>
+                                    <select
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        value={formData.gender}
+                                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                        required
+                                    >
+                                        <option value="">Seleccionar Género</option>
+                                        <option value="ALL">Todos</option>
+                                        <option value="MALE">Masculino</option>
+                                        <option value="FEMALE">Femenino</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Ubicación</label>
+                                    <input
+                                        type="text"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        placeholder="Ej: Bogotá, Medellín"
+                                        value={formData.location}
+                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 3: Budget */}
+                {step === 3 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Presupuesto</h2>
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Presupuesto Diario (COP)</label>
+                                <div className="mt-1 relative rounded-md shadow-sm">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <span className="text-gray-500 sm:text-sm">$</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        className="block w-full rounded-md border border-gray-300 pl-7 pr-12 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        placeholder="100000"
+                                        value={formData.dailyBudget}
+                                        onChange={(e) => setFormData({ ...formData, dailyBudget: Number(e.target.value) })}
+                                        min={10000}
+                                        step={10000}
+                                    />
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <span className="text-gray-500 sm:text-sm">COP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Presupuesto Total (COP)</label>
+                                <div className="mt-1 relative rounded-md shadow-sm">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <span className="text-gray-500 sm:text-sm">$</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        className="block w-full rounded-md border border-gray-300 pl-7 pr-12 py-2 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        placeholder="700000"
+                                        value={formData.totalBudget}
+                                        onChange={(e) => setFormData({ ...formData, totalBudget: Number(e.target.value) })}
+                                        min={formData.dailyBudget}
+                                        step={50000}
+                                    />
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <span className="text-gray-500 sm:text-sm">COP</span>
+                                    </div>
+                                </div>
+                                <p className="mt-1 text-xs text-gray-500">Mínimo: {formData.dailyBudget.toLocaleString('es-CO')}</p>
+                            </div>
+                            <div className="rounded-lg bg-blue-50 p-4">
+                                <div className="flex justify-between text-sm font-medium text-blue-900">
+                                    <span>Duración Calculada:</span>
+                                    <span className="text-lg">{durationDays} días</span>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-600">Presupuesto Total: {formData.totalBudget.toLocaleString('es-CO')} COP</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 4: Creative */}
+                {step === 4 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Creativo del Anuncio</h2>
+                        <div className="space-y-6">
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, creativeType: "IMAGE" })}
+                                    className={`flex-1 rounded-lg border p-3 text-center ${formData.creativeType === "IMAGE" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200"}`}
+                                >
+                                    <ImageIcon className="mx-auto mb-1 h-5 w-5" />
+                                    Imagen
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, creativeType: "VIDEO" })}
+                                    className={`flex-1 rounded-lg border p-3 text-center ${formData.creativeType === "VIDEO" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200"}`}
+                                >
+                                    <Play className="mx-auto mb-1 h-5 w-5" />
+                                    Video (Max 20s)
+                                </button>
+                            </div>
+                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center hover:bg-gray-50">
+                                <input
+                                    type="file"
+                                    id="file-upload"
+                                    className="hidden"
+                                    accept={formData.creativeType === "IMAGE" ? "image/*" : "video/mp4"}
+                                    onChange={handleFileUpload}
+                                    disabled={formData.uploading}
+                                />
+                                <label htmlFor="file-upload" className="cursor-pointer">
+                                    {formData.uploading ? (
+                                        <div>
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+                                            <p className="mt-2 text-sm text-gray-600">Subiendo...</p>
+                                        </div>
+                                    ) : formData.creativeUrl ? (
+                                        <div>
+                                            <Check className="mx-auto h-12 w-12 text-green-500" />
+                                            <p className="mt-2 text-sm text-green-600">Archivo subido exitosamente</p>
+                                            <img src={formData.creativeUrl} alt="Preview" className="mx-auto mt-4 max-h-40 rounded" />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); setFormData({ ...formData, creativeUrl: "" }); }}
+                                                className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                                            >
+                                                Cambiar archivo
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                            <p className="mt-2 text-sm text-gray-600">
+                                                Arrastra tu {formData.creativeType === "IMAGE" ? "imagen" : "video"} aquí o haz clic para subir
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                {formData.creativeType === "IMAGE" ? "JPG, PNG hasta 10MB" : "MP4 hasta 20s"}
+                                            </p>
+                                        </div>
+                                    )}
+                                </label>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Texto del Anuncio</label>
+                                <input
+                                    type="text"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                    placeholder="Escribe un texto para tu anuncio..."
+                                    value={formData.creativeText}
+                                    onChange={(e) => setFormData({ ...formData, creativeText: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            {/* New fields for ad description and destination URL */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Descripción del Anuncio</label>
+                                <textarea
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                    placeholder="Descripción breve..."
+                                    rows={3}
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">URL de Destino</label>
+                                <input
+                                    type="url"
+                                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                    placeholder="https://example.com"
+                                    value={formData.destinationUrl}
+                                    onChange={(e) => setFormData({ ...formData, destinationUrl: e.target.value })}
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 5: Review */}
+                {step === 5 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Revisar Campaña</h2>
+                        <div className="space-y-4 rounded-lg bg-gray-50 p-4 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Campaña:</span>
+                                <span className="font-medium text-gray-900">{formData.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Objetivo:</span>
+                                <span className="font-medium text-gray-900">{formData.objective}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Segmentación:</span>
+                                <span className="font-medium text-gray-900">{formData.industry} - {formData.sector}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Presupuesto Diario:</span>
+                                <span className="font-medium text-gray-900">{formData.dailyBudget.toLocaleString('es-CO')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Duración:</span>
+                                <span className="font-medium text-gray-900">{durationDays} días</span>
+                            </div>
+                            <div className="flex justify-between border-t border-gray-200 pt-2">
+                                <span className="font-bold text-gray-900">Total:</span>
+                                <span className="font-bold text-blue-600">{formData.totalBudget.toLocaleString('es-CO')} COP</span>
+                            </div>
+                        </div>
+                        <div className="mt-6">
+                            <button
+                                onClick={handleCreateCampaign}
+                                disabled={loading}
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+                            >
+                                {loading ? 'Creando...' : 'Crear Campaña'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="mt-6 flex justify-between">
+                    {step > 1 && (
+                        <button
+                            onClick={handleBack}
+                            className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                            Atrás
+                        </button>
+                    )}
+                    {step < 5 && (
+                        <button
+                            onClick={handleNext}
+                            className="ml-auto rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                            Siguiente
+                        </button>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

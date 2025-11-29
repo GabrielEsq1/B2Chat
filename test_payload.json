@@ -1,0 +1,10 @@
+{
+    "conversationId": "test-conv",
+    "userId": "test-user",
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hola"
+        }
+    ]
+}

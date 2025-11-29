@@ -1,0 +1,92 @@
+import { AuthOptions, Profile } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+
+export const authOptions: AuthOptions = {
+    providers: [
+        CredentialsProvider({
+            name: "Credentials",
+            credentials: {
+                phone: { label: "Phone", type: "text" },
+                password: { label: "Password", type: "password" },
+                otpCode: { label: "OTP Code", type: "text" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.phone) {
+                    throw new Error("Phone number is required");
+                }
+
+                const user = await prisma.user.findUnique({
+                    where: { phone: credentials.phone },
+                });
+
+                if (!user) {
+                    throw new Error("User not found");
+                }
+
+                // Check if using OTP or password
+                if (credentials.otpCode) {
+                    // OTP-based authentication
+                    if (!user.otpCode || !user.otpExpiresAt) {
+                        throw new Error("No active OTP code");
+                    }
+
+                    if (new Date() > user.otpExpiresAt) {
+                        throw new Error("OTP code has expired");
+                    }
+
+                    if (user.otpCode !== credentials.otpCode) {
+                        throw new Error("Invalid OTP code");
+                    }
+
+                    // Clear OTP after successful login
+                    await prisma.user.update({
+                        where: { phone: credentials.phone },
+                        data: { otpCode: null, otpExpiresAt: null },
+                    });
+                } else if (credentials.password) {
+                    // Password-based authentication
+                    const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+                    if (!isValid) {
+                        throw new Error("Invalid password");
+                    }
+                } else {
+                    throw new Error("Either password or OTP code is required");
+                }
+
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    role: user.role,
+                };
+            },
+        }),
+    ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                token.role = (user as any).role;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.id as string;
+                session.user.role = token.role as string;
+            }
+            return session;
+        },
+    },
+    pages: {
+        signIn: "/login",
+        error: "/login",
+    },
+    secret: process.env.NEXTAUTH_SECRET,
+    session: {
+        strategy: "jwt",
+    },
+};
