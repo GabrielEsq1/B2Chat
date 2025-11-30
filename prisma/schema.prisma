@@ -47,8 +47,10 @@ model User {
   otpCode                String?
   otpExpiresAt           DateTime?
   creditBalance          Float               @default(10.0)
-  planType               String              @default("FREE")
-  campaigns              AdCampaign[]
+  createdCampaigns       AdCampaign[]        @relation("CreatedCampaigns")
+  ads                    AdCreative[]
+  campaigns              AdCampaignUser[]
+  walletTransactions     Transaction[]       @relation("UserTransactions")
   conversationsAsA       Conversation[]      @relation("UserA")
   conversationsAsB       Conversation[]      @relation("UserB")
   creditTransactions     CreditTransaction[]
@@ -142,7 +144,7 @@ model Transaction {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User     @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])

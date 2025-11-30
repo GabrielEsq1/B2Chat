@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         const transaction = await nequiDeposit(user.phone, amount);
 
         // Save to database
-        await prisma.transaction.create({
+        const savedTransaction = await prisma.transaction.create({
             data: {
                 userId: session.user.id,
                 type: 'DEPOSIT',

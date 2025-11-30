@@ -1,5 +1,6 @@
-// Nequi API Client for Colombia
-// Documentation: https://conectate.nequi.com.co/
+// Nequi API Client for Colombia - Official Implementation
+// Documentation: https://conecta.nequi.com.co/
+// API Version: 2020-10-07T19:17:00Z
 
 const NEQUI_API_BASE = process.env.NEQUI_API_URL || 'https://api.nequi.com.co';
 const NEQUI_CLIENT_ID = process.env.NEQUI_CLIENT_ID;
@@ -9,7 +10,7 @@ const NEQUI_API_KEY = process.env.NEQUI_API_KEY;
 interface NequiAuthResponse {
     access_token: string;
     token_type: string;
-    expires_in: number;
+    expires_in: string; // Nequi returns string, not number
 }
 
 interface NequiTransaction {
@@ -39,9 +40,12 @@ async function getAccessToken(): Promise<string> {
     }
 
     try {
-        const auth = Buffer.from(`${NEQUI_CLIENT_ID}:${NEQUI_CLIENT_SECRET}`).toString('base64');
+        // Create Basic Auth header as per Nequi docs
+        const credentials = `${NEQUI_CLIENT_ID}:${NEQUI_CLIENT_SECRET}`;
+        const auth = Buffer.from(credentials).toString('base64');
 
-        const response = await fetch(`${NEQUI_API_BASE}/oauth/token`, {
+        // OAuth2 endpoint as per official docs
+        const response = await fetch(`${NEQUI_API_BASE}/oauth2/token`, {
             method: 'POST',
             headers: {
                 'Authorization': `Basic ${auth}`,
@@ -51,15 +55,17 @@ async function getAccessToken(): Promise<string> {
         });
 
         if (!response.ok) {
-            throw new Error(`Nequi auth failed: ${response.status}`);
+            const error = await response.text();
+            throw new Error(`Nequi auth failed (${response.status}): ${error}`);
         }
 
         const data: NequiAuthResponse = await response.json();
 
-        // Cache token
+        // Cache token (Nequi returns expires_in as string)
+        const expiresInSeconds = parseInt(data.expires_in);
         cachedToken = {
             token: data.access_token,
-            expiresAt: Date.now() + (data.expires_in * 1000) - 60000 // 1 min buffer
+            expiresAt: Date.now() + (expiresInSeconds * 1000) - 60000 // 1 min buffer
         };
 
         return data.access_token;
