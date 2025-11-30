@@ -14,6 +14,7 @@ import {
     UserCircle,
 } from "lucide-react";
 import { useState } from "react";
+import CreditBalance from "./monetization/CreditBalance";
 
 export default function AppNavbar() {
     const { data: session } = useSession();
@@ -107,6 +108,9 @@ export default function AppNavbar() {
                     <div className="hidden md:flex items-center gap-4">
                         {session?.user ? (
                             <>
+                                <div className="mr-2">
+                                    <CreditBalance />
+                                </div>
                                 <Link
                                     href="/profile"
                                     className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"

@@ -1,43 +1,91 @@
-// Plan limits configuration
-export const PLAN_LIMITS = {
+// Plan types as string union since PlanType enum doesn't exist in schema
+type PlanType = 'FREE' | 'PRO' | 'BUSINESS' | 'ENTERPRISE';
+
+export const PLAN_LIMITS: Record<PlanType, {
+    name: string;
+    price: number;
+    currency: string;
+    credits: number;
+    maxStores: number;
+    features: string[];
+}> = {
     FREE: {
-        maxCreativesPerCampaign: 1,
-        rotationHours: null, // No rotation
-        maxCampaigns: 1,
-        maxFileSize: 2 * 1024 * 1024, // 2MB
+        name: "Freemium",
+        price: 0,
+        currency: "COP",
+        credits: 10,
+        maxStores: 1,
+        features: [
+            "1 Tienda Virtual",
+            "Chat Básico",
+            "10 USD en Créditos",
+            "1 Campaña Email de Prueba"
+        ]
     },
     PRO: {
-        maxCreativesPerCampaign: 3,
-        rotationHours: 24, // Rotate every 24 hours
-        maxCampaigns: 10,
-        maxFileSize: 5 * 1024 * 1024, // 5MB
+        name: "Básico",
+        price: 60000,
+        currency: "COP",
+        credits: 200,
+        maxStores: 1,
+        features: [
+            "1 Tienda Completa",
+            "Chat Ilimitado",
+            "200 USD en Créditos",
+            "Acceso a Anuncios"
+        ]
     },
     BUSINESS: {
-        maxCreativesPerCampaign: 10,
-        rotationHours: 12, // Rotate every 12 hours
-        maxCampaigns: 50,
-        maxFileSize: 10 * 1024 * 1024, // 10MB
+        name: "Profesional",
+        price: 150000, // Starting price
+        currency: "COP",
+        credits: 500, // Starting credits
+        maxStores: 5, // Multi-store
+        features: [
+            "Multi-tienda",
+            "Analíticas Avanzadas",
+            "500-1000 USD en Créditos",
+            "Prioridad en Anuncios"
+        ]
     },
     ENTERPRISE: {
-        maxCreativesPerCampaign: -1, // Unlimited
-        rotationHours: 6, // Rotate every 6 hours
-        maxCampaigns: -1, // Unlimited
-        maxFileSize: 20 * 1024 * 1024, // 20MB
-    },
-} as const;
+        name: "Enterprise",
+        price: 2000,
+        currency: "USD",
+        credits: 999999, // Unlimited effectively
+        maxStores: 999,
+        features: [
+            "Integración APIs",
+            "Soporte 24/7",
+            "Créditos Personalizados",
+            "Todo Ilimitado"
+        ]
+    }
+};
 
-export type PlanType = keyof typeof PLAN_LIMITS;
+export const CREDIT_COSTS = {
+    AD_CREATION: 5, // 5 USD per ad creation
+    EMAIL_CAMPAIGN: 10, // 10 USD per campaign
+    PREMIUM_MESSAGE: 0.05 // 0.05 USD per premium message
+};
 
-export function getPlanLimits(plan: PlanType) {
-    return PLAN_LIMITS[plan] || PLAN_LIMITS.FREE;
-}
-
+// Helper functions
 export function canAddCreative(currentCount: number, plan: PlanType): boolean {
-    const limits = getPlanLimits(plan);
-    if (limits.maxCreativesPerCampaign === -1) return true;
-    return currentCount < limits.maxCreativesPerCampaign;
+    const limits: Record<PlanType, number> = {
+        FREE: 1,
+        PRO: 3,
+        BUSINESS: 10,
+        ENTERPRISE: 999
+    };
+    return currentCount < limits[plan];
 }
 
-export function getRotationHours(plan: PlanType): number | null {
-    return getPlanLimits(plan).rotationHours;
+export function getRotationHours(plan: PlanType): number {
+    const hours: Record<PlanType, number> = {
+        FREE: 24,
+        PRO: 12,
+        BUSINESS: 6,
+        ENTERPRISE: 1
+    };
+    return hours[plan];
 }

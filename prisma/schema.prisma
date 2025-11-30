@@ -6,6 +6,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 
@@ -34,6 +35,13 @@ enum PlanType {
   ENTERPRISE
 }
 
+enum TransactionType {
+  RECHARGE
+  CONSUMPTION
+  BONUS
+  REFUND
+}
+
 model Company {
   id        String   @id @default(uuid())
   name      String
@@ -60,6 +68,10 @@ model User {
   companyId    String?
   avatar       String?  // Profile picture URL
   
+  // Monetization Fields
+  creditBalance Float    @default(10.0) // Default 10 USD for Freemium
+  planType      PlanType @default(FREE)
+
   // B2B Profile Fields
   bio          String?  // Professional description
   website      String?  // Company/personal website
@@ -93,6 +105,19 @@ model User {
   stores       Store[]
   sentFriendRequests FriendRequest[] @relation("RequesterUser")
   receivedFriendRequests FriendRequest[] @relation("ReceiverUser")
+  creditTransactions CreditTransaction[]
+}
+
+model CreditTransaction {
+  id          String          @id @default(uuid())
+  userId      String
+  amount      Float           // Positive for add, negative for consume
+  type        TransactionType
+  description String
+  referenceId String?         // ID of the related entity (e.g., CampaignID, MessageID)
+  createdAt   DateTime        @default(now())
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CompanyConnection {
