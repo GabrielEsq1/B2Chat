@@ -47,9 +47,8 @@ model User {
   otpCode                String?
   otpExpiresAt           DateTime?
   creditBalance          Float               @default(10.0)
-  createdCampaigns       AdCampaign[]        @relation("CreatedCampaigns")
-  ads                    AdCreative[]
-  campaigns              AdCampaignUser[]
+  planType               String              @default("FREE")
+  campaigns              AdCampaign[]
   walletTransactions     Transaction[]       @relation("UserTransactions")
   conversationsAsA       Conversation[]      @relation("UserA")
   conversationsAsB       Conversation[]      @relation("UserB")
