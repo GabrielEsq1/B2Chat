@@ -1,13 +1,11 @@
-import { streamText } from 'ai';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { aiModel, systemPrompt } from '@/lib/ai-config';
 
 // export const runtime = 'edge'; // Disabled for Prisma compatibility
 
 /**
- * API Route para Chat con IA usando Vercel AI SDK
- * Soporta Groq (Llama 3.1) y otros proveedores configurados en ai-config
+ * API Route para Chat con IA usando Olivia AI Local
+ * Integración nativa de Olivia en español
  */
 export async function POST(req: Request) {
     try {
@@ -38,53 +36,76 @@ export async function POST(req: Request) {
         }
 
         // Guardar mensaje del usuario en la base de datos
+        const userMessage = messages[messages.length - 1].content;
         await prisma.message.create({
             data: {
                 conversationId,
                 senderUserId: userId,
-                text: messages[messages.length - 1].content,
+                text: userMessage,
             },
         });
 
-        // Streaming de respuesta desde IA (Llama 3.1 via Groq)
-        const result = streamText({
-            model: aiModel,
-            system: systemPrompt,
-            messages,
-            async onFinish({ text, usage }) {
-                // Guardar respuesta de IA en la base de datos
-                try {
-                    // Buscar el bot de IA
-                    const aiBot = await prisma.user.findFirst({
-                        where: {
-                            isBot: true,
-                            botPersonality: 'assistant'
-                        },
-                    });
+        // Procesar con Olivia (Local AI)
+        const { olivia } = await import('@/lib/olivia');
+        const aiResponseText = olivia.process(userMessage);
 
-                    if (aiBot) {
+        // Simular streaming para compatibilidad con el cliente
+        const stream = new ReadableStream({
+            async start(controller) {
+                const encoder = new TextEncoder();
+
+                // Simular delay de "pensamiento"
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Enviar respuesta
+                controller.enqueue(encoder.encode(aiResponseText));
+
+                // Guardar respuesta en BD
+                try {
+                    // Identificar el bot correcto para la conversación
+                    // Si el usuario A es el humano, el B es el bot, y viceversa
+                    const botUser = conversation.userAId === userId ? conversation.userB : conversation.userA;
+
+                    if (botUser && botUser.isBot) {
                         await prisma.message.create({
                             data: {
                                 conversationId,
-                                senderUserId: aiBot.id,
-                                text,
+                                senderUserId: botUser.id,
+                                text: aiResponseText,
                             },
                         });
+                    } else {
+                        // Fallback: buscar cualquier bot si la conversación no tiene uno claro (raro)
+                        const aiBot = await prisma.user.findFirst({
+                            where: { isBot: true },
+                        });
+                        if (aiBot) {
+                            await prisma.message.create({
+                                data: {
+                                    conversationId,
+                                    senderUserId: aiBot.id,
+                                    text: aiResponseText,
+                                },
+                            });
+                        }
                     }
 
-                    console.log('AI response saved:', {
+                    console.log('Olivia response saved:', {
                         conversationId,
-                        textLength: text.length,
-                        usage,
+                        textLength: aiResponseText.length,
                     });
+
                 } catch (error) {
-                    console.error('Error saving AI response:', error);
+                    console.error('Error saving Olivia response:', error);
                 }
+
+                controller.close();
             },
         });
 
-        // Retornar respuesta en streaming
-        return result.toTextStreamResponse();
+        return new Response(stream, {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
     } catch (error: any) {
         console.error('Error in AI chat endpoint:', error);
         return NextResponse.json(

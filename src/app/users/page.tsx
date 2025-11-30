@@ -14,6 +14,12 @@ interface User {
     isBot: boolean;
     website: string | null;
     friendStatus: { type: "sent" | "received"; status: string } | null;
+    isLocal?: boolean;
+    source?: string;
+    phone?: string;
+    address?: string;
+    domain?: string;
+    company?: string;
 }
 
 export default function UsersPage() {
@@ -30,12 +36,19 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         try {
             const params = new URLSearchParams();
-            if (search) params.set("search", search);
+            if (search) params.set("query", search);
             if (selectedIndustry) params.set("industry", selectedIndustry);
 
-            const res = await fetch(`/api/users?${params}`);
+            const res = await fetch(`/api/companies/search?${params}`);
             const data = await res.json();
-            setUsers(data.users || []);
+
+            // Combine local and external results
+            const combinedUsers = [
+                ...(data.localResults || []),
+                ...(data.externalResults || [])
+            ];
+
+            setUsers(combinedUsers);
         } catch (error) {
             console.error("Error fetching users:", error);
         } finally {
@@ -163,6 +176,11 @@ export default function UsersPage() {
                                     {user.industry && (
                                         <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded mb-3">
                                             {user.industry}
+                                        </span>
+                                    )}
+                                    {!user.isLocal && user.source && (
+                                        <span className="inline-block ml-2 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded mb-3">
+                                            🌐 {user.source}
                                         </span>
                                     )}
 

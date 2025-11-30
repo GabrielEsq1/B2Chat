@@ -5,118 +5,73 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-
-
-enum Role {
-  SUPERADMIN
-  ADMIN_EMPRESA
-  USUARIO
-}
-
-enum ConnectionStatus {
-  PENDING
-  ACCEPTED
-  BLOCKED
-}
-
-enum ConversationType {
-  COMPANY_COMPANY
-  USER_USER
-}
-
-enum PlanType {
-  FREE
-  PRO
-  BUSINESS
-  ENTERPRISE
-}
-
-enum TransactionType {
-  RECHARGE
-  CONSUMPTION
-  BONUS
-  REFUND
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Company {
-  id        String   @id @default(uuid())
-  name      String
-  taxId     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users       User[]
-  connectionsAsA CompanyConnection[] @relation("CompanyA")
-  connectionsAsB CompanyConnection[] @relation("CompanyB")
-  conversationsAsA Conversation[] @relation("CompanyA")
-  conversationsAsB Conversation[] @relation("CompanyB")
-  adCampaigns AdCampaign[]
-  subscription Subscription?
+  id                      String              @id @default(uuid())
+  name                    String
+  taxId                   String?
+  whatsappPaymentEnabled  Boolean             @default(false)
+  whatsappNumber          String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  adCampaigns             AdCampaign[]
+  connectionsAsA          CompanyConnection[] @relation("CompanyA")
+  connectionsAsB          CompanyConnection[] @relation("CompanyB")
+  conversationsAsA        Conversation[]      @relation("CompanyA")
+  conversationsAsB        Conversation[]      @relation("CompanyB")
+  subscription            Subscription?
+  users                   User[]
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  phone        String   @unique  // Primary identifier (like WhatsApp)
-  email        String?  @unique  // Optional
-  passwordHash String
-  role         Role     @default(USUARIO)
-  companyId    String?
-  avatar       String?  // Profile picture URL
-  
-  // Monetization Fields
-  creditBalance Float    @default(10.0) // Default 10 USD for Freemium
-  planType      PlanType @default(FREE)
-
-  // B2B Profile Fields
-  bio          String?  // Professional description
-  website      String?  // Company/personal website
-  position     String?  // Job title/position
-  industry     String?  // Industry sector
-  profilePicture String? // Profile photo URL
-  
-  // AI Bot Fields
-  isBot        Boolean  @default(false) // Is this user an AI bot?
-  botPersonality String? // Bot personality type
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Password Reset
-  resetCode           String?
-  resetCodeExpiresAt  DateTime?
-
-  // WhatsApp OTP Authentication
-  otpCode             String?
-  otpExpiresAt        DateTime?
-
-  company      Company? @relation(fields: [companyId], references: [id])
-  sentMessages Message[]
-  conversationsAsA Conversation[] @relation("UserA")
-  conversationsAsB Conversation[] @relation("UserB")
-  campaigns    AdCampaign[]
-  subscription Subscription?
-  groupMemberships GroupMember[]
-  createdGroups Group[]
-  stores       Store[]
-  sentFriendRequests FriendRequest[] @relation("RequesterUser")
-  receivedFriendRequests FriendRequest[] @relation("ReceiverUser")
-  creditTransactions CreditTransaction[]
+  id                     String              @id @default(uuid())
+  name                   String
+  phone                  String              @unique
+  email                  String?             @unique
+  passwordHash           String
+  role                   String              @default("USUARIO")
+  companyId              String?
+  avatar                 String?
+  bio                    String?
+  website                String?
+  position               String?
+  industry               String?
+  profilePicture         String?
+  isBot                  Boolean             @default(false)
+  botPersonality         String?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  resetCode              String?
+  resetCodeExpiresAt     DateTime?
+  otpCode                String?
+  otpExpiresAt           DateTime?
+  creditBalance          Float               @default(10.0)
+  planType               String              @default("FREE")
+  campaigns              AdCampaign[]
+  conversationsAsA       Conversation[]      @relation("UserA")
+  conversationsAsB       Conversation[]      @relation("UserB")
+  creditTransactions     CreditTransaction[]
+  receivedFriendRequests FriendRequest[]     @relation("ReceiverUser")
+  sentFriendRequests     FriendRequest[]     @relation("RequesterUser")
+  createdGroups          Group[]
+  groupMemberships       GroupMember[]
+  sentMessages           Message[]
+  stores                 Store[]
+  subscription           Subscription?
+  company                Company?            @relation(fields: [companyId], references: [id])
 }
 
 model CreditTransaction {
   id          String          @id @default(uuid())
   userId      String
-  amount      Float           // Positive for add, negative for consume
-  type        TransactionType
+  amount      Float
+  type        String
   description String
-  referenceId String?         // ID of the related entity (e.g., CampaignID, MessageID)
+  referenceId String?
   createdAt   DateTime        @default(now())
-
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -124,166 +79,133 @@ model CompanyConnection {
   id         String           @id @default(uuid())
   companyAId String
   companyBId String
-  status     ConnectionStatus @default(PENDING)
+  status     String           @default("PENDING")
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
-
-  companyA   Company @relation("CompanyA", fields: [companyAId], references: [id])
-  companyB   Company @relation("CompanyB", fields: [companyBId], references: [id])
+  companyA   Company          @relation("CompanyA", fields: [companyAId], references: [id])
+  companyB   Company          @relation("CompanyB", fields: [companyBId], references: [id])
 
   @@unique([companyAId, companyBId])
 }
 
 model Conversation {
-  id          String           @id @default(uuid())
-  type        ConversationType
-  companyAId  String?
-  companyBId  String?
-  userAId     String?
-  userBId     String?
-  groupId     String?          // For group conversations
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  companyA    Company? @relation("CompanyA", fields: [companyAId], references: [id])
-  companyB    Company? @relation("CompanyB", fields: [companyBId], references: [id])
-  userA       User?    @relation("UserA", fields: [userAId], references: [id])
-  userB       User?    @relation("UserB", fields: [userBId], references: [id])
-  group       Group?   @relation(fields: [groupId], references: [id])
-  messages    Message[]
+  id         String           @id @default(uuid())
+  type       String
+  companyAId String?
+  companyBId String?
+  userAId    String?
+  userBId    String?
+  groupId    String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  companyA   Company?         @relation("CompanyA", fields: [companyAId], references: [id])
+  companyB   Company?         @relation("CompanyB", fields: [companyBId], references: [id])
+  group      Group?           @relation(fields: [groupId], references: [id])
+  userA      User?            @relation("UserA", fields: [userAId], references: [id])
+  userB      User?            @relation("UserB", fields: [userBId], references: [id])
+  messages   Message[]
 }
 
 model Group {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  avatar      String?
-  createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  createdBy   User @relation(fields: [createdById], references: [id])
-  members     GroupMember[]
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  avatar        String?
+  createdById   String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   conversations Conversation[]
+  createdBy     User           @relation(fields: [createdById], references: [id])
+  members       GroupMember[]
 }
 
 model GroupMember {
-  id        String   @id @default(uuid())
-  groupId   String
-  userId    String
-  isAdmin   Boolean  @default(false)
-  joinedAt  DateTime @default(now())
-
-  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String   @id @default(uuid())
+  groupId  String
+  userId   String
+  isAdmin  Boolean  @default(false)
+  joinedAt DateTime @default(now())
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
 }
 
 model Message {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   conversationId String
   senderUserId   String
   text           String
   attachmentUrl  String?
-  // attachmentType String?  // IMAGE, VIDEO, FILE, AUDIO
   readAt         DateTime?
-  createdAt      DateTime @default(now())
-
+  createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderUserId], references: [id])
 }
 
 model AdCampaign {
-  id            String   @id @default(uuid())
-  companyId     String
-  userId        String
-  name          String
-  objective     String   // TRAFFIC, SALES, AWARENESS
-  status        String   @default("DRAFT") // DRAFT, ACTIVE, PAUSED, COMPLETED
-  
-  // Segmentation
-  industry      String?
-  sector        String?
-  targetRoles   String?  // JSON array of roles
-  
-  // Budget
-  dailyBudget   Float
-  durationDays  Int
-  totalBudget   Float    // Calculated: dailyBudget * durationDays
-  spent         Float    @default(0)
-  
-  // Creative
-  creativeType  String   // IMAGE, VIDEO
-  creativeUrl   String?  // URL of uploaded file
-  creativeText  String?  // Ad text overlay
-  
-  // Metrics
-  impressions   Int      @default(0)
-  clicks        Int      @default(0)
-  conversions   Int      @default(0)
-  
-  startDate     DateTime?
-  endDate       DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  company       Company  @relation(fields: [companyId], references: [id])
-  user          User     @relation(fields: [userId], references: [id])
-  creatives     AdCreative[]
+  id           String       @id @default(uuid())
+  companyId    String
+  userId       String
+  name         String
+  objective    String
+  status       String       @default("DRAFT")
+  industry     String?
+  sector       String?
+  targetRoles  String?
+  dailyBudget  Float
+  durationDays Int
+  totalBudget  Float
+  spent        Float        @default(0)
+  creativeType String
+  creativeUrl  String?
+  creativeText String?
+  impressions  Int          @default(0)
+  clicks       Int          @default(0)
+  conversions  Int          @default(0)
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  company      Company      @relation(fields: [companyId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  creatives    AdCreative[]
 }
 
-
 model AdCreative {
-  id          String   @id @default(uuid())
-  campaignId  String
-  title       String
-  description String?
-  imageUrl    String?
-  ctaLabel    String?
-  destinationUrl String?  // NEW: URL de destino del anuncio
-  // mobileImageUrl String?  // TEMP COMMENTED: Production DB doesn't have this column yet
-  // format         String?  // TEMP COMMENTED: Production DB doesn't have this column yet
-  
-  // NEW: Segmentación adicional
-  ageRange    String?  // "18-25", "26-35", "36-45", "46+"
-  gender      String?  // "ALL", "MALE", "FEMALE"
-  location    String?  // "Bogotá", "Medellín", "Cali", etc.
-  
-  // New fields for Video/Creative
-  type        String   @default("IMAGE") // IMAGE, VIDEO
-  videoUrl    String?
-  videoDuration Int?   // in seconds
-  
-  // Rotation settings
-  isActive    Boolean  @default(true)
-  approvalStatus String @default("PENDING") // PENDING, APPROVED, REJECTED
-  displayOrder Int     @default(0)
-  rotationHours Int?   // How many hours before rotating to next creative
-  lastShownAt DateTime?
-  impressionsCount Int @default(0)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  campaign    AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  stats       AdStats?
+  id               String     @id @default(uuid())
+  campaignId       String
+  title            String
+  description      String?
+  imageUrl         String?
+  ctaLabel         String?
+  destinationUrl   String?
+  ageRange         String?
+  gender           String?
+  location         String?
+  type             String     @default("IMAGE")
+  videoUrl         String?
+  videoDuration    Int?
+  isActive         Boolean    @default(true)
+  approvalStatus   String     @default("PENDING")
+  displayOrder     Int        @default(0)
+  rotationHours    Int?
+  lastShownAt      DateTime?
+  impressionsCount Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  campaign         AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  stats            AdStats?
 }
 
 model AdStats {
-  id             String @id @default(uuid())
-  adCreativeId   String @unique
-  impressions    Int    @default(0)
-  clicks         Int    @default(0)
-  whatsappClicks Int    @default(0)
-
+  id             String     @id @default(uuid())
+  adCreativeId   String     @unique
+  impressions    Int        @default(0)
+  clicks         Int        @default(0)
+  whatsappClicks Int        @default(0)
   creative       AdCreative @relation(fields: [adCreativeId], references: [id])
 }
-
-// ============================================
-// B2BChat Ecosystem Models
-// ============================================
-
 
 model ExternalStore {
   id          String   @id @default(uuid())
@@ -297,42 +219,35 @@ model ExternalStore {
   updatedAt   DateTime @updatedAt
 }
 
-
-
 model Subscription {
-  id                String   @id @default(uuid())
-  userId            String   @unique
-  companyId         String?  @unique
-  plan              PlanType @default(FREE)
-  stripeCustomerId  String?
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  companyId            String?   @unique
+  plan                 String    @default("FREE")
+  stripeCustomerId     String?
   stripeSubscriptionId String?
-  status            String   @default("active")
-  currentPeriodEnd  DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  user              User     @relation(fields: [userId], references: [id])
-  company           Company? @relation(fields: [companyId], references: [id])
+  status               String    @default("active")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  company              Company?  @relation(fields: [companyId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id])
 }
 
-
-
-
 model Store {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String    @unique
   description String?
   category    String?
   logoUrl     String?
-  isFeatured  Boolean  @default(false)
-  isActive    Boolean  @default(true)
+  isFeatured  Boolean   @default(false)
+  isActive    Boolean   @default(true)
   ownerUserId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  owner       User     @relation(fields: [ownerUserId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   products    Product[]
+  owner       User      @relation(fields: [ownerUserId], references: [id])
 }
 
 model Product {
@@ -346,26 +261,22 @@ model Product {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-}
-
-enum FriendRequestStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
 }
 
 model FriendRequest {
   id          String              @id @default(uuid())
   requesterId String
   receiverId  String
-  status      FriendRequestStatus @default(PENDING)
+  status      String              @default("PENDING")
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-
-  requester User @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
-  receiver  User @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver    User                @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
+  requester   User                @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
 
   @@unique([requesterId, receiverId])
 }
+
+// Enums converted to String for SQLite compatibility
+// Original enums: Role, ConnectionStatus, ConversationType, PlanType, TransactionType, FriendRequestStatus
+

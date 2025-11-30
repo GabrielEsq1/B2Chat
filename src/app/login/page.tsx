@@ -55,6 +55,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
+            console.log("Attempting login with:", { phone, usePassword });
             const res = await signIn("credentials", {
                 phone,
                 password: usePassword ? password : undefined,
@@ -62,13 +63,22 @@ export default function LoginPage() {
                 redirect: false,
             });
 
+            console.log("Login response:", res);
+
             if (res?.error) {
+                console.error("Login error:", res.error);
                 setError(res.error);
                 setLoading(false);
-            } else {
+            } else if (res?.ok) {
+                console.log("Login successful, redirecting...");
                 window.location.href = "/dashboard";
+            } else {
+                console.error("Unexpected login response:", res);
+                setError("Error inesperado al iniciar sesión");
+                setLoading(false);
             }
         } catch (err: any) {
+            console.error("Login exception:", err);
             setError("Error al iniciar sesión");
             setLoading(false);
         }

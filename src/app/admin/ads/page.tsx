@@ -2,225 +2,180 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { Check, X, Eye, Loader2 } from "lucide-react";
 
-interface Ad {
+interface AdCreative {
     id: string;
     title: string;
-    description: string | null;
-    type: string;
-    imageUrl: string | null;
-    videoUrl: string | null;
+    description: string;
+    imageUrl?: string;
+    destinationUrl?: string;
     approvalStatus: string;
-    createdAt: string;
     campaign: {
         name: string;
         company: {
             name: string;
-        };
-        user: {
-            name: string;
-            email: string;
         };
     };
 }
 
 export default function AdminAdsPage() {
     const router = useRouter();
-    const { data: session, status } = useSession();
-    const [ads, setAds] = useState<Ad[]>([]);
-    const [filter, setFilter] = useState("PENDING");
+    const [ads, setAds] = useState<AdCreative[]>([]);
     const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState<string | null>(null);
 
     useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/login");
-        }
-    }, [status, router]);
+        fetchPendingAds();
+    }, []);
 
-    useEffect(() => {
-        fetchAds();
-    }, [filter]);
-
-    const fetchAds = async () => {
-        setLoading(true);
+    const fetchPendingAds = async () => {
         try {
-            const response = await fetch(`/api/admin/ads?status=${filter}`);
-            const data = await response.json();
-            if (data.success) {
-                setAds(data.ads);
-            }
+            const res = await fetch('/api/admin/ads/pending');
+            const data = await res.json();
+            setAds(data.ads || []);
         } catch (error) {
-            console.error("Error fetching ads:", error);
+            console.error('Error fetching ads:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleApprove = async (id: string) => {
+    const handleApprove = async (adId: string) => {
+        setProcessing(adId);
         try {
-            const response = await fetch(`/api/admin/ads/${id}/approve`, {
-                method: "POST",
+            const res = await fetch('/api/admin/ads/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adId, action: 'APPROVE' })
             });
-            if (response.ok) {
-                fetchAds();
+
+            if (res.ok) {
+                setAds(prev => prev.filter(ad => ad.id !== adId));
+            } else {
+                alert('Error al aprobar');
             }
         } catch (error) {
-            console.error("Error approving ad:", error);
+            alert('Error al aprobar');
+        } finally {
+            setProcessing(null);
         }
     };
 
-    const handleReject = async (id: string) => {
+    const handleReject = async (adId: string) => {
+        setProcessing(adId);
         try {
-            const response = await fetch(`/api/admin/ads/${id}/reject`, {
-                method: "POST",
+            const res = await fetch('/api/admin/ads/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adId, action: 'REJECT' })
             });
-            if (response.ok) {
-                fetchAds();
+
+            if (res.ok) {
+                setAds(prev => prev.filter(ad => ad.id !== adId));
+            } else {
+                alert('Error al rechazar');
             }
         } catch (error) {
-            console.error("Error rejecting ad:", error);
+            alert('Error al rechazar');
+        } finally {
+            setProcessing(null);
         }
     };
-
-    if (status === "loading" || loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-xl">Cargando...</div>
-            </div>
-        );
-    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-slate-900 p-6">
-            {/* Header */}
-            <div className="max-w-7xl mx-auto mb-8">
+        <div className="min-h-screen bg-gray-50 pt-16">
+            <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Gestión de Anuncios</h1>
-                        <p className="text-blue-100">Aprobar o rechazar anuncios pendientes</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Aprobación de Anuncios</h1>
+                        <p className="text-gray-600 mt-1">Revisa y aprueba los anuncios pendientes</p>
                     </div>
                     <button
-                        onClick={() => router.push("/admin/dashboard")}
-                        className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all"
+                        onClick={() => router.push('/admin/dashboard')}
+                        className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
                     >
-                        ← Volver al Panel
+                        ← Volver
                     </button>
                 </div>
 
-                {/* Filters */}
-                <div className="flex gap-4 mb-6">
-                    {["PENDING", "APPROVED", "REJECTED"].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setFilter(status)}
-                            className={`px-6 py-3 rounded-lg font-semibold transition-all ${filter === status
-                                    ? "bg-white text-blue-600 shadow-lg"
-                                    : "bg-white/20 text-white hover:bg-white/30"
-                                }`}
-                        >
-                            {status === "PENDING" && "Pendientes"}
-                            {status === "APPROVED" && "Aprobados"}
-                            {status === "REJECTED" && "Rechazados"}
-                            <span className="ml-2 bg-white/30 px-2 py-1 rounded-full text-sm">
-                                {ads.length}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Ads Grid */}
-            <div className="max-w-7xl mx-auto">
-                {ads.length === 0 ? (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-12 text-center">
-                        <p className="text-white text-lg">No hay anuncios {filter.toLowerCase()}</p>
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                    </div>
+                ) : ads.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                        <Eye className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">No hay anuncios pendientes de aprobación</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {ads.map((ad) => (
-                            <div
-                                key={ad.id}
-                                className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
-                            >
-                                {/* Media Preview */}
-                                <div className="relative h-48 bg-gray-100">
-                                    {ad.type === "VIDEO" && ad.videoUrl ? (
-                                        <video
-                                            src={ad.videoUrl}
-                                            controls
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : ad.imageUrl ? (
+                            <div key={ad.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                {ad.imageUrl && (
+                                    <div className="aspect-video bg-gray-100">
                                         <img
                                             src={ad.imageUrl}
                                             alt={ad.title}
                                             className="w-full h-full object-cover"
                                         />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            Sin imagen
-                                        </div>
-                                    )}
-                                    <div className="absolute top-2 right-2">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${ad.type === "VIDEO"
-                                                ? "bg-purple-500 text-white"
-                                                : "bg-blue-500 text-white"
-                                            }`}>
-                                            {ad.type}
-                                        </span>
                                     </div>
-                                </div>
-
-                                {/* Content */}
+                                )}
                                 <div className="p-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2">{ad.title}</h3>
-                                    {ad.description && (
-                                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                            {ad.description}
-                                        </p>
-                                    )}
-
-                                    {/* Campaign Info */}
-                                    <div className="mb-4 space-y-1">
-                                        <p className="text-xs text-gray-500">
-                                            <span className="font-semibold">Campaña:</span> {ad.campaign.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            <span className="font-semibold">Empresa:</span> {ad.campaign.company.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            <span className="font-semibold">Usuario:</span> {ad.campaign.user.name}
-                                        </p>
+                                    <div className="mb-4">
+                                        <h3 className="text-xl font-bold text-gray-900 mb-1">{ad.title}</h3>
+                                        <p className="text-sm text-gray-600">{ad.campaign.company.name}</p>
+                                        <p className="text-xs text-gray-500">Campaña: {ad.campaign.name}</p>
                                     </div>
 
-                                    {/* Actions */}
-                                    {filter === "PENDING" && (
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleApprove(ad.id)}
-                                                className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-all transform hover:scale-[1.02]"
+                                    {ad.description && (
+                                        <p className="text-gray-700 mb-4">{ad.description}</p>
+                                    )}
+
+                                    {ad.destinationUrl && (
+                                        <div className="mb-4">
+                                            <p className="text-xs text-gray-500 mb-1">URL Destino:</p>
+                                            <a
+                                                href={ad.destinationUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline text-sm break-all"
                                             >
-                                                ✓ Aprobar
-                                            </button>
-                                            <button
-                                                onClick={() => handleReject(ad.id)}
-                                                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all transform hover:scale-[1.02]"
-                                            >
-                                                ✗ Rechazar
-                                            </button>
+                                                {ad.destinationUrl}
+                                            </a>
                                         </div>
                                     )}
-                                    {filter === "APPROVED" && (
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                                            <span className="text-green-700 font-semibold">✓ Aprobado</span>
-                                        </div>
-                                    )}
-                                    {filter === "REJECTED" && (
-                                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-                                            <span className="text-red-700 font-semibold">✗ Rechazado</span>
-                                        </div>
-                                    )}
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleApprove(ad.id)}
+                                            disabled={processing === ad.id}
+                                            className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 transition-colors"
+                                        >
+                                            {processing === ad.id ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <Check className="h-5 w-5" />
+                                                    Aprobar
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => handleReject(ad.id)}
+                                            disabled={processing === ad.id}
+                                            className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 transition-colors"
+                                        >
+                                            {processing === ad.id ? (
+                                                <Loader2 className="h-5 w-5 animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <X className="h-5 w-5" />
+                                                    Rechazar
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

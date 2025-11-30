@@ -25,8 +25,14 @@ export const authOptions: AuthOptions = {
                     throw new Error("User not found");
                 }
 
+                const otpCode = credentials.otpCode;
+                const password = credentials.password;
+
+                const isOtpLogin = otpCode && otpCode !== "undefined" && otpCode !== "null" && otpCode !== "";
+                const isPasswordLogin = password && password !== "undefined" && password !== "null" && password !== "";
+
                 // Check if using OTP or password
-                if (credentials.otpCode) {
+                if (isOtpLogin) {
                     // OTP-based authentication
                     if (!user.otpCode || !user.otpExpiresAt) {
                         throw new Error("No active OTP code");
@@ -36,7 +42,7 @@ export const authOptions: AuthOptions = {
                         throw new Error("OTP code has expired");
                     }
 
-                    if (user.otpCode !== credentials.otpCode) {
+                    if (user.otpCode !== otpCode) {
                         throw new Error("Invalid OTP code");
                     }
 
@@ -45,9 +51,9 @@ export const authOptions: AuthOptions = {
                         where: { phone: credentials.phone },
                         data: { otpCode: null, otpExpiresAt: null },
                     });
-                } else if (credentials.password) {
+                } else if (isPasswordLogin) {
                     // Password-based authentication
-                    const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+                    const isValid = await bcrypt.compare(password, user.passwordHash);
                     if (!isValid) {
                         throw new Error("Invalid password");
                     }
