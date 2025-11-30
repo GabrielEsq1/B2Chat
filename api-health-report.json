@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-11-30T05:51:03.369Z",
+  "results": [
+    {
+      "api": "google_places",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "yelp",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "github",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "opencorporates",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "companies_house",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "huggingface",
+      "status": "skipped",
+      "available": null
+    },
+    {
+      "api": "twilio",
+      "status": "skipped",
+      "available": null
+    }
+  ]
+}

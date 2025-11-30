@@ -1,0 +1,106 @@
+name: API Health Check & Auto-Update
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run health check every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Job 1: Validate API Configuration
+  validate-apis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate YAML configuration
+        run: |
+          npm install -g yaml-validator
+          yaml-validator config/apis.yaml
+
+      - name: Check API availability
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          YELP_API_KEY: ${{ secrets.YELP_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          node scripts/check-api-health.js
+
+  # Job 2: Test API Integrations
+  test-apis:
+    needs: validate-apis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API integration tests
+        env:
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+          YELP_API_KEY: ${{ secrets.YELP_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          npm run test:apis
+
+  # Job 3: Update API Status Badge
+  update-status:
+    needs: [validate-apis, test-apis]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate API status report
+        run: |
+          echo "# API Status Report" > API_STATUS.md
+          echo "Last updated: $(date)" >> API_STATUS.md
+          echo "" >> API_STATUS.md
+          echo "| API | Status | Rate Limit |" >> API_STATUS.md
+          echo "|-----|--------|-----------|" >> API_STATUS.md
+          # Add dynamic status from previous jobs
+
+      - name: Commit status report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update API status report [skip ci]"
+          file_pattern: API_STATUS.md
+
+  # Job 4: Notify on Failure
+  notify:
+    needs: [validate-apis, test-apis]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Send notification
+        run: |
+          echo "⚠️ API health check failed!"
+          # Add Slack/Discord notification here if needed

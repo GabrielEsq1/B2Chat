@@ -1,0 +1,87 @@
+# APIs Configuration - Centralized Management
+# This file is used by GitHub Actions to validate API availability before deployment
+
+apis:
+  # Company Data APIs
+  google_places:
+    name: "Google Places API"
+    endpoint: "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    env_var: "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"
+    required: false
+    free_tier: true
+    rate_limit: "1000/day"
+    
+  yelp:
+    name: "Yelp Fusion API"
+    endpoint: "https://api.yelp.com/v3/businesses/search"
+    env_var: "YELP_API_KEY"
+    required: false
+    free_tier: true
+    rate_limit: "5000/day"
+    
+  github:
+    name: "GitHub API"
+    endpoint: "https://api.github.com/search/users"
+    env_var: "GITHUB_TOKEN"
+    required: false
+    free_tier: true
+    rate_limit: "5000/hour"
+    
+  opencorporates:
+    name: "OpenCorporates API"
+    endpoint: "https://api.opencorporates.com/v0.4/companies/search"
+    env_var: "OPENCORPORATES_API_KEY"
+    required: false
+    free_tier: true
+    rate_limit: "500/month"
+    
+  companies_house:
+    name: "Companies House UK API"
+    endpoint: "https://api.company-information.service.gov.uk/search/companies"
+    env_var: "COMPANIES_HOUSE_API_KEY"
+    required: false
+    free_tier: true
+    rate_limit: "unlimited"
+    
+  # AI/ML APIs
+  huggingface:
+    name: "Hugging Face Inference API"
+    endpoint: "https://api-inference.huggingface.co/models"
+    env_var: "HUGGINGFACE_API_KEY"
+    required: false
+    free_tier: true
+    rate_limit: "30000/month"
+    models:
+      - "facebook/blenderbot-400M-distill"
+      - "microsoft/DialoGPT-medium"
+      - "google/flan-t5-base"
+      
+  # WhatsApp Integration
+  twilio:
+    name: "Twilio WhatsApp API"
+    endpoint: "https://api.twilio.com/2010-04-01/Accounts"
+    env_var: "TWILIO_ACCOUNT_SID"
+    required: false
+    free_tier: true
+    rate_limit: "messaging"
+
+# Fallback configurations
+fallbacks:
+  ai_chat:
+    primary: "huggingface"
+    secondary: "local_olivia"
+    
+  company_search:
+    order:
+      - "google_places"
+      - "yelp"
+      - "opencorporates"
+      - "github"
+      - "companies_house"
+
+# Health check configuration
+health_checks:
+  enabled: true
+  interval: "1h"
+  timeout: "10s"
+  retry: 3

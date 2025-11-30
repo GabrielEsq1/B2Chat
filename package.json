@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:apis": "node scripts/check-api-health.js",
+    "health": "node scripts/check-api-health.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +25,7 @@
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.16.1",
+    "js-yaml": "^4.1.1",
     "lucide-react": "^0.554.0",
     "next": "^16.0.4",
     "next-auth": "^4.24.13",
