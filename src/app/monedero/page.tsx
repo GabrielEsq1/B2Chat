@@ -12,24 +12,8 @@ import { redirect } from 'next/navigation';
 
 type ViewType = 'dashboard' | 'send' | 'request' | 'deposit' | 'withdraw' | 'history';
 
-interface User {
-    id: string;
-    email: string;
-    name: string;
-    balance: number;
-    accountNumber: string;
-}
+import { User, Transaction } from './types';
 
-interface Transaction {
-    id: string;
-    type: 'send' | 'receive' | 'deposit' | 'withdraw' | 'request';
-    amount: number;
-    recipient?: string;
-    sender?: string;
-    note?: string;
-    date: string;
-    status: 'completed' | 'pending' | 'failed';
-}
 
 const mockTransactions: Transaction[] = [
     { id: '1', type: 'receive', amount: 1500, sender: 'John Doe', note: 'Payment received', date: new Date(Date.now() - 3600000).toISOString(), status: 'completed' },
@@ -135,7 +119,7 @@ export default function MonederoPage() {
                         className={`nav-item ${currentView === 'withdraw' ? 'active' : ''}`}
                         onClick={() => handleNavigate('withdraw')}
                     >
-                        <span className="nav- icon">⬆</span>
+                        <span className="nav-icon">⬆</span>
                         <span className="nav-label">Retirar</span>
                     </button>
                     <button
@@ -165,7 +149,7 @@ export default function MonederoPage() {
 
             <main className="main-content">
                 {currentView === 'dashboard' && (
-                    <Dashboard user={user} transactions={transactions} on Navigate={handleNavigate} />
+                    <Dashboard user={user} transactions={transactions} onNavigate={handleNavigate} />
                 )}
                 {currentView === 'send' && (
                     <SendMoney user={user} onSend={handleSend} onBack={() => handleNavigate('dashboard')} />
