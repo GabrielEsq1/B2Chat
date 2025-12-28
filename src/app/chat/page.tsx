@@ -110,9 +110,10 @@ function ChatContent() {
                 )}
             </main>
 
-            {/* 3. RIGHT: ADS MARKETPLACE (320px) - ALWAYS VISIBLE ON DESKTOP, HIGH Z-INDEX */}
+
+            {/* 3. RIGHT: ADS MARKETPLACE (320px) - ALWAYS VISIBLE ON DESKTOP */}
             <aside
-                className="hidden md:flex h-full flex-col bg-gray-50 border-l border-gray-200 shadow-2xl relative"
+                className="hidden md:flex h-full flex-col bg-white relative"
                 style={{ zIndex: 30 }}
             >
                 <InternalAdsPanel />
