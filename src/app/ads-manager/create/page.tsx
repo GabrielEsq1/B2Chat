@@ -162,25 +162,33 @@ export default function CreateCampaignPage() {
                     ageRange: formData.ageRange,
                     gender: formData.gender,
                     location: formData.location,
+                    status: 'PENDING_PAYMENT', // Marca como pendiente de pago
                 }),
             });
             const data = await response.json();
-            if (data.success) {
+            if (data.success && data.campaign) {
+                // Generate campaign review URL for admin
+                const appUrl = process.env.NEXT_PUBLIC_B2BCHAT_AUTH_APP_BASEURL_PROD || 'https://creatiendasgit1.vercel.app';
+                const reviewUrl = `${appUrl}/admin/campaigns/review/${data.campaign.id}`;
+
                 // Prepare WhatsApp message with campaign details
-                const whatsappMessage = `🎯 *Nueva Campaña Creada*%0A%0A` +
-                    `📋 *Campaña:* ${formData.name}%0A` +
+                const whatsappMessage = `🎯 *NUEVA CAMPAÑA - PENDIENTE DE APROBACIÓN*%0A%0A` +
+                    `📋 *ID Campaña:* ${data.campaign.id.slice(-8)}%0A` +
+                    `📝 *Nombre:* ${formData.name}%0A` +
                     `🎯 *Objetivo:* ${formData.objective}%0A` +
-                    `🏢 *Industria:* ${formData.industry} - ${formData.sector}%0A` +
+                    `🏢 *Segmentación:* ${formData.industry} - ${formData.sector}%0A` +
                     `💰 *Presupuesto Total:* $${formData.totalBudget.toLocaleString('es-CO')} COP%0A` +
                     `📅 *Duración:* ${durationDays} días%0A` +
                     `💵 *Presupuesto Diario:* $${formData.dailyBudget.toLocaleString('es-CO')} COP%0A%0A` +
-                    `👤 *Segmentación:*%0A` +
+                    `👤 *Segmentación Avanzada:*%0A` +
                     `- Edad: ${formData.ageRange}%0A` +
                     `- Género: ${formData.gender}%0A` +
-                    `- Ubicación: ${formData.location}%0A%0A` +
-                    `🔗 *URL Destino:* ${formData.destinationUrl}%0A%0A` +
-                    `✅ *Campaña creada exitosamente*%0A%0A` +
-                    `Por favor, envía el link de pago al cliente.`;
+                    `- Ubicación: ${formData.location}%0A` +
+                    `- Cargos: ${formData.roles}%0A%0A` +
+                    `📄 *Descripción:*%0A${formData.description.substring(0, 100)}...%0A%0A` +
+                    `🔗 *Revisar Campaña Completa:*%0A${reviewUrl}%0A%0A` +
+                    `⚠️ *Estado:* PENDIENTE DE PAGO%0A%0A` +
+                    `📲 Por favor, envía el link de pago de Nequi al cliente.`;
 
                 // Redirect to WhatsApp (configured in src/config/whatsapp.ts)
                 const whatsappNumber = WHATSAPP_CONFIG.phoneNumber;
@@ -555,13 +563,36 @@ export default function CreateCampaignPage() {
                                 <span className="font-bold text-blue-600">{formData.totalBudget.toLocaleString('es-CO')} COP</span>
                             </div>
                         </div>
+
+                        {/* Payment Approval Explanation */}
+                        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                                <span className="text-lg">ℹ️</span>
+                                ¿Qué sucede después?
+                            </h3>
+                            <div className="text-xs text-blue-800 space-y-2">
+                                <p>
+                                    <strong>1.</strong> Tu campaña se guardará en B2BChat con estado <strong className="text-blue-900">"Pendiente de Pago"</strong>
+                                </p>
+                                <p>
+                                    <strong>2.</strong> Serás redirigido a WhatsApp para coordinar el pago con nuestro equipo
+                                </p>
+                                <p>
+                                    <strong>3.</strong> Una vez confirmado el pago por Nequi, un administrador <strong className="text-blue-900">aprobará manualmente</strong> tu campaña
+                                </p>
+                                <p>
+                                    <strong>4.</strong> Recibirás notificación cuando tu campaña esté <strong className="text-green-700">ACTIVA</strong>
+                                </p>
+                            </div>
+                        </div>
+
                         <div className="mt-6">
                             <button
                                 onClick={handleCreateCampaign}
                                 disabled={loading}
                                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
                             >
-                                {loading ? 'Creando...' : 'Crear Campaña'}
+                                {loading ? 'Creando...' : '✅ Crear Campaña y Continuar a WhatsApp'}
                             </button>
                         </div>
                     </div>
