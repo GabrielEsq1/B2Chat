@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
                 companyId: user.companyId,
                 name: data.name,
                 objective: data.objective,
-                status: "PENDING", // Changed from DRAFT to PENDING for approval workflow
+                status: "PENDING_PAYMENT", // Harmonized with frontend wizard status for payment flow
 
                 // Segmentation
                 industry: data.industry,
