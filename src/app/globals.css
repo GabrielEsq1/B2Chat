@@ -20,17 +20,38 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* CRITICAL: Force all inputs to have BLACK text for visibility */
+/* CRITICAL: Force ALL inputs to have BLACK text - MAXIMUM SPECIFICITY */
 @layer base {
+
   input,
   textarea,
-  select {
-    @apply text-gray-900 !important;
+  select,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="password"],
+  input[type="url"],
+  input[type="number"] {
+    color: #111827 !important;
   }
-  
+
   input::placeholder,
-  textarea::placeholder {
-    @apply text-gray-400 !important;
+  textarea::placeholder,
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="tel"]::placeholder,
+  input[type="search"]::placeholder {
+    color: #9ca3af !important;
   }
 }
 
+/* ULTRA SPECIFIC: Target any input inside any container */
+@layer components {
+
+  * input,
+  * textarea,
+  * select {
+    color: #111827 !important;
+  }
+}
