@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest) {
 
         const { name, email, position, bio, website, industry, profilePicture } = await req.json();
 
-        // Update user
+        // Update user - sync profilePicture to avatar for global visibility
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
@@ -27,7 +27,10 @@ export async function PATCH(req: NextRequest) {
                 ...(bio !== undefined && { bio }),
                 ...(website !== undefined && { website }),
                 ...(industry !== undefined && { industry }),
-                ...(profilePicture !== undefined && { profilePicture }),
+                ...(profilePicture !== undefined && {
+                    profilePicture,
+                    avatar: profilePicture // SYNC to avatar for global visibility
+                }),
             },
             select: {
                 id: true,
@@ -39,6 +42,7 @@ export async function PATCH(req: NextRequest) {
                 website: true,
                 industry: true,
                 profilePicture: true,
+                avatar: true,
             },
         });
 

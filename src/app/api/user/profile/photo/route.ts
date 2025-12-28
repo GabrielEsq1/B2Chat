@@ -24,16 +24,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Update user profile picture
+        // Update user profile picture - SYNC with avatar for global visibility
         const updatedUser = await prisma.user.update({
             where: { id: session.user.id },
             data: {
                 profilePicture: photoData,
+                avatar: photoData, // SYNC to avatar so all users see updated photo
             },
             select: {
                 id: true,
                 name: true,
                 profilePicture: true,
+                avatar: true,
             },
         });
 
