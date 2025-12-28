@@ -334,41 +334,41 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   return (
     <div className="flex flex-1 flex-col bg-[#efeae2]">
       {/* Header */}
-      <div className="flex items-center justify-between bg-gray-50 px-4 py-2 border-b border-gray-200">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 border-b border-gray-200">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {onBack && (
-            <button onClick={onBack} className="lg:hidden p-2 hover:bg-gray-200 rounded-full text-gray-600">
+            <button onClick={onBack} className="lg:hidden p-2 hover:bg-gray-200 rounded-full text-gray-600 flex-shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </button>
           )}
-          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <span className="font-semibold text-blue-600">
+          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <span className="font-semibold text-blue-600 text-sm sm:text-base">
               {conversation.otherUser?.name?.charAt(0).toUpperCase() || '?'}
             </span>
           </div>
-          <div>
-            <h3 className="font-medium text-gray-900">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
               {conversation.otherUser?.name || 'Usuario'}
             </h3>
-            <div className="flex items-center gap-1">
-              <p className="text-xs text-gray-500">
+            <div className="flex items-center gap-1 flex-wrap">
+              <p className="text-xs text-gray-500 truncate">
                 {conversation.otherUser?.phone || ''}
               </p>
               {isConnected ? (
-                <div className="flex items-center gap-1 ml-2">
+                <div className="flex items-center gap-1">
                   <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="text-xs text-green-600">Conectado</span>
+                  <span className="text-xs text-green-600 hidden sm:inline">Conectado</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 ml-2">
+                <div className="flex items-center gap-1">
                   <span className="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-                  <span className="text-xs text-red-500">Desconectado</span>
+                  <span className="text-xs text-red-500 hidden sm:inline">Desconectado</span>
                 </div>
               )}
             </div>
           </div>
         </div>
-        <div className="flex gap-2 text-gray-500">
+        <div className="flex gap-1 text-gray-500 flex-shrink-0">
           {conversation.otherUser?.phone && (
             <button
               onClick={async () => {
@@ -394,7 +394,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                   }
                 }
               }}
-              className="hover:bg-gray-200 p-2 rounded-full transition-colors"
+              className="hover:bg-gray-200 p-2 rounded-full transition-colors hidden sm:block"
               title="Enviar a WhatsApp"
             >
               <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
@@ -404,7 +404,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           )}
           <button
             onClick={toggleSound}
-            className="hover:bg-gray-200 p-2 rounded-full transition-colors"
+            className="hover:bg-gray-200 p-2 rounded-full transition-colors hidden sm:block"
             title={soundEnabled ? "Desactivar sonido" : "Activar sonido"}
           >
             {soundEnabled ? (
@@ -413,7 +413,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
               <VolumeX className="h-5 w-5 text-gray-400" />
             )}
           </button>
-          <button className="hover:bg-gray-200 p-2 rounded-full">
+          <button className="hover:bg-gray-200 p-2 rounded-full hidden sm:block">
             <Search className="h-5 w-5" />
           </button>
           <button className="hover:bg-gray-200 p-2 rounded-full">
