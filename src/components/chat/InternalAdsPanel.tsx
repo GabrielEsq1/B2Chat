@@ -11,6 +11,7 @@ export default function InternalAdsPanel() {
         const fetchAds = async () => {
             try {
                 const res = await fetch('/api/ads/marketplace');
+                if (!res.ok) throw new Error('Fetch failed');
                 const data = await res.json();
                 if (data.ads) setAds(data.ads);
             } catch (error) {
@@ -35,44 +36,41 @@ export default function InternalAdsPanel() {
     };
 
     return (
-        <div className="flex h-full w-full flex-col bg-gray-50">
-            {/* Header Section */}
-            <div className="bg-white border-b border-gray-200 p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-gray-900 text-lg">Marketplace B2B</h3>
-                    <span className="text-[10px] bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
-                        Patrocinado
+        <div className="flex h-full w-full flex-col bg-gray-100 relative overflow-hidden" style={{ minWidth: '320px' }}>
+            {/* Sticky Top Header */}
+            <div className="bg-white border-b border-gray-200 p-6 z-10 shadow-sm">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="font-black text-gray-900 text-lg tracking-tight">Marketplace B2B</h3>
+                    <span className="text-[9px] bg-blue-600 text-white px-2 py-1 rounded-sm font-black uppercase">
+                        PRO
                     </span>
                 </div>
 
                 <a
                     href="/ads-manager"
-                    className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-3.5 text-sm font-bold text-white hover:brightness-110 transition-all shadow-md active:scale-95"
+                    className="flex items-center justify-center gap-3 w-full rounded-2xl bg-blue-600 px-4 py-4 text-sm font-black text-white hover:bg-blue-700 transition-all shadow-lg active:scale-95 border-b-4 border-blue-800"
                 >
-                    <span className="text-xl">📢</span>
-                    Crear Mi Campaña
+                    <span className="text-2xl">⚡</span>
+                    CREAR CAMPAÑA
                 </a>
-                <p className="text-[10px] text-gray-500 text-center mt-3 font-semibold">
-                    Lanza tu oferta hoy mismo
-                </p>
             </div>
 
-            {/* Ads List Section */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Scrollable Feed */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-8 scrollbar-hide">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center h-40 space-y-3">
-                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-                        <p className="text-xs text-gray-500 font-medium">Buscando ofertas...</p>
+                    <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent shadow-md"></div>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Sincronizando Marketplace...</p>
                     </div>
                 ) : ads.length === 0 ? (
-                    <div className="text-center text-gray-500 py-10 px-4 bg-white rounded-2xl border border-dashed border-gray-300">
-                        <div className="text-4xl mb-3">🏙️</div>
-                        <p className="font-bold text-gray-900 text-sm">No hay ofertas todavía</p>
-                        <p className="text-[11px] mt-1">¡Sé el primero en anunciarte!</p>
+                    <div className="text-center py-16 px-6 bg-white rounded-3xl border-2 border-dashed border-gray-200 shadow-inner">
+                        <div className="text-5xl mb-5 mx-auto">🏙️</div>
+                        <p className="font-black text-gray-900 text-sm uppercase">Sin Ofertas Activas</p>
+                        <p className="text-[11px] text-gray-500 mt-2 font-medium">¡Lidera el mercado siendo el primero en aparecer aquí!</p>
                     </div>
                 ) : (
                     ads.map((ad) => (
-                        <div key={ad.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 p-1">
+                        <div key={ad.id} className="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-100 transform transition-transform hover:-translate-y-1">
                             <AdPreviewCard
                                 title={ad.title}
                                 description={ad.description}
@@ -89,11 +87,11 @@ export default function InternalAdsPanel() {
                 )}
             </div>
 
-            {/* Footer Section */}
-            <div className="p-4 border-t border-gray-200 bg-white/50 backdrop-blur-sm">
-                <div className="flex items-center justify-center gap-2 opacity-60">
-                    <div className="h-6 w-6 rounded bg-blue-600 flex items-center justify-center text-[10px] text-white font-black shadow-inner">B2B</div>
-                    <span className="text-xs font-bold text-gray-800">B2BChat Ads Platform</span>
+            {/* Bottom Branding */}
+            <div className="p-5 border-t border-gray-200 bg-white">
+                <div className="flex items-center justify-center gap-3 grayscale opacity-30">
+                    <div className="h-6 w-10 rounded bg-black flex items-center justify-center text-[10px] text-white font-black">B2B</div>
+                    <span className="text-[10px] font-black text-black tracking-tighter">POWERED BY B2BCHAT</span>
                 </div>
             </div>
         </div>
