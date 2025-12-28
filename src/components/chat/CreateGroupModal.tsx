@@ -102,7 +102,7 @@ export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroup
                                 type="text"
                                 value={groupName}
                                 onChange={(e) => setGroupName(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                                 placeholder="Ej: Equipo de Ventas"
                                 maxLength={50}
                             />
@@ -116,7 +116,7 @@ export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroup
                                 id="group-description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none resize-none"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
                                 placeholder="Describe el propósito del grupo..."
                                 rows={3}
                                 maxLength={200}
@@ -148,8 +148,8 @@ export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroup
                                         key={contact.id}
                                         onClick={() => toggleContact(contact.id)}
                                         className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${selectedContacts.includes(contact.id)
-                                                ? 'bg-blue-50 border-2 border-blue-500'
-                                                : 'bg-white border-2 border-transparent hover:bg-gray-50'
+                                            ? 'bg-blue-50 border-2 border-blue-500'
+                                            : 'bg-white border-2 border-transparent hover:bg-gray-50'
                                             }`}
                                     >
                                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
