@@ -97,7 +97,7 @@ export const authOptions: AuthOptions = {
         signIn: "/login",
         error: "/login",
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.B2BCHAT_AUTH_SIGNING_SECRET_PROD || process.env.NEXTAUTH_SECRET,
     session: {
         strategy: "jwt",
     },

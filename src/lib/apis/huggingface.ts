@@ -1,7 +1,7 @@
 // Hugging Face API Client
 // Free tier: 30,000 requests/month
 
-const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const HF_API_KEY = process.env.B2BCHAT_EXT_HUGGINGFACE_KEY_PROD || process.env.HUGGINGFACE_API_KEY;
 const HF_BASE_URL = 'https://api-inference.huggingface.co/models';
 
 // Available free models

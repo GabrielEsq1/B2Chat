@@ -1,7 +1,7 @@
 // OpenCorporates API Client
 // Free tier: 500 calls/month
 
-const OPENCORPORATES_API_KEY = process.env.OPENCORPORATES_API_KEY;
+const OPENCORPORATES_API_KEY = process.env.B2BCHAT_EXT_OPENCORPORATES_KEY_PROD || process.env.OPENCORPORATES_API_KEY;
 const OPENCORPORATES_BASE_URL = 'https://api.opencorporates.com/v0.4';
 
 export interface OpenCorpCompany {

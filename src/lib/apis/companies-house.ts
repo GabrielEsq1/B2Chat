@@ -1,7 +1,7 @@
 // Companies House UK API Client
 // Free tier: Unlimited
 
-const COMPANIES_HOUSE_API_KEY = process.env.COMPANIES_HOUSE_API_KEY;
+const COMPANIES_HOUSE_API_KEY = process.env.B2BCHAT_EXT_COMPANIES_HOUSE_KEY_PROD || process.env.COMPANIES_HOUSE_API_KEY;
 const COMPANIES_HOUSE_BASE_URL = 'https://api.company-information.service.gov.uk';
 
 export interface CompaniesHouseCompany {

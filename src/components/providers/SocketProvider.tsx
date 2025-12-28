@@ -30,7 +30,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
                 if (!mounted) return;
 
                 // Use window.location.origin to connect to the same server
-                const socketUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001');
+                const socketUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001');
 
                 console.log('[SocketProvider] Connecting to:', socketUrl);
 

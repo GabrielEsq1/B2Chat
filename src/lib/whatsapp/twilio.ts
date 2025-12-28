@@ -1,9 +1,9 @@
 // Twilio WhatsApp Client
 // Handles sending and receiving WhatsApp messages via Twilio API
 
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-const TWILIO_WHATSAPP_NUMBER = process.env.TWILIO_WHATSAPP_NUMBER; // Format: whatsapp:+14155238886
+const TWILIO_ACCOUNT_SID = process.env.B2BCHAT_MSG_TWILIO_SID_PROD || process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.B2BCHAT_MSG_TWILIO_TOKEN_PROD || process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_WHATSAPP_NUMBER = process.env.B2BCHAT_MSG_TWILIO_FROM_NUMBER_PROD || process.env.TWILIO_WHATSAPP_NUMBER; // Format: whatsapp:+14155238886
 
 interface WhatsAppMessage {
     to: string; // Format: whatsapp:+573001234567

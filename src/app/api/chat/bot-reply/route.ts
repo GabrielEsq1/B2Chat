@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
         // Broadcast to Socket.IO
         try {
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+            const appUrl = process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
             await fetch(`${appUrl}/api/socket/broadcast`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

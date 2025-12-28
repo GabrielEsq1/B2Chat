@@ -5,7 +5,7 @@ import { createGroq } from '@ai-sdk/groq';
  * Groq ofrece inferencia extremadamente rápida para modelos Llama
  */
 const groq = createGroq({
-    apiKey: process.env.GROQ_API_KEY,
+    apiKey: process.env.B2BCHAT_AI_GROQ_KEY_PROD || process.env.GROQ_API_KEY,
 });
 
 // Usamos Llama 3.3 70B para un balance óptimo entre inteligencia y velocidad
