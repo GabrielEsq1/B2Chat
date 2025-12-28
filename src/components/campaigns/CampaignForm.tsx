@@ -199,246 +199,264 @@ export default function CampaignForm({ onSuccess, onCancel }: CampaignFormProps)
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto p-4">
-            {/* Left Column: Form */}
-            <div className="flex-1 space-y-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
-                        <LayoutDashboard className="w-6 h-6 text-blue-600" />
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900">Nueva Campaña</h2>
-                            <p className="text-sm text-gray-500">Configura los detalles de tu anuncio</p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="p-6 space-y-8">
-                        {errors.length > 0 && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-                                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                                <ul className="text-sm text-red-700 list-disc list-inside">
-                                    {errors.map((err, idx) => <li key={idx}>{err}</li>)}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* Section 1: Basic Info */}
-                        <section className="space-y-4">
-                            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                <Target className="w-4 h-4" /> Información Básica
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                                    <input
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="Ej: Promo Verano"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
-                                    <select
-                                        name="objective"
-                                        value={formData.objective}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="TRAFFIC">Tráfico</option>
-                                        <option value="SALES">Ventas</option>
-                                        <option value="AWARENESS">Reconocimiento</option>
-                                    </select>
-                                </div>
-                            </div>
+        <div className="min-h-screen bg-gray-50 pt-16 pb-20 md:pb-8">
+            <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto px-4 py-6">
+                {/* Left Column: Form */}
+                <div className="flex-1 space-y-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+                            <LayoutDashboard className="w-6 h-6 text-blue-600" />
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del Anuncio</label>
-                                <textarea
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    rows={3}
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="Texto que aparecerá en el anuncio..."
-                                />
+                                <h2 className="text-xl font-bold text-gray-900">Nueva Campaña</h2>
+                                <p className="text-sm text-gray-500">Configura los detalles de tu anuncio</p>
                             </div>
-                        </section>
+                        </div>
 
-                        <div className="border-t border-gray-100" />
-
-                        {/* Section 2: Creative */}
-                        <section className="space-y-4">
-                            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                <Save className="w-4 h-4" /> Creatividad
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <AdCreativeUpload
-                                    label="Imagen/Video Principal"
-                                    mediaPreview={mediaPreview}
-                                    creativeType={formData.creativeType}
-                                    onFileSelect={handleFileSelect}
-                                    onClear={() => {
-                                        setMediaFile(null);
-                                        setMediaPreview("");
-                                        setVideoDuration(0);
-                                    }}
-                                    videoDuration={videoDuration}
-                                />
-                                <AdCreativeUpload
-                                    label="Versión Móvil (Opcional)"
-                                    mediaPreview={mobilePreview}
-                                    creativeType="IMAGE"
-                                    onFileSelect={handleMobileFileSelect}
-                                    onClear={() => {
-                                        setMobileFile(null);
-                                        setMobilePreview("");
-                                    }}
-                                    accept="image/*"
-                                    helperText="Formato vertical 9:16 para historias"
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Texto del Botón (CTA)</label>
-                                    <input
-                                        name="ctaLabel"
-                                        value={formData.ctaLabel}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-lg"
-                                        placeholder="Ver Más"
-                                    />
+                        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                            {errors.length > 0 && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+                                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                                    <ul className="text-sm text-red-700 list-disc list-inside">
+                                        {errors.map((err, idx) => <li key={idx}>{err}</li>)}
+                                    </ul>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">URL de Destino</label>
-                                    <input
-                                        name="destinationUrl"
-                                        value={formData.destinationUrl}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border rounded-lg"
-                                        placeholder="https://..."
-                                    />
-                                </div>
-                            </div>
-                        </section>
-
-                        <div className="border-t border-gray-100" />
-
-                        {/* Section 3: Targeting & Budget */}
-                        <section className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                        <Users className="w-4 h-4" /> Segmentación
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <input
-                                            name="industry"
-                                            value={formData.industry}
-                                            onChange={handleInputChange}
-                                            className="w-full px-3 py-2 border rounded-lg"
-                                            placeholder="Industria"
-                                        />
-                                        <input
-                                            name="sector"
-                                            value={formData.sector}
-                                            onChange={handleInputChange}
-                                            className="w-full px-3 py-2 border rounded-lg"
-                                            placeholder="Sector"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                                        <DollarSign className="w-4 h-4" /> Presupuesto
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <label className="text-xs text-gray-500 block mb-1">Diario (USD)</label>
-                                            <input
-                                                type="number"
-                                                name="dailyBudget"
-                                                value={formData.dailyBudget}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border rounded-lg"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-xs text-gray-500 block mb-1">Total (USD)</label>
-                                            <input
-                                                type="number"
-                                                name="totalBudget"
-                                                value={formData.totalBudget}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border rounded-lg"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Actions */}
-                        <div className="pt-6 flex gap-4">
-                            {onCancel && (
-                                <button
-                                    type="button"
-                                    onClick={onCancel}
-                                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                                >
-                                    Cancelar
-                                </button>
                             )}
-                            <button
-                                type="submit"
-                                disabled={submitting || uploading}
-                                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm disabled:opacity-50"
-                            >
-                                {submitting ? "Creando..." : "Lanzar Campaña"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
-            {/* Right Column: Live Preview */}
-            <div className="w-full lg:w-80 xl:w-96 space-y-6">
-                <div className="sticky top-6">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Vista Previa en Vivo</h3>
-
-                    <div className="space-y-6">
-                        {/* Feed Preview */}
-                        <div>
-                            <p className="text-xs text-gray-400 mb-2">Feed de Noticias</p>
-                            <AdPreviewCard
-                                title={formData.name}
-                                description={formData.description}
-                                creativeUrl={mediaPreview}
-                                videoUrl={mediaPreview}
-                                creativeType={formData.creativeType}
-                                ctaLabel={formData.ctaLabel}
-                                destinationUrl={formData.destinationUrl}
-                                aspectRatio="square"
-                            />
-                        </div>
-
-                        {/* Mobile/Story Preview */}
-                        {mobilePreview && (
-                            <div>
-                                <p className="text-xs text-gray-400 mb-2">Historia / Móvil</p>
-                                <div className="scale-90 origin-top-left">
-                                    <AdPreviewCard
-                                        title={formData.name}
-                                        description={formData.description}
-                                        creativeUrl={mobilePreview}
-                                        creativeType="IMAGE"
-                                        ctaLabel={formData.ctaLabel}
-                                        destinationUrl={formData.destinationUrl}
-                                        aspectRatio="story"
+                            {/* Section 1: Basic Info */}
+                            <section className="space-y-4">
+                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                    <Target className="w-4 h-4" /> Información Básica
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Nombre <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Ej: Promo Verano"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Objetivo <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            name="objective"
+                                            value={formData.objective}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        >
+                                            <option value="">Seleccionar...</option>
+                                            <option value="TRAFFIC">Tráfico</option>
+                                            <option value="SALES">Ventas</option>
+                                            <option value="AWARENESS">Reconocimiento</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Descripción del Anuncio <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        required
+                                        rows={3}
+                                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        placeholder="Texto que aparecerá en el anuncio..."
                                     />
                                 </div>
+                            </section>
+
+                            <div className="border-t border-gray-100" />
+
+                            {/* Section 2: Creative */}
+                            <section className="space-y-4">
+                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                    <Save className="w-4 h-4" /> Creatividad
+                                </h3>
+                                <div className="space-y-6">
+                                    <AdCreativeUpload
+                                        label="Imagen/Video Principal *"
+                                        mediaPreview={mediaPreview}
+                                        creativeType={formData.creativeType}
+                                        onFileSelect={handleFileSelect}
+                                        onClear={() => {
+                                            setMediaFile(null);
+                                            setMediaPreview("");
+                                            setVideoDuration(0);
+                                        }}
+                                        videoDuration={videoDuration}
+                                    />
+                                    <AdCreativeUpload
+                                        label="Versión Móvil (Opcional)"
+                                        mediaPreview={mobilePreview}
+                                        creativeType="IMAGE"
+                                        onFileSelect={handleMobileFileSelect}
+                                        onClear={() => {
+                                            setMobileFile(null);
+                                            setMobilePreview("");
+                                        }}
+                                        accept="image/*"
+                                        helperText="Formato vertical 9:16 para historias"
+                                    />
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Texto del Botón (CTA)</label>
+                                        <input
+                                            name="ctaLabel"
+                                            value={formData.ctaLabel}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border rounded-lg"
+                                            placeholder="Ver Más"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">URL de Destino</label>
+                                        <input
+                                            name="destinationUrl"
+                                            value={formData.destinationUrl}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border rounded-lg"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <div className="border-t border-gray-100" />
+
+                            {/* Section 3: Targeting & Budget */}
+                            <section className="space-y-4">
+                                <div className="space-y-6">
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                            <Users className="w-4 h-4" /> Segmentación
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <input
+                                                name="industry"
+                                                value={formData.industry}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border rounded-lg"
+                                                placeholder="Industria"
+                                            />
+                                            <input
+                                                name="sector"
+                                                value={formData.sector}
+                                                onChange={handleInputChange}
+                                                className="w-full px-3 py-2 border rounded-lg"
+                                                placeholder="Sector"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                                            <DollarSign className="w-4 h-4" /> Presupuesto
+                                        </h3>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="text-xs text-gray-500 block mb-1">
+                                                    Diario (USD) <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="dailyBudget"
+                                                    value={formData.dailyBudget}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    min="1"
+                                                    className="w-full px-3 py-2 border rounded-lg"
+                                                    placeholder="10"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500 block mb-1">Total (USD)</label>
+                                                <input
+                                                    type="number"
+                                                    name="totalBudget"
+                                                    value={formData.totalBudget}
+                                                    onChange={handleInputChange}
+                                                    min="0"
+                                                    className="w-full px-3 py-2 border rounded-lg"
+                                                    placeholder="100"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Actions */}
+                            <div className="pt-6 flex flex-col md:flex-row gap-3">
+                                {onCancel && (
+                                    <button
+                                        type="button"
+                                        onClick={onCancel}
+                                        className="w-full md:flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                                    >
+                                        Cancelar
+                                    </button>
+                                )}
+                                <button
+                                    type="submit"
+                                    disabled={submitting || uploading}
+                                    className="w-full md:flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm disabled:opacity-50"
+                                >
+                                    {submitting ? "Creando..." : "Lanzar Campaña"}
+                                </button>
                             </div>
-                        )}
+                        </form>
+                    </div>
+                </div>
+
+                {/* Right Column: Live Preview */}
+                <div className="w-full lg:w-80 xl:w-96 space-y-6">
+                    <div className="sticky top-6">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Vista Previa en Vivo</h3>
+
+                        <div className="space-y-6">
+                            {/* Feed Preview */}
+                            <div>
+                                <p className="text-xs text-gray-400 mb-2">Feed de Noticias</p>
+                                <AdPreviewCard
+                                    title={formData.name}
+                                    description={formData.description}
+                                    creativeUrl={mediaPreview}
+                                    videoUrl={mediaPreview}
+                                    creativeType={formData.creativeType}
+                                    ctaLabel={formData.ctaLabel}
+                                    destinationUrl={formData.destinationUrl}
+                                    aspectRatio="square"
+                                />
+                            </div>
+
+                            {/* Mobile/Story Preview */}
+                            {mobilePreview && (
+                                <div>
+                                    <p className="text-xs text-gray-400 mb-2">Historia / Móvil</p>
+                                    <div className="scale-90 origin-top-left">
+                                        <AdPreviewCard
+                                            title={formData.name}
+                                            description={formData.description}
+                                            creativeUrl={mobilePreview}
+                                            creativeType="IMAGE"
+                                            ctaLabel={formData.ctaLabel}
+                                            destinationUrl={formData.destinationUrl}
+                                            aspectRatio="story"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
