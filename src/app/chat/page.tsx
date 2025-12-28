@@ -35,9 +35,7 @@ function ChatContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId: userId }),
             });
-
             if (!res.ok) return;
-
             const data = await res.json();
             if (data.conversation) {
                 const conv = data.conversation;
@@ -45,7 +43,7 @@ function ChatContent() {
                 setSelectedConversation({ ...conv, otherUser });
             }
         } catch (error) {
-            console.error("[ChatPage] Error initiating chat:", error);
+            console.error(error);
         } finally {
             setInitializing(false);
         }
@@ -54,11 +52,11 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        <div className="flex h-screen w-full pt-16 bg-white overflow-hidden">
-            {/* 1. Left Sidebar (Chats) - Hidden on mobile if a chat is open */}
+        <div className="flex h-screen w-full pt-16 bg-white overflow-hidden relative">
+            {/* 1. LEFT COLUMN: Chat List (320px) */}
             <div className={`
                 ${selectedConversation ? 'hidden md:flex' : 'flex'} 
-                w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white
+                w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white z-20
             `}>
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
@@ -66,10 +64,10 @@ function ChatContent() {
                 />
             </div>
 
-            {/* 2. Middle Content (Chat Window) - Hidden on mobile if NO chat is open */}
+            {/* 2. CENTER COLUMN: Messages (Fluid) */}
             <main className={`
                 ${!selectedConversation ? 'hidden md:flex' : 'flex'} 
-                flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative
+                flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative z-10
             `}>
                 {initializing ? (
                     <div className="flex h-full items-center justify-center bg-gray-50">
@@ -93,8 +91,8 @@ function ChatContent() {
                 )}
             </main>
 
-            {/* 3. Right Sidebar (Ads) - Always visible on Desktop (md+) */}
-            <aside className="hidden md:flex h-full w-80 flex-shrink-0 border-l border-gray-200">
+            {/* 3. RIGHT COLUMN: Marketplace/Ads (320px) - FORCED VISIBILITY ON DESKTOP */}
+            <aside className="hidden md:flex h-full w-80 flex-shrink-0 flex-col border-l border-gray-300 bg-gray-50 overflow-hidden shadow-2xl z-20">
                 <InternalAdsPanel />
             </aside>
         </div>
