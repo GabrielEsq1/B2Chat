@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("B2BCHAT_DB_PRIMARY_CONNSTRING_PROD")
+  provider  = "postgresql"
+  url       = env("B2BCHAT_DB_PRIMARY_CONNSTRING_PROD")
+  directUrl = env("B2BCHAT_DB_DIRECT_URL_PROD")
 }
 
 model Company {
