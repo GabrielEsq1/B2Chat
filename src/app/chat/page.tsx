@@ -56,14 +56,14 @@ function ChatContent() {
     return (
         /* 
            FORCE 3-COLUMN LAYOUT Using CSS Grid
-           MD+ : Grid 320px | 1fr | 320px
-           Mobile: Flex/Block with visibility toggles
+           Desktop/Tablet: Grid 320px | 1fr | 320px (Ads always visible)
+           Mobile: Flex with floating button
         */
         <div className="h-screen w-full bg-[#efeae2] overflow-hidden pt-16 md:grid md:grid-cols-[320px_1fr_320px]">
 
             {/* 1. LEFT: CHATS (320px on Desktop) */}
             <div
-                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col border-r border-gray-200 bg-white z-20`}
+                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col border-r border-gray-200 bg-white`}
             >
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
@@ -73,7 +73,7 @@ function ChatContent() {
 
             {/* 2. CENTER: MESSAGES (Flexible Area) */}
             <main
-                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col bg-[#efeae2] relative z-10 overflow-hidden`}
+                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col bg-[#efeae2] relative overflow-hidden`}
             >
                 {initializing ? (
                     <div className="flex h-full items-center justify-center">
@@ -110,16 +110,15 @@ function ChatContent() {
                 )}
             </main>
 
-            {/* 3. RIGHT: ADS MARKETPLACE (320px) - Always visible on Desktop */}
+            {/* 3. RIGHT: ADS MARKETPLACE (320px) - ALWAYS VISIBLE ON DESKTOP, HIGH Z-INDEX */}
             <aside
-                className="hidden md:flex h-full flex-col bg-gray-50 border-l border-gray-200 shadow-2xl z-20"
+                className="hidden md:flex h-full flex-col bg-gray-50 border-l border-gray-200 shadow-2xl relative"
+                style={{ zIndex: 30 }}
             >
-                <div className="flex-1 flex flex-col h-full bg-slate-50">
-                    <InternalAdsPanel />
-                </div>
+                <InternalAdsPanel />
             </aside>
 
-            {/* Floating Ads Button - Mobile Only */}
+            {/* Floating Ads Button - Mobile Only - POSITIONED ABOVE SEND BUTTON */}
             <FloatingAdsButton />
         </div>
     );
