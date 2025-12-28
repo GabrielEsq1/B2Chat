@@ -40,7 +40,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [showStarredMessages, setShowStarredMessages] = useState(false);
     const [showProfileEdit, setShowProfileEdit] = useState(false);
-    const [searchPhone, setSearchPhone] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [showOptionsMenu, setShowOptionsMenu] = useState(false);
     const [selectedChats, setSelectedChats] = useState<string[]>([]);
@@ -172,21 +172,28 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
     };
 
     const handleSearchContact = async () => {
-        if (!searchPhone.trim()) return;
+        if (!searchQuery.trim() || searchQuery.length < 3) return;
 
         try {
-            const res = await fetch(`/api/contacts/search?phone=${encodeURIComponent(searchPhone)}`);
+            const res = await fetch(`/api/contacts/search?query=${encodeURIComponent(searchQuery)}`);
             const data = await res.json();
 
-            if (data.invited) {
-                // Contact not found, show invitation modal
-                setInvitedPhone(searchPhone);
-                setShowInvitationModal(true);
-                setSearchPhone("");
-                setShowNewChat(false);
-            } else if (data.user) {
-                // Contact found
-                setSearchResults([data.user]);
+            if (data.users && data.users.length > 0) {
+                // Contacts found
+                setSearchResults(data.users);
+            } else if (data.users && data.users.length === 0) {
+                // No contact found, show invitation modal if it looks like a phone
+                // or just let the user type the phone to invite
+                const isPhone = /^\+?[\d\s-]{8,}$/.test(searchQuery);
+                if (isPhone) {
+                    setInvitedPhone(searchQuery);
+                    setShowInvitationModal(true);
+                    setSearchQuery("");
+                } else {
+                    // Just show a message or generic invitation button
+                    setSearchResults([]);
+                    // Optional: could show a "No results, want to invite someone?" button
+                }
             } else if (data.error) {
                 alert(data.error);
             }
@@ -230,7 +237,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                 console.log('[ChatSidebar] Formatted conversation:', formattedConversation);
 
                 setShowNewChat(false);
-                setSearchPhone("");
+                setSearchQuery("");
                 setSearchResults([]);
                 loadConversations();
 
@@ -522,41 +529,67 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
             {
                 showNewChat && (
                     <div className="border-b border-gray-200 bg-blue-50 p-4">
-                        <h3 className="mb-2 font-medium text-gray-900">Nuevo Chat</h3>
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-medium text-gray-900">Nuevo Chat</h3>
+                            <button onClick={() => setShowNewChat(false)} className="text-gray-400 hover:text-gray-600">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
                         <div className="flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="+57 300 123 4567"
-                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                                value={searchPhone}
-                                onChange={(e) => setSearchPhone(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSearchContact()}
-                            />
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Nombre, email o teléfono..."
+                                    className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearchContact()}
+                                />
+                            </div>
                             <button
                                 onClick={handleSearchContact}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                             >
                                 Buscar
                             </button>
                         </div>
 
                         {searchResults.length > 0 && (
-                            <div className="mt-2 space-y-2">
+                            <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                                 {searchResults.map((user) => (
                                     <button
                                         key={user.id}
                                         onClick={() => handleStartChat(user.id)}
-                                        className="w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left hover:bg-gray-50"
+                                        className="w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left hover:bg-gray-50 transition-colors shadow-sm"
                                     >
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                                            <User className="h-5 w-5 text-gray-500" />
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">
+                                            {user.avatar || user.name?.charAt(0).toUpperCase()}
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">{user.name}</p>
-                                            <p className="text-sm text-gray-500">{user.phone}</p>
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="font-medium text-gray-900 truncate">{user.name}</p>
+                                            <p className="text-xs text-gray-500 truncate">{user.company?.name || user.email || user.phone}</p>
                                         </div>
+                                        <Plus className="h-4 w-4 text-gray-400" />
                                     </button>
                                 ))}
+                            </div>
+                        )}
+
+                        {searchQuery.length > 0 && searchResults.length === 0 && (
+                            <div className="mt-4 rounded-lg bg-white border border-gray-100 p-6 text-center shadow-sm">
+                                <p className="text-sm text-gray-500 mb-4">No se encontraron usuarios registrados.</p>
+                                <button
+                                    onClick={() => {
+                                        const isPhone = /^\+?[\d\s-]{8,}$/.test(searchQuery);
+                                        setInvitedPhone(isPhone ? searchQuery : "");
+                                        setShowInvitationModal(true);
+                                    }}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 transition-colors"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Invitar por WhatsApp
+                                </button>
                             </div>
                         )}
                     </div>

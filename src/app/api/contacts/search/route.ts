@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/contacts/search?phone=123456789 - Search user by phone number
+// GET /api/contacts/search?query=val - Search user by name, email, or phone
 export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,22 +16,31 @@ export async function GET(req: NextRequest) {
         }
 
         const { searchParams } = new URL(req.url);
-        const phone = searchParams.get("phone");
+        const query = searchParams.get("query");
 
-        if (!phone) {
+        if (!query || query.length < 3) {
             return NextResponse.json(
-                { error: "Número de teléfono requerido" },
+                { error: "La búsqueda debe tener al menos 3 caracteres" },
                 { status: 400 }
             );
         }
 
-        const user = await prisma.user.findUnique({
-            where: { phone },
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { email: { contains: query, mode: 'insensitive' } },
+                    { phone: { contains: query } }
+                ],
+                NOT: { id: session.user.id } // Don't find yourself
+            },
             select: {
                 id: true,
                 name: true,
                 phone: true,
                 avatar: true,
+                email: true,
+                profilePicture: true,
                 company: {
                     select: {
                         id: true,
@@ -39,46 +48,21 @@ export async function GET(req: NextRequest) {
                     },
                 },
             },
+            take: 10
         });
 
-        if (!user) {
-            // Send WhatsApp invitation
-            try {
-                const inviter = await prisma.user.findUnique({
-                    where: { id: session.user.id },
-                    include: { company: true }
-                });
-
-                // 🚀 PRODUCTION: Send via WhatsApp Business API
-                // This is a simulation of the WhatsApp API call
-                const isProduction = process.env.NODE_ENV === 'production';
-
-                if (isProduction) {
-                    console.log(`[WhatsApp API] Sending invitation to ${phone}`);
-                    // await sendWhatsAppTemplate(phone, 'invitation_template', { inviter_name: inviter?.name });
-                } else {
-                    console.log(`📱 WhatsApp Invitation to ${phone}:`);
-                    console.log(`From: ${inviter?.name} (${inviter?.company?.name || 'B2BChat'})`);
-                    console.log(`Message: ¡Hola! ${inviter?.name} quiere conectar contigo en B2BChat.`);
-                    console.log(`Link: ${process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/register`);
-                }
-
-                return NextResponse.json({
-                    invited: true,
-                    message: `Invitación enviada a ${phone}`,
-                    phone: phone
-                });
-            } catch (error) {
-                console.error('Error sending invitation:', error);
-            }
-
-            return NextResponse.json(
-                { error: "Usuario no encontrado. Se ha enviado una invitación por WhatsApp." },
-                { status: 404 }
-            );
+        if (users.length === 0) {
+            return NextResponse.json({
+                success: true,
+                users: [],
+                message: "No se encontraron usuarios"
+            });
         }
 
-        return NextResponse.json({ user });
+        return NextResponse.json({
+            success: true,
+            users
+        });
     } catch (error) {
         console.error("Error searching contact:", error);
         return NextResponse.json(
