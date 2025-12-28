@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
     MessageSquare,
@@ -77,9 +78,7 @@ export default function AppNavbar() {
                 <div className="flex items-center justify-between h-full">
                     {/* Logo */}
                     <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
-                            <MessageSquare className="h-5 w-5 text-white" />
-                        </div>
+                        <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg shadow-md" />
                         <span className="text-xl font-bold text-gray-900">B2BChat</span>
                     </Link>
 

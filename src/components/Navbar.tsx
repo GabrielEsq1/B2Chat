@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import {
@@ -33,12 +34,9 @@ export default function Navbar() {
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white shadow-sm">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
-                    {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold">
-                                B2B
-                            </div>
+                            <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg" />
                             <span className="text-xl font-bold text-gray-900">B2BChat</span>
                         </Link>
                     </div>
@@ -82,8 +80,8 @@ export default function Navbar() {
                                     className="flex items-center space-x-2 text-sm text-gray-700 hover:text-blue-600"
                                 >
                                     {(session.user as any)?.avatar || (session.user as any)?.profilePicture ? (
-                                        <img 
-                                            src={(session.user as any).avatar || (session.user as any).profilePicture} 
+                                        <img
+                                            src={(session.user as any).avatar || (session.user as any).profilePicture}
                                             alt={session.user?.name || 'User'}
                                             className="h-8 w-8 rounded-full object-cover"
                                         />
