@@ -3,7 +3,7 @@ import { User, Transaction } from '../types';
 interface DashboardProps {
     user: User;
     transactions: Transaction[];
-    onNavigate: (view: string) => void;
+    onNavigate: (view: any) => void;
 }
 
 export default function Dashboard({ user, transactions, onNavigate }: DashboardProps) {

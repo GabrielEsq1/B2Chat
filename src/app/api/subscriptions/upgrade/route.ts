@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PLAN_LIMITS } from "@/lib/plan-limits";
-import { PlanType, TransactionType } from "@prisma/client";
+import { PLAN_LIMITS, PlanType } from "@/lib/plan-limits";
+// type PlanType = 'FREE' | 'PRO' | 'BUSINESS' | 'ENTERPRISE';
+// type TransactionType = 'RECHARGE' | 'PAYMENT' | 'WITHDRAW' | 'BONUS';
 
 export async function POST(req: NextRequest) {
     try {
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
                 data: {
                     userId: session.user.id,
                     amount: planDetails.credits,
-                    type: TransactionType.RECHARGE, // Or BONUS/PLAN_UPGRADE
+                    type: 'RECHARGE' as any, // Or BONUS/PLAN_UPGRADE
                     description: `Upgrade to ${planDetails.name} Plan`,
                     referenceId: `PLAN_${newPlan}`,
                 },

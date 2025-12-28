@@ -24,6 +24,38 @@ export default function AdminAdsPage() {
     const [ads, setAds] = useState<AdCreative[]>([]);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState<string | null>(null);
+    const [editingAd, setEditingAd] = useState<AdCreative | null>(null);
+
+    const handleSaveEdit = async () => {
+        if (!editingAd) return;
+        setLoading(true);
+        try {
+            const res = await fetch('/api/admin/ads/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: editingAd.id,
+                    title: editingAd.title,
+                    description: editingAd.description,
+                    destinationUrl: editingAd.destinationUrl
+                })
+            });
+
+            if (res.ok) {
+                const updated = await res.json();
+                setAds(prev => prev.map(ad => ad.id === updated.ad.id ? { ...ad, ...updated.ad } : ad));
+                setEditingAd(null);
+                alert('Anuncio actualizado. Ahora puedes aprobarlo.');
+            } else {
+                alert('Error al actualizar');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error al actualizar');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchPendingAds();
@@ -113,7 +145,7 @@ export default function AdminAdsPage() {
                         {ads.map((ad) => (
                             <div key={ad.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                                 {ad.imageUrl && (
-                                    <div className="aspect-video bg-gray-100">
+                                    <div className="aspect-video bg-gray-100 relative group">
                                         <img
                                             src={ad.imageUrl}
                                             alt={ad.title}
@@ -146,39 +178,102 @@ export default function AdminAdsPage() {
                                         </div>
                                     )}
 
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-2 flex-wrap">
                                         <button
-                                            onClick={() => handleApprove(ad.id)}
-                                            disabled={processing === ad.id}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 transition-colors"
+                                            onClick={() => setEditingAd(ad)}
+                                            className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 font-medium mb-2"
                                         >
-                                            {processing === ad.id ? (
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Check className="h-5 w-5" />
-                                                    Aprobar
-                                                </>
-                                            )}
+                                            ✏️ Modificar / Corregir
                                         </button>
-                                        <button
-                                            onClick={() => handleReject(ad.id)}
-                                            disabled={processing === ad.id}
-                                            className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 transition-colors"
-                                        >
-                                            {processing === ad.id ? (
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <X className="h-5 w-5" />
-                                                    Rechazar
-                                                </>
-                                            )}
-                                        </button>
+
+                                        <div className="flex gap-2 w-full">
+                                            <button
+                                                onClick={() => handleApprove(ad.id)}
+                                                disabled={processing === ad.id}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 transition-colors"
+                                            >
+                                                {processing === ad.id ? (
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <Check className="h-5 w-5" />
+                                                        Aprobar
+                                                    </>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => handleReject(ad.id)}
+                                                disabled={processing === ad.id}
+                                                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-300 transition-colors"
+                                            >
+                                                {processing === ad.id ? (
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <X className="h-5 w-5" />
+                                                        Rechazar
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Edit Modal */}
+                {editingAd && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+                            <h2 className="text-xl font-bold mb-4">Modificar Anuncio</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Título</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded-lg p-2 mt-1"
+                                        value={editingAd.title}
+                                        onChange={(e) => setEditingAd({ ...editingAd, title: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Descripción</label>
+                                    <textarea
+                                        className="w-full border rounded-lg p-2 mt-1"
+                                        rows={3}
+                                        value={editingAd.description}
+                                        onChange={(e) => setEditingAd({ ...editingAd, description: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">URL Destino</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded-lg p-2 mt-1"
+                                        value={editingAd.destinationUrl || ''}
+                                        onChange={(e) => setEditingAd({ ...editingAd, destinationUrl: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={() => setEditingAd(null)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleSaveEdit}
+                                        disabled={loading}
+                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        {loading ? 'Guardando...' : 'Guardar Cambios'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

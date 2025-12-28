@@ -1,5 +1,5 @@
 generator client {
-  provider   = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,20 +8,27 @@ datasource db {
 }
 
 model Company {
-  id                      String              @id @default(uuid())
-  name                    String
-  taxId                   String?
-  whatsappPaymentEnabled  Boolean             @default(false)
-  whatsappNumber          String?
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
-  adCampaigns             AdCampaign[]
-  connectionsAsA          CompanyConnection[] @relation("CompanyA")
-  connectionsAsB          CompanyConnection[] @relation("CompanyB")
-  conversationsAsA        Conversation[]      @relation("CompanyA")
-  conversationsAsB        Conversation[]      @relation("CompanyB")
-  subscription            Subscription?
-  users                   User[]
+  id                     String              @id @default(uuid())
+  name                   String
+  taxId                  String?
+  whatsappPaymentEnabled Boolean             @default(false)
+  whatsappNumber         String?
+  isActivated            Boolean             @default(false)
+  activatedAt            DateTime?
+  activationMethod       String?
+  publicInfo             Json?
+  invitationsSent        Int                 @default(0)
+  lastInvitationSent     DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  adCampaigns            AdCampaign[]
+  connectionsAsA         CompanyConnection[] @relation("CompanyA")
+  connectionsAsB         CompanyConnection[] @relation("CompanyB")
+  conversationsAsA       Conversation[]      @relation("CompanyA")
+  conversationsAsB       Conversation[]      @relation("CompanyB")
+  subscription           Subscription?
+  users                  User[]
+  invitations            CompanyInvitation[]
 }
 
 model User {
@@ -55,6 +62,7 @@ model User {
   creditTransactions     CreditTransaction[]
   receivedFriendRequests FriendRequest[]     @relation("ReceiverUser")
   sentFriendRequests     FriendRequest[]     @relation("RequesterUser")
+  sentInvitations        CompanyInvitation[] @relation("SentInvitations")
   createdGroups          Group[]
   groupMemberships       GroupMember[]
   sentMessages           Message[]
@@ -64,44 +72,44 @@ model User {
 }
 
 model CreditTransaction {
-  id          String          @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   amount      Float
   type        String
   description String
   referenceId String?
-  createdAt   DateTime        @default(now())
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CompanyConnection {
-  id         String           @id @default(uuid())
+  id         String   @id @default(uuid())
   companyAId String
   companyBId String
-  status     String           @default("PENDING")
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  companyA   Company          @relation("CompanyA", fields: [companyAId], references: [id])
-  companyB   Company          @relation("CompanyB", fields: [companyBId], references: [id])
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  companyA   Company  @relation("CompanyA", fields: [companyAId], references: [id])
+  companyB   Company  @relation("CompanyB", fields: [companyBId], references: [id])
 
   @@unique([companyAId, companyBId])
 }
 
 model Conversation {
-  id         String           @id @default(uuid())
+  id         String    @id @default(uuid())
   type       String
   companyAId String?
   companyBId String?
   userAId    String?
   userBId    String?
   groupId    String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  companyA   Company?         @relation("CompanyA", fields: [companyAId], references: [id])
-  companyB   Company?         @relation("CompanyB", fields: [companyBId], references: [id])
-  group      Group?           @relation(fields: [groupId], references: [id])
-  userA      User?            @relation("UserA", fields: [userAId], references: [id])
-  userB      User?            @relation("UserB", fields: [userBId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  companyA   Company?  @relation("CompanyA", fields: [companyAId], references: [id])
+  companyB   Company?  @relation("CompanyB", fields: [companyBId], references: [id])
+  group      Group?    @relation(fields: [groupId], references: [id])
+  userA      User?     @relation("UserA", fields: [userAId], references: [id])
+  userB      User?     @relation("UserB", fields: [userBId], references: [id])
   messages   Message[]
 }
 
@@ -132,18 +140,18 @@ model GroupMember {
 }
 
 model Transaction {
-  id            String   @id @default(cuid())
-  userId        String
-  type          String   // SEND, RECEIVE, DEPOSIT, WITHDRAW
-  amount        Float
+  id             String   @id @default(cuid())
+  userId         String
+  type           String // SEND, RECEIVE, DEPOSIT, WITHDRAW
+  amount         Float
   recipientPhone String?
-  status        String   // PENDING, APPROVED, REJECTED
-  externalId    String?  // Nequi transaction ID
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  status         String // PENDING, APPROVED, REJECTED
+  externalId     String? // Nequi transaction ID
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  user          User     @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -284,18 +292,36 @@ model Product {
 }
 
 model FriendRequest {
-  id          String              @id @default(uuid())
+  id          String   @id @default(uuid())
   requesterId String
   receiverId  String
-  status      String              @default("PENDING")
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  receiver    User                @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
-  requester   User                @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  receiver    User     @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
+  requester   User     @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
 
   @@unique([requesterId, receiverId])
 }
 
-// Enums converted to String for SQLite compatibility
-// Original enums: Role, ConnectionStatus, ConversationType, PlanType, TransactionType, FriendRequestStatus
+model CompanyInvitation {
+  id           String    @id @default(uuid())
+  companyId    String
+  senderUserId String
+  message      String
+  status       String    @default("PENDING")
+  sentAt       DateTime  @default(now())
+  viewedAt     DateTime?
+  acceptedAt   DateTime?
 
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sender  User    @relation("SentInvitations", fields: [senderUserId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([senderUserId])
+  @@index([status])
+}
+
+// Enums converted to String for SQLite compatibility
+
+// Original enums: Role, ConnectionStatus, ConversationType, PlanType, TransactionType, FriendRequestStatus

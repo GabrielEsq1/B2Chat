@@ -1,5 +1,5 @@
 // Plan types as string union since PlanType enum doesn't exist in schema
-type PlanType = 'FREE' | 'PRO' | 'BUSINESS' | 'ENTERPRISE';
+export type PlanType = 'FREE' | 'PRO' | 'BUSINESS' | 'ENTERPRISE';
 
 export const PLAN_LIMITS: Record<PlanType, {
     name: string;

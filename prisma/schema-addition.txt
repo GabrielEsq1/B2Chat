@@ -1,0 +1,18 @@
+
+model CompanyInvitation {
+  id              String   @id @default(uuid())
+  companyId       String
+  senderUserId    String
+  message         String
+  status          String   @default("PENDING")
+  sentAt          DateTime @default(now())
+  viewedAt        DateTime?
+  acceptedAt      DateTime?
+  
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sender          User     @relation("SentInvitations", fields: [senderUserId], references: [id], onDelete: Cascade)
+  
+  @@index([companyId])
+  @@index([senderUserId])
+  @@index([status])
+}

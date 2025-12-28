@@ -172,8 +172,8 @@ export default function CampaignForm({ onSuccess, onCancel }: CampaignFormProps)
 
             const campaignData = {
                 ...formData,
-                [formData.creativeType === "IMAGE" ? "creativeUrl" : "videoUrl"]: mediaUrl,
-                mobileImageUrl: mobileUrl,
+                [formData.creativeType === "IMAGE" ? "creativeUrl" : "videoUrl"]: mediaUrl as string,
+                mobileImageUrl: mobileUrl as string,
                 videoDuration: formData.creativeType === "VIDEO" ? videoDuration : undefined,
             };
 

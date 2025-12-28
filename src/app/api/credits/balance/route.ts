@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PLAN_LIMITS } from "@/lib/plan-limits";
+import { PLAN_LIMITS, PlanType } from "@/lib/plan-limits";
 
 export async function GET(req: NextRequest) {
     try {
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const planDetails = PLAN_LIMITS[user.planType];
+        const planDetails = PLAN_LIMITS[user.planType as PlanType];
 
         return NextResponse.json({
             balance: user.creditBalance,

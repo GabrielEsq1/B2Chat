@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX } from "lucide-react";
+import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile } from "lucide-react";
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
 
 interface Message {
@@ -28,6 +29,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [toast, setToast] = useState<{ show: boolean, message: string, senderName: string } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const notifiedMessageIds = useRef<Set<string>>(new Set());
@@ -225,7 +227,6 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     }
   }, [socket, conversation?.id, messages, session?.user?.id]);
 
-  // Handle typing events
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
@@ -236,6 +237,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         socket.emit("stop_typing", { conversationId: conversation.id, userId: session.user.id });
       }
     }
+  };
+
+  const onEmojiClick = (emojiObject: EmojiClickData) => {
+    setNewMessage((prev) => prev + emojiObject.emoji);
+    setShowEmojiPicker(false);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -488,8 +494,20 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       )}
 
       {/* Input */}
-      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 relative">
+        {showEmojiPicker && (
+          <div className="absolute bottom-16 left-4 z-50">
+            <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={400} />
+          </div>
+        )}
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors"
+          >
+            <Smile className="h-6 w-6" />
+          </button>
           <input
             type="text"
             placeholder="Escribe un mensaje"

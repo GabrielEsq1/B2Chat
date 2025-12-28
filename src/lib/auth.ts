@@ -14,11 +14,17 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.phone) {
-                    throw new Error("Phone number is required");
+                    throw new Error("Identifier (email or phone) is required");
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { phone: credentials.phone },
+                // Check for user by email first, then phone
+                const user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            { email: credentials.phone },
+                            { phone: credentials.phone }
+                        ]
+                    },
                 });
 
                 if (!user) {

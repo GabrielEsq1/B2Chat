@@ -2,144 +2,67 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { MessageCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-    const router = useRouter();
-    const [step, setStep] = useState<"REQUEST" | "RESET">("REQUEST");
-    const [email, setEmail] = useState("");
-    const [code, setCode] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [phone, setPhone] = useState("");
 
-    const handleRequestCode = async (e: React.FormEvent) => {
+    const handleWhatsAppRedirect = (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setMessage(null);
-
-        try {
-            const res = await fetch("/api/auth/forgot-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-            const data = await res.json();
-
-            if (data.error) {
-                setMessage({ type: "error", text: data.error });
-            } else {
-                setMessage({ type: "success", text: "Código enviado. Revisa la consola del servidor (modo local)." });
-                setStep("RESET");
-            }
-        } catch (error) {
-            setMessage({ type: "error", text: "Error de conexión" });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleResetPassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage(null);
-
-        try {
-            const res = await fetch("/api/auth/reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, code, newPassword }),
-            });
-            const data = await res.json();
-
-            if (data.error) {
-                setMessage({ type: "error", text: data.error });
-            } else {
-                setMessage({ type: "success", text: "Contraseña actualizada. Redirigiendo..." });
-                setTimeout(() => router.push("/login"), 2000);
-            }
-        } catch (error) {
-            setMessage({ type: "error", text: "Error de conexión" });
-        } finally {
-            setLoading(false);
-        }
+        
+        // El número de soporte definido
+        const supportNumber = "3026687991"; // Número proporcionado por el usuario
+        
+        const message = `Hola, necesito recuperar mi contraseña. Mi número de cuenta es: ${phone}`;
+        const whatsappUrl = `https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`;
+        
+        window.open(whatsappUrl, "_blank");
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">Recuperar Contraseña</h1>
+                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <MessageCircle className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900">Recuperar Acceso</h1>
                     <p className="text-gray-600 mt-2">
-                        {step === "REQUEST"
-                            ? "Ingresa tu email para recibir un código de recuperación"
-                            : "Ingresa el código recibido y tu nueva contraseña"}
+                        Para tu seguridad, la recuperación de cuenta se gestiona personalmente a través de nuestro soporte en WhatsApp.
                     </p>
                 </div>
 
-                {message && (
-                    <div className={`p-4 mb-6 rounded-lg ${message.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
-                        {message.text}
+                <form onSubmit={handleWhatsAppRedirect} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tu Número de Teléfono
+                        </label>
+                        <input
+                            type="tel"
+                            required
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            placeholder="+57 300 123 4567"
+                        />
                     </div>
-                )}
 
-                {step === "REQUEST" ? (
-                    <form onSubmit={handleRequestCode} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="tu@email.com"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                        >
-                            {loading ? "Enviando..." : "Enviar Código"}
-                        </button>
-                    </form>
-                ) : (
-                    <form onSubmit={handleResetPassword} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Código de Verificación</label>
-                            <input
-                                type="text"
-                                required
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="123456"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
-                            <input
-                                type="password"
-                                required
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                        >
-                            {loading ? "Actualizando..." : "Cambiar Contraseña"}
-                        </button>
-                    </form>
-                )}
+                    <button
+                        type="submit"
+                        disabled={!phone}
+                        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <MessageCircle className="w-5 h-5" />
+                        Contactar Soporte en WhatsApp
+                    </button>
+                    
+                    <p className="text-xs text-center text-gray-500">
+                        Te contactaremos para verificar tu identidad y asignarte una nueva contraseña manualmente.
+                    </p>
+                </form>
 
                 <div className="mt-6 text-center">
-                    <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                    <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
                         Volver al Login
                     </Link>
                 </div>

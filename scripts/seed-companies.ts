@@ -1,96 +1,169 @@
-import { prisma } from "../src/lib/prisma";
-import * as dotenv from 'dotenv';
+import { PrismaClient } from '../node_modules/@prisma/client';
 
-dotenv.config({ path: '.env.local' });
+const prisma = new PrismaClient();
 
-async function main() {
-    console.log("🌱 Seeding companies...");
+const topColombianCompanies = [
+    {
+        name: "Bancolombia",
+        industry: "Banca y Finanzas",
+        city: "Medellín",
+        website: "https://www.bancolombia.com",
+        email: "info@bancolombia.com",
+        description: "Grupo financiero líder en Colombia y Centroamérica"
+    },
+    {
+        name: "Grupo Éxito",
+        industry: "Retail",
+        city: "Medellín",
+        website: "https://www.grupoexito.com.co",
+        email: "contacto@exito.com.co",
+        description: "Cadena de supermercados y retail líder en Colombia"
+    },
+    {
+        name: "Ecopetrol",
+        industry: "Energía y Petróleo",
+        city: "Bogotá",
+        website: "https://www.ecopetrol.com.co",
+        email: "info@ecopetrol.com.co",
+        description: "Empresa de energía más grande de Colombia"
+    },
+    {
+        name: "Avianca",
+        industry: "Aerolíneas",
+        city: "Bogotá",
+        website: "https://www.avianca.com",
+        email: "servicioalcliente@avianca.com",
+        description: "Aerolínea líder en Colombia y Latinoamérica"
+    },
+    {
+        name: "Grupo Argos",
+        industry: "Construcción e Infraestructura",
+        city: "Medellín",
+        website: "https://www.grupoargos.com",
+        email: "info@grupoargos.com",
+        description: "Conglomerado de cemento, energía e infraestructura"
+    },
+    {
+        name: "Rappi",
+        industry: "Tecnología y Delivery",
+        city: "Bogotá",
+        website: "https://www.rappi.com.co",
+        email: "soporte@rappi.com",
+        description: "Super app de delivery y servicios digitales"
+    },
+    {
+        name: "Coca-Cola FEMSA Colombia",
+        industry: "Bebidas",
+        city: "Bogotá",
+        website: "https://www.coca-colafemsa.com",
+        email: "contacto@kof.com.co",
+        description: "Embotelladora y distribuidora de Coca-Cola"
+    },
+    {
+        name: "Bavaria",
+        industry: "Bebidas",
+        city: "Bogotá",
+        website: "https://www.ab-inbev.com",
+        email: "contacto@bavaria.co",
+        description: "Cervecería líder en Colombia"
+    },
+    {
+        name: "Cementos Argos",
+        industry: "Construcción",
+        city: "Medellín",
+        website: "https://www.argos.co",
+        email: "info@argos.co",
+        description: "Productor de cemento y concreto líder en la región"
+    },
+    {
+        name: "Grupo Nutresa",
+        industry: "Alimentos",
+        city: "Medellín",
+        website: "https://www.gruponutresa.com",
+        email: "info@nutresa.com",
+        description: "Empresa de alimentos procesados más grande de Colombia"
+    },
+    {
+        name: "EPM (Empresas Públicas de Medellín)",
+        industry: "Servicios Públicos",
+        city: "Medellín",
+        website: "https://www.epm.com.co",
+        email: "info@epm.com.co",
+        description: "Grupo empresarial de servicios públicos"
+    },
+    {
+        name: "Claro Colombia",
+        industry: "Telecomunicaciones",
+        city: "Bogotá",
+        website: "https://www.claro.com.co",
+        email: "atencion@claro.com.co",
+        description: "Operador de telecomunicaciones líder"
+    },
+    {
+        name: "Movistar Colombia",
+        industry: "Telecomunicaciones",
+        city: "Bogotá",
+        website: "https://www.movistar.co",
+        email: "contacto@movistar.co",
+        description: "Proveedor de servicios de telecomunicaciones"
+    },
+    {
+        name: "Tigo Colombia",
+        industry: "Telecomunicaciones",
+        city: "Bogotá",
+        website: "https://www.tigo.com.co",
+        email: "servicio@tigo.com.co",
+        description: "Empresa de telecomunicaciones móviles"
+    },
+    {
+        name: "Grupo Aval",
+        industry: "Holding Financiero",
+        city: "Bogotá",
+        website: "https://www.grupoaval.com",
+        email: "info@grupoaval.com",
+        description: "Grupo financiero más grande de Colombia"
+    }
+];
 
+async function seedCompanies() {
     try {
-        // Get some existing users to be company admins
-        const users = await prisma.user.findMany({
-            take: 5,
-            where: { role: "ADMIN_EMPRESA" }
-        });
+        console.log('🌱 Seeding pre-fabricated company profiles...\n');
 
-        if (users.length === 0) {
-            console.log("⚠️ No admin users found. Creating one...");
-            const newAdmin = await prisma.user.create({
-                data: {
-                    name: "Admin Madoco",
-                    email: "admin@madoco.com",
-                    passwordHash: "test123", // hash it properly in real app
-                    role: "ADMIN_EMPRESA",
-                    industry: "Seguridad Industrial",
-                    phone: "+573000000000"
-                }
-            });
-            users.push(newAdmin);
-        }
-
-        const companiesData = [
-            {
-                name: "MADOCO XXI SAS BIC",
-                description: "Expertos en ropa de seguridad industrial y dotaciones.",
-                industry: "Textil",
-                website: "https://madoco.com",
-                phone: "+573001234567",
-                adminEmail: users[0]?.email || "admin@madoco.com"
-            },
-            {
-                name: "Tech Solutions Ltd",
-                description: "Desarrollo de software y consultoría TI.",
-                industry: "Tecnología",
-                website: "https://techsolutions.com",
-                phone: "+573009876543",
-                adminEmail: users[1]?.email
-            },
-            {
-                name: "Constructora Global",
-                description: "Proyectos de infraestructura y vivienda.",
-                industry: "Construcción",
-                website: "https://globalconst.com",
-                phone: "+573005551234",
-                adminEmail: users[2]?.email
-            }
-        ];
-
-        for (const companyData of companiesData) {
-            if (!companyData.adminEmail) continue;
-
-            const admin = await prisma.user.findUnique({
-                where: { email: companyData.adminEmail }
+        for (const companyData of topColombianCompanies) {
+            const existing = await prisma.company.findFirst({
+                where: { name: companyData.name }
             });
 
-            if (admin) {
-                // Check if company exists
-                const existing = await prisma.company.findFirst({
-                    where: { name: companyData.name }
-                });
-
-                if (!existing) {
-                    await prisma.company.create({
-                        data: {
-                            name: companyData.name,
-                            users: {
-                                connect: { id: admin.id }
-                            }
+            if (!existing) {
+                const company = await prisma.company.create({
+                    data: {
+                        name: companyData.name,
+                        isActivated: false,
+                        publicInfo: {
+                            industry: companyData.industry,
+                            city: companyData.city,
+                            website: companyData.website,
+                            email: companyData.email,
+                            description: companyData.description
                         }
-                    });
-                    console.log(`✅ Created company: ${companyData.name}`);
-                } else {
-                    console.log(`ℹ️ Company already exists: ${companyData.name}`);
-                }
+                    }
+                });
+                console.log(`✅ Created: ${company.name} (${companyData.industry})`);
+            } else {
+                console.log(`⏭️  Skipped: ${companyData.name} (already exists)`);
             }
         }
 
-        console.log("✅ Company seeding completed.");
+        console.log('\n🎉 Company seeding complete!');
+        console.log(`📊 Total companies in database: ${await prisma.company.count()}`);
+        console.log(`🔵 Available profiles: ${await prisma.company.count({ where: { isActivated: false } })}`);
+        console.log(`🟢 Activated profiles: ${await prisma.company.count({ where: { isActivated: true } })}`);
 
     } catch (error) {
-        console.error("❌ Error seeding companies:", error);
+        console.error('❌ Error seeding companies:', error);
     } finally {
         await prisma.$disconnect();
     }
 }
 
-main();
+seedCompanies();

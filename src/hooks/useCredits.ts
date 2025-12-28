@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { PlanType } from '@prisma/client';
+import { PlanType } from '@/lib/plan-limits';
 
 interface PlanDetails {
   name: string;

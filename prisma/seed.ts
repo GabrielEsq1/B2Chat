@@ -1,5 +1,8 @@
 
-import { PrismaClient, ConnectionStatus, ConversationType, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+type ConnectionStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+type ConversationType = 'DIRECT' | 'USER_USER' | 'GROUP';
+type Role = 'USUARIO' | 'ADMIN' | 'SUPERADMIN' | 'ADMIN_EMPRESA';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
