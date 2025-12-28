@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
                     console.log(`📱 WhatsApp Invitation to ${phone}:`);
                     console.log(`From: ${inviter?.name} (${inviter?.company?.name || 'B2BChat'})`);
                     console.log(`Message: ¡Hola! ${inviter?.name} quiere conectar contigo en B2BChat.`);
-                    console.log(`Link: ${process.env.NEXT_PUBLIC_APP_URL}/auth/register`);
+                    console.log(`Link: ${process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/register`);
                 }
 
                 return NextResponse.json({

@@ -74,7 +74,7 @@ export async function GET(req: Request) {
 
         // Real Google Places API search
         let googlePlacesResults: any[] = [];
-        const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_B2BCHAT_MAPS_GOOGLE_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
         if (GOOGLE_API_KEY && query) {
             try {

@@ -3,9 +3,9 @@
 // API Version: 2020-10-07T19:17:00Z
 
 const NEQUI_API_BASE = process.env.NEQUI_API_URL || 'https://api.nequi.com.co';
-const NEQUI_CLIENT_ID = process.env.NEQUI_CLIENT_ID;
-const NEQUI_CLIENT_SECRET = process.env.NEQUI_CLIENT_SECRET;
-const NEQUI_API_KEY = process.env.NEQUI_API_KEY;
+const NEQUI_CLIENT_ID = process.env.B2BCHAT_PAY_NEQUI_ID_PROD || process.env.NEQUI_CLIENT_ID;
+const NEQUI_CLIENT_SECRET = process.env.B2BCHAT_PAY_NEQUI_SECRET_PROD || process.env.NEQUI_CLIENT_SECRET;
+const NEQUI_API_KEY = process.env.B2BCHAT_PAY_NEQUI_KEY_PROD || process.env.NEQUI_API_KEY;
 
 interface NequiAuthResponse {
     access_token: string;

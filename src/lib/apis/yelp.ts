@@ -1,7 +1,7 @@
 // Yelp Fusion API Client
 // Free tier: 5,000 calls/day
 
-const YELP_API_KEY = process.env.YELP_API_KEY;
+const YELP_API_KEY = process.env.B2BCHAT_EXT_YELP_KEY_PROD || process.env.YELP_API_KEY;
 const YELP_BASE_URL = 'https://api.yelp.com/v3';
 
 export interface YelpBusiness {

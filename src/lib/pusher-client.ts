@@ -5,9 +5,9 @@ let pusherClient: PusherClient | null = null;
 export function getPusherClient(): PusherClient {
     if (!pusherClient) {
         pusherClient = new PusherClient(
-            process.env.NEXT_PUBLIC_PUSHER_KEY!,
+            process.env.NEXT_PUBLIC_B2BCHAT_REALTIME_PUSHER_KEY || process.env.NEXT_PUBLIC_PUSHER_KEY!,
             {
-                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+                cluster: process.env.NEXT_PUBLIC_B2BCHAT_REALTIME_PUSHER_CLUSTER || process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
             }
         );
     }

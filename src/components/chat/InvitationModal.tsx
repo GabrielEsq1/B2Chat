@@ -11,7 +11,7 @@ interface InvitationModalProps {
 export default function InvitationModal({ phone, onClose }: InvitationModalProps) {
     const [copied, setCopied] = useState(false);
 
-    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/register?ref=${phone}`;
+    const inviteLink = `${process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/register?ref=${phone}`;
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(inviteLink);
@@ -79,8 +79,8 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                             <button
                                 onClick={handleCopyLink}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${copied
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 title="Copiar link"
                             >

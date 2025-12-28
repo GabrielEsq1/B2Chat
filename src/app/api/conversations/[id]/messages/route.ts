@@ -133,7 +133,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                 uploadFormData.append('type', file.type.startsWith('image/') ? 'image' :
                     file.type.startsWith('video/') ? 'video' : 'file');
 
-                const uploadRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
+                const uploadRes = await fetch(`${process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/upload`, {
                     method: 'POST',
                     body: uploadFormData,
                 });
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
         // Trigger AI responses
         if (botsToTrigger.length > 0) {
-            const baseUrl = process.env.NEXTAUTH_URL ||
+            const baseUrl = process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL ||
                 (req.headers.get('origin') || 'http://localhost:3000');
 
             console.log(`[Messages API] Triggering ${botsToTrigger.length} bots at ${baseUrl}`);

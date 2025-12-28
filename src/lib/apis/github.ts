@@ -1,7 +1,7 @@
 // GitHub Organizations API Client
 // Free tier: 5,000 calls/hour (unauthenticated)
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.B2BCHAT_EXT_GITHUB_TOKEN_PROD || process.env.GITHUB_TOKEN;
 const GITHUB_API_URL = 'https://api.github.com';
 
 export interface GitHubOrg {
