@@ -54,7 +54,7 @@ export default function InternalAdsPanel() {
 
     if (loading) {
         return (
-            <div className="hidden w-80 flex-col border-l border-gray-200 bg-white lg:flex">
+            <div className="hidden w-80 flex-col border-l border-gray-200 bg-white md:flex">
                 <div className="border-b border-gray-200 p-4">
                     <h3 className="font-semibold text-gray-900">Novedades y Ofertas</h3>
                 </div>
@@ -109,43 +109,63 @@ export default function InternalAdsPanel() {
             )}
 
             {/* Desktop Sidebar */}
-            <div className="hidden w-80 flex-col border-l border-gray-200 bg-white lg:flex">
-                <div className="border-b border-gray-200 p-4">
-                    <h3 className="font-semibold text-gray-900">Novedades y Ofertas</h3>
+            <div className="hidden w-80 flex-col border-l border-gray-200 bg-gray-50 md:flex shadow-inner overflow-hidden">
+                {/* Fixed Header with Create Button */}
+                <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10 shadow-sm">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>Marketplace B2B</span>
+                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Patrocinado</span>
+                    </h3>
+
+                    <a
+                        href="/ads-manager"
+                        className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-bold text-white hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                        <span className="text-lg">📢</span>
+                        Crear Mi Campaña
+                    </a>
+                    <p className="text-[10px] text-gray-500 text-center mt-3 font-medium">
+                        Lanza tu oferta hoy y llega a cientos de empresas
+                    </p>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+
+                {/* Scrollable Ads List */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
                     {ads.length === 0 ? (
-                        <div className="text-center text-gray-500 py-4">
-                            <p>No hay ofertas disponibles por el momento.</p>
+                        <div className="text-center text-gray-500 py-12 flex flex-col items-center gap-4">
+                            <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center text-3xl">
+                                🏙️
+                            </div>
+                            <div>
+                                <p className="font-medium">No hay ofertas todavía</p>
+                                <p className="text-xs">¡Sé el primero en anunciarte aquí!</p>
+                            </div>
                         </div>
                     ) : (
                         ads.map((ad) => (
-                            <AdPreviewCard
-                                key={ad.id}
-                                title={ad.title}
-                                description={ad.description}
-                                creativeUrl={ad.image}
-                                creativeType="IMAGE"
-                                ctaLabel={ad.cta}
-                                destinationUrl={ad.link}
-                                sponsoredBy={ad.companyName}
-                                aspectRatio="square"
-                                onAdClick={() => handleAdClick(ad.id)}
-                            />
+                            <div key={ad.id} className="transform transition-all hover:scale-[1.02]">
+                                <AdPreviewCard
+                                    title={ad.title}
+                                    description={ad.description}
+                                    creativeUrl={ad.image}
+                                    creativeType="IMAGE"
+                                    ctaLabel={ad.cta}
+                                    destinationUrl={ad.link}
+                                    sponsoredBy={ad.companyName}
+                                    aspectRatio="square"
+                                    onAdClick={() => handleAdClick(ad.id)}
+                                    className="!shadow-md hover:!shadow-xl border-none ring-1 ring-black/5"
+                                />
+                            </div>
                         ))
                     )}
+                </div>
 
-                    <div className="rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 p-4 text-white">
-                        <h4 className="mb-2 font-bold">¿Quieres anunciarte aquí?</h4>
-                        <p className="mb-3 text-sm opacity-90">
-                            Llega a miles de empresas B2B directamente en su chat.
-                        </p>
-                        <a
-                            href="/ads-manager"
-                            className="block w-full rounded-md bg-white px-4 py-2 text-center text-sm font-bold text-indigo-600 hover:bg-gray-50"
-                        >
-                            Crear Campaña
-                        </a>
+                {/* Small Footer Branding */}
+                <div className="p-4 border-t border-gray-200 bg-white">
+                    <div className="flex items-center justify-center gap-1.5 opacity-40 grayscale hover:grayscale-0 transition-all cursor-default">
+                        <div className="h-5 w-5 rounded bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold">B2B</div>
+                        <span className="text-xs font-bold text-gray-900">B2BChat Ads</span>
                     </div>
                 </div>
             </div>

@@ -68,13 +68,13 @@ function ChatContent() {
 
     return (
         <div className="flex h-screen pt-16 bg-white">
-            <div className={`${selectedConversation ? 'hidden lg:flex' : 'flex'} h-full w-full lg:w-80 flex-col border-r border-gray-200 bg-white`}>
+            <div className={`${selectedConversation ? 'hidden md:flex' : 'flex'} h-full w-full md:w-80 flex-col border-r border-gray-200 bg-white`}>
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
                     selectedId={selectedConversation?.id}
                 />
             </div>
-            <div className={`${!selectedConversation ? 'hidden lg:flex' : 'flex'} flex-1 flex-col bg-[#efeae2]`}>
+            <div className={`${!selectedConversation ? 'hidden md:flex' : 'flex'} flex-1 flex-col bg-[#efeae2]`}>
                 {initializing ? (
                     <div className="flex h-full items-center justify-center bg-gray-50">
                         <div className="text-center">
