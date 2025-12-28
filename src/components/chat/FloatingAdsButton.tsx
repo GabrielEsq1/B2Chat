@@ -9,10 +9,10 @@ export default function FloatingAdsButton() {
 
     return (
         <>
-            {/* Floating Button - Only visible on mobile */}
+            {/* Floating Button - Only visible on mobile - POSITIONED HIGH TO AVOID SEND BUTTON */}
             <button
                 onClick={() => setShowAds(true)}
-                className="md:hidden fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 shadow-2xl flex items-center justify-center text-white hover:scale-110 transition-all duration-300 animate-bounce"
+                className="md:hidden fixed bottom-32 right-4 z-40 h-14 w-14 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 shadow-2xl flex items-center justify-center text-white hover:scale-110 transition-all duration-300 animate-bounce"
                 aria-label="Ver ofertas"
             >
                 <Sparkles className="h-6 w-6" />
