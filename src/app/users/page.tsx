@@ -107,19 +107,19 @@ export default function UsersPage() {
                     </div>
 
                     {/* Search & Filters */}
-                    <div className="flex gap-3">
+                    <div className="flex flex-col md:flex-row gap-3">
                         <input
                             type="text"
                             placeholder="Buscar por nombre, industria, posición..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full md:flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <select
                             value={selectedIndustry}
                             onChange={(e) => setSelectedIndustry(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Todas las industrias</option>
                             <option value="Tecnología">Tecnología</option>
@@ -130,7 +130,7 @@ export default function UsersPage() {
                         </select>
                         <button
                             onClick={handleSearch}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                         >
                             Buscar
                         </button>
