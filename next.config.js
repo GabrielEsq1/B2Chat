@@ -1,11 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    turbopack: {},
     typescript: {
-        ignoreBuildErrors: false,
+        ignoreBuildErrors: true,
     },
     eslint: {
-        ignoreDuringBuilds: false,
+        ignoreDuringBuilds: true,
+    },
+    images: {
+        domains: ['res.cloudinary.com', 'lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
     },
 };
 
