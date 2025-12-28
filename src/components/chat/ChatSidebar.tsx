@@ -535,7 +535,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2 md:flex-row">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                 <input
@@ -549,7 +549,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                             </div>
                             <button
                                 onClick={handleSearchContact}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 w-full md:w-auto"
                             >
                                 Buscar
                             </button>
