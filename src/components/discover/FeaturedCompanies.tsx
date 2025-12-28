@@ -109,13 +109,13 @@ export default function FeaturedCompanies() {
             </div>
 
             {/* Scrollable Content - Company Cards */}
-            <div className="flex-1 overflow-y-auto pt-32 pb-20 md:pb-4">
-                <div className="px-4 py-4">
-                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+            <div className="flex-1 overflow-y-auto pt-32 pb-20 md:pb-4 bg-gray-50">
+                <div className="w-full px-4 py-4">
+                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
                         {companies.map((company) => (
                             <div
                                 key={company.id}
-                                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1"
+                                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1 w-full"
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
