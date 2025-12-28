@@ -101,7 +101,7 @@ function ChatContent() {
             </div>
 
             {/* Right Ads Panel - Permanent on Desktop */}
-            <div className="hidden xl:flex h-full w-80 flex-shrink-0">
+            <div className="hidden lg:flex h-full w-80 flex-shrink-0">
                 <InternalAdsPanel />
             </div>
         </div>
