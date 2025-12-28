@@ -87,6 +87,7 @@ function ChatContent() {
                         conversationId={selectedConversation.id}
                         userId={session?.user?.id || ''}
                         userName={session?.user?.name || 'Usuario'}
+                        onBack={() => setSelectedConversation(null)}
                     />
                 ) : (
                     <ChatWindow

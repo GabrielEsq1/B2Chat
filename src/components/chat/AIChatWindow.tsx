@@ -8,13 +8,16 @@ interface AIChatWindowProps {
     conversationId: string;
     userId: string;
     userName?: string;
+    onBack?: () => void;
 }
+
+import { ArrowLeft } from 'lucide-react';
 
 /**
  * Componente de Chat con IA usando Vercel AI SDK
  * Basado en código probado de vercel/ai-chatbot
  */
-export function AIChatWindow({ conversationId, userId, userName = 'Usuario' }: AIChatWindowProps) {
+export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onBack }: AIChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
@@ -36,7 +39,12 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario' }: A
     return (
         <div className="flex flex-col h-full bg-white">
             {/* Header */}
-            <div className="flex items-center gap-2 p-4 border-b bg-gradient-to-r from-blue-500 to-purple-600">
+            <div className="flex items-center gap-3 p-4 border-b bg-gradient-to-r from-blue-500 to-purple-600">
+                {onBack && (
+                    <button onClick={onBack} className="lg:hidden p-1 hover:bg-white/20 rounded-full text-white transition-colors">
+                        <ArrowLeft className="h-6 w-6" />
+                    </button>
+                )}
                 <Bot className="w-6 h-6 text-white" />
                 <div>
                     <h2 className="font-semibold text-white">Asistente IA</h2>

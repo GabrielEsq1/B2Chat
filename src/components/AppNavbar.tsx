@@ -72,15 +72,15 @@ export default function AppNavbar() {
     };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm h-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                <div className="flex items-center justify-between h-full">
                     {/* Logo */}
                     <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
-                            <MessageSquare className="h-6 w-6 text-white" />
+                        <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
+                            <MessageSquare className="h-5 w-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold text-gray-900 hidden sm:block">B2BChat</span>
+                        <span className="text-xl font-bold text-gray-900">B2BChat</span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -92,9 +92,9 @@ export default function AppNavbar() {
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${isActive
-                                        ? "bg-blue-600 text-white shadow-md"
-                                        : "text-gray-700 hover:bg-gray-100"
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${isActive
+                                        ? "bg-blue-50 text-blue-600"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                         }`}
                                 >
                                     <Icon className="h-4 w-4" />
@@ -104,7 +104,7 @@ export default function AppNavbar() {
                         })}
                     </div>
 
-                    {/* Right side - User menu */}
+                    {/* Right side - User menu (Desktop Only) */}
                     <div className="hidden md:flex items-center gap-4">
                         {session?.user ? (
                             <>
@@ -113,7 +113,7 @@ export default function AppNavbar() {
                                 </div>
                                 <Link
                                     href="/profile"
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
                                     <UserCircle className="h-5 w-5 text-gray-600" />
                                     <span className="text-sm font-medium text-gray-700">
@@ -122,93 +122,38 @@ export default function AppNavbar() {
                                 </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium"
+                                    className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                    title="Cerrar Sesión"
                                 >
-                                    <LogOut className="h-4 w-4" />
-                                    Salir
+                                    <LogOut className="h-5 w-5" />
                                 </button>
                             </>
                         ) : (
                             <Link
                                 href="/login"
-                                className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+                                className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors text-sm"
                             >
                                 Iniciar Sesión
                             </Link>
                         )}
                     </div>
 
-                    {/* Mobile menu button */}
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                        {mobileMenuOpen ? (
-                            <X className="h-6 w-6 text-gray-700" />
-                        ) : (
-                            <Menu className="h-6 w-6 text-gray-700" />
+                    {/* Mobile Header Elements (Balance & Profile only) */}
+                    <div className="md:hidden flex items-center gap-3">
+                        {session?.user && (
+                            <>
+                                <CreditBalance />
+                                <button
+                                    onClick={handleLogout}
+                                    className="p-2 text-gray-500 hover:text-red-600"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </>
                         )}
-                    </button>
-                </div>
-            </div>
-
-            {/* Mobile Navigation */}
-            {mobileMenuOpen && (
-                <div className="md:hidden border-t border-gray-200 bg-white">
-                    <div className="px-4 py-4 space-y-2">
-                        {navLinks.filter(link => link.show).map((link) => {
-                            const Icon = link.icon;
-                            const isActive = pathname === link.href || pathname?.startsWith(link.href + "/");
-                            return (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${isActive
-                                        ? "bg-blue-600 text-white shadow-md"
-                                        : "text-gray-700 hover:bg-gray-100"
-                                        }`}
-                                >
-                                    <Icon className="h-5 w-5" />
-                                    {link.label}
-                                </Link>
-                            );
-                        })}
-                        <div className="border-t border-gray-200 pt-2 mt-2">
-                            {session?.user ? (
-                                <>
-                                    <Link
-                                        href="/profile"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
-                                    >
-                                        <UserCircle className="h-5 w-5" />
-                                        Mi Perfil
-                                    </Link>
-                                    <button
-                                        onClick={() => {
-                                            setMobileMenuOpen(false);
-                                            handleLogout();
-                                        }}
-                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-medium"
-                                    >
-                                        <LogOut className="h-5 w-5" />
-                                        Cerrar Sesión
-                                    </button>
-                                </>
-                            ) : (
-                                <Link
-                                    href="/login"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="w-full block text-center px-4 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-                                >
-                                    Iniciar Sesión
-                                </Link>
-                            )}
-                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </nav>
     );
 }
