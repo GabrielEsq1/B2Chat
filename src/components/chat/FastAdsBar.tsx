@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Plus, ExternalLink, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Ad {
     id: string;
@@ -15,6 +17,7 @@ interface Ad {
 }
 
 export default function FastAdsBar() {
+    const router = useRouter();
     const [ads, setAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -55,18 +58,21 @@ export default function FastAdsBar() {
                 `}</style>
                 <div className="flex gap-3 sm:gap-4 min-w-max">
                     {/* "Your Story" Placeholder */}
-                    <div className="flex flex-col items-center gap-1.5 min-w-[70px] sm:min-w-[80px] cursor-pointer group flex-shrink-0">
+                    <div
+                        onClick={() => router.push('/ads-manager')}
+                        className="flex flex-col items-center gap-1.5 min-w-[70px] sm:min-w-[80px] cursor-pointer group flex-shrink-0"
+                    >
                         <div className="relative">
                             <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 p-[3px] group-hover:scale-105 transition-transform duration-200">
-                                <div className="h-full w-full rounded-full bg-white flex items-center justify-center">
+                                <Link href="/ads-manager" className="h-full w-full rounded-full bg-white flex items-center justify-center">
                                     <div className="h-[60px] w-[60px] sm:h-[74px] sm:w-[74px] rounded-full bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
                                         <Plus className="h-7 w-7 sm:h-8 sm:w-8 text-blue-600" strokeWidth={2.5} />
                                     </div>
-                                </div>
+                                </Link>
                             </div>
                         </div>
                         <span className="text-[11px] sm:text-xs font-medium text-gray-800 truncate w-full text-center">
-                            Tu Anuncio
+                            Anunciarme
                         </span>
                     </div>
 
