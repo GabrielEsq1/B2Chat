@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2, LogOut, Settings, Star } from "lucide-react";
+import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import InvitationModal from "./InvitationModal";
 import CreateGroupModal from "./CreateGroupModal";
 import GlobalCompanySearch from "./GlobalCompanySearch";
-// import FastAdsBar from "./FastAdsBar"; // Removed from sidebar for cleaner look, or verify if needed. Keeping it for now but maybe outside? User said "Clean". I'll keep it but style it better.
+import FastAdsBar from "./FastAdsBar";
 
 interface Conversation {
     id: string;
@@ -141,6 +141,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
 
             if (data.conversations) {
                 const processedConversations = data.conversations.map((conv: any) => {
+                    // API already returns otherUser, so use it directly
                     return {
                         id: conv.id,
                         otherUser: conv.otherUser || null,
@@ -178,11 +179,13 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
             const data = await res.json();
 
             if (data.invited) {
+                // Contact not found, show invitation modal
                 setInvitedPhone(searchPhone);
                 setShowInvitationModal(true);
                 setSearchPhone("");
                 setShowNewChat(false);
             } else if (data.user) {
+                // Contact found
                 setSearchResults([data.user]);
             } else if (data.error) {
                 alert(data.error);
@@ -194,6 +197,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
     };
 
     const handleStartChat = async (userId: string) => {
+        console.log('[ChatSidebar] Starting chat with userId:', userId);
         try {
             const res = await fetch('/api/conversations', {
                 method: 'POST',
@@ -202,11 +206,16 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
             });
 
             const data = await res.json();
+            console.log('[ChatSidebar] Conversation response:', data);
 
             if (data.conversation) {
+                // Get the full conversation with user data
                 const conv = data.conversation;
+
+                // Determine otherUser from conversation
                 const otherUser = conv.userAId === session?.user?.id ? conv.userB : conv.userA;
 
+                // Create properly formatted conversation object
                 const formattedConversation = {
                     id: conv.id,
                     otherUser: {
@@ -215,13 +224,16 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                         phone: otherUser.phone,
                         avatar: otherUser.avatar || otherUser.profilePicture
                     },
-                    participants: []
+                    participants: [] // Added to satisfy interface
                 };
+
+                console.log('[ChatSidebar] Formatted conversation:', formattedConversation);
 
                 setShowNewChat(false);
                 setSearchPhone("");
                 setSearchResults([]);
                 loadConversations();
+
                 onSelectConversation(formattedConversation);
             }
         } catch (error) {
@@ -278,322 +290,516 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
     );
 
     return (
-        <div className="flex h-full w-full flex-col bg-white border-r border-gray-100 shadow-sm relative z-50">
-            {/* 1. Contemporary Header */}
-            <div className="flex h-16 items-center justify-between px-5 bg-white border-b border-gray-50 flex-shrink-0">
-                <div className="flex items-center gap-3">
+        <div className="flex h-full w-full lg:w-80 flex-col border-r border-gray-200 bg-white">
+            {/* Header */}
+            <div className="flex items-center justify-between bg-gray-50 px-4 py-3 border-b border-gray-200">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="rounded-full p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all"
+                        className="rounded-full p-2 hover:bg-gray-200 text-gray-600"
+                        title="Volver al dashboard"
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </button>
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">Mensajes</h1>
+                    <button
+                        onClick={() => setShowProfileEdit(true)}
+                        className="flex items-center gap-2 hover:bg-gray-100 rounded-lg p-1 transition-colors"
+                        title="Editar perfil"
+                    >
+                        {(session?.user as any)?.avatar || (session?.user as any)?.profilePicture ? (
+                            <img
+                                src={(session?.user as any).avatar || (session?.user as any).profilePicture}
+                                alt={session?.user?.name || 'User'}
+                                className="h-10 w-10 rounded-full object-cover"
+                            />
+                        ) : (
+                            <div className="h-10 w-10 overflow-hidden rounded-full bg-blue-100 flex items-center justify-center">
+                                <span className="text-sm font-bold text-blue-600">
+                                    {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                </span>
+                            </div>
+                        )}
+                        <span className="font-medium text-gray-700">{session?.user?.name}</span>
+                    </button>
                 </div>
-
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowGlobalSearch(true)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                        className="rounded-full p-2 hover:bg-gray-200 text-green-600"
+                        title="Buscar empresas globalmente"
+                        aria-label="Buscar empresas"
                     >
                         <Globe className="h-5 w-5" />
                     </button>
                     <button
                         onClick={() => setShowNewChat(!showNewChat)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                        className="rounded-full p-2 hover:bg-gray-200 text-blue-600"
+                        aria-label="Nuevo chat"
                     >
                         <Plus className="h-5 w-5" />
                     </button>
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all"
+                            className="rounded-full p-2 hover:bg-gray-200 text-gray-600"
+                            aria-label="Opciones"
                         >
                             <MoreVertical className="h-5 w-5" />
                         </button>
 
                         {/* Dropdown Menu */}
                         {showOptionsMenu && (
-                            <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-xl border border-gray-100 ring-1 ring-black ring-opacity-5 z-[9999] py-2 animate-in fade-in zoom-in-95 duration-100">
-                                <button
-                                    onClick={() => { setShowNewGroup(true); setShowOptionsMenu(false); }}
-                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <MessageSquare className="h-4 w-4" /> Nuevo grupo
-                                </button>
-                                <button
-                                    onClick={() => { setShowStarredMessages(true); setShowOptionsMenu(false); }}
-                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <Star className="h-4 w-4" /> Destacados
-                                </button>
-                                <button
-                                    onClick={() => { setIsSelectionMode(!isSelectionMode); setSelectedChats([]); setShowOptionsMenu(false); }}
-                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <Trash2 className="h-4 w-4" /> {isSelectionMode ? "Cancelar" : "Seleccionar"}
-                                </button>
-                                <div className="border-t border-gray-100 my-1"></div>
-                                <button
-                                    onClick={() => { setShowOptionsMenu(false); window.location.href = '/dashboard/profile'; }}
-                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                    <Settings className="h-4 w-4" /> Configuración
-                                </button>
-                                <button
-                                    onClick={() => { setShowOptionsMenu(false); window.location.href = '/api/auth/signout'; }}
-                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                    <LogOut className="h-4 w-4" /> Cerrar sesión
-                                </button>
+                            <div className="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-xl border border-gray-200 z-[9999]">
+                                <div className="py-1">
+                                    <button
+                                        onClick={() => {
+                                            setShowNewGroup(true);
+                                            setShowOptionsMenu(false);
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Nuevo grupo
+                                    </button>
+                                    <button
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                        onClick={() => {
+                                            setShowStarredMessages(true);
+                                            setShowOptionsMenu(false);
+                                        }}
+                                    >
+                                        Mensajes destacados
+                                    </button>
+                                    <button
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                        onClick={() => {
+                                            setIsSelectionMode(!isSelectionMode);
+                                            setSelectedChats([]);
+                                            setShowOptionsMenu(false);
+                                        }}
+                                    >
+                                        {isSelectionMode ? "Cancelar selección" : "Seleccionar chats"}
+                                    </button>
+                                    <div className="border-t border-gray-200 my-1"></div>
+                                    <button
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                                        onClick={() => {
+                                            setShowOptionsMenu(false);
+                                            window.location.href = '/dashboard/profile';
+                                        }}
+                                    >
+                                        Configuración
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowOptionsMenu(false);
+                                            window.location.href = '/api/auth/signout';
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* 2. Modern Search Bar */}
-            <div className="px-5 py-3 bg-white">
-                <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Buscar chats..."
-                        className="w-full rounded-2xl border border-gray-100 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 focus:bg-white transition-all outline-none"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+            {/* Fast Ads Bar - Always Visible on Mobile & Desktop */}
+            <div className="w-full">
+                <FastAdsBar />
             </div>
 
-            {/* 3. Conversations List */}
-            <div className="flex-1 overflow-y-auto px-3">
-
-                {/* Selection Mode Header */}
-                {isSelectionMode && (
-                    <div className="mb-3 mx-2 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center justify-between">
-                        <span className="text-sm font-bold text-red-700">{selectedChats.length} seleccionados</span>
-                        {selectedChats.length > 0 && (
-                            <button
-                                onClick={handleDeleteConversations}
-                                className="text-xs bg-white border border-red-200 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition-all font-bold"
-                            >
-                                ELIMINAR
-                            </button>
-                        )}
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-10 opacity-50">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
-                    </div>
-                ) : filteredConversations.length === 0 && searchTerm.length < 3 ? (
-                    <div className="text-center py-16 px-6">
-                        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-600">
-                            <MessageSquare className="h-8 w-8" />
+            {/* Profile Edit Modal */}
+            {
+                showProfileEdit && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Editar Perfil</h3>
+                                <button onClick={() => setShowProfileEdit(false)} className="text-gray-500 hover:text-gray-700" title="Cerrar">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">Nombre</label>
+                                    <input
+                                        id="edit-name"
+                                        type="text"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 font-medium focus:border-blue-500 focus:outline-none"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        placeholder="Tu nombre"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="edit-phone" className="block text-sm font-medium text-gray-700">Teléfono</label>
+                                    <input
+                                        id="edit-phone"
+                                        type="tel"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-100"
+                                        value={(session?.user as any)?.phone || ''}
+                                        disabled
+                                        title="El teléfono no se puede cambiar"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">El teléfono no se puede cambiar</p>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex gap-3">
+                                <button
+                                    onClick={() => setShowProfileEdit(false)}
+                                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setSavingProfile(true);
+                                        try {
+                                            const res = await fetch('/api/user/profile', {
+                                                method: 'PATCH',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ name: editName })
+                                            });
+                                            if (res.ok) {
+                                                alert('Perfil actualizado');
+                                                setShowProfileEdit(false);
+                                                window.location.reload();
+                                            }
+                                        } catch (error) {
+                                            alert('Error al actualizar perfil');
+                                        } finally {
+                                            setSavingProfile(false);
+                                        }
+                                    }}
+                                    disabled={savingProfile}
+                                    className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+                                >
+                                    {savingProfile ? 'Guardando...' : 'Guardar'}
+                                </button>
+                            </div>
                         </div>
-                        <h3 className="text-gray-900 font-bold mb-1">Sin mensajes</h3>
-                        <p className="text-sm text-gray-500 mb-6">Tus conversaciones aparecerán aquí.</p>
-                        <button
-                            onClick={() => setShowNewChat(true)}
-                            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
-                        >
-                            Iniciar Chat
-                        </button>
                     </div>
-                ) : (
-                    <div className="space-y-1 pb-4">
-                        {filteredConversations.map((conv) => (
-                            <div
-                                key={conv.id}
-                                onClick={() => {
-                                    if (isSelectionMode) {
-                                        setSelectedChats(prev => prev.includes(conv.id) ? prev.filter(id => id !== conv.id) : [...prev, conv.id]);
-                                    } else {
-                                        onSelectConversation(conv);
-                                    }
-                                }}
-                                className={`
-                                    group flex items-center gap-4 p-3 rounded-2xl cursor-pointer transition-all border border-transparent
-                                    ${selectedId === conv.id ? "bg-blue-50/80 border-blue-100" : "hover:bg-gray-50"}
-                                    ${selectedChats.includes(conv.id) ? "bg-red-50 border-red-100" : ""}
-                                `}
-                            >
-                                {/* Checkbox for Selection Mode */}
-                                {isSelectionMode && (
-                                    <div className={`
-                                        h-5 w-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all
-                                        ${selectedChats.includes(conv.id) ? "bg-red-600 border-red-600" : "border-gray-300 bg-white"}
-                                    `}>
-                                        {selectedChats.includes(conv.id) && <User className="h-3 w-3 text-white" />}
-                                    </div>
-                                )}
+                )
+            }
 
-                                {/* Avatar */}
-                                <div className="relative flex-shrink-0">
-                                    {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
-                                        <img
-                                            src={conv.otherUser.avatar || conv.otherUser.profilePicture}
-                                            alt={conv.otherUser.name}
-                                            className="h-12 w-12 rounded-2xl object-cover shadow-sm bg-gray-100"
-                                        />
-                                    ) : (
-                                        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                            {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
-                                        </div>
-                                    )}
-                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
-                                        <span className="absolute -bottom-1 -right-1 h-4 w-4 bg-white rounded-full flex items-center justify-center">
-                                            <span className="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-0.5">
-                                        <h3 className={`font-bold text-[15px] truncate ${selectedId === conv.id ? 'text-blue-900' : 'text-gray-900'}`}>
-                                            {conv.otherUser?.name || 'Usuario'}
-                                        </h3>
-                                        {conv.lastMessageAt && (
-                                            <span className={`text-[11px] font-medium ${selectedId === conv.id ? 'text-blue-500' : 'text-gray-400'}`}>
-                                                {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <p className={`text-[13px] truncate pr-4 ${selectedId === conv.id ? 'text-blue-700/80' : 'text-gray-500'}`}>
-                                            {conv.lastMessage || 'Envía un mensaje...'}
-                                        </p>
-                                        {conv.unreadCount && conv.unreadCount > 0 ? (
-                                            <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-                                                {conv.unreadCount}
-                                            </span>
-                                        ) : null}
-                                    </div>
-                                </div>
+            {/* Starred Messages Modal */}
+            {
+                showStarredMessages && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl max-h-[80vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Mensajes Destacados</h3>
+                                <button
+                                    onClick={() => setShowStarredMessages(false)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                    title="Cerrar"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
-                        ))}
+                            <div className="text-center py-8 text-gray-500">
+                                <p>No tienes mensajes destacados</p>
+                                <p className="text-sm mt-2">Mantén presionado un mensaje y selecciona la estrella para destacarlo</p>
+                            </div>
+                        </div>
                     </div>
-                )}
-            </div>
+                )
+            }
 
-            {/* New Chat Slide-over / Modal (Simplified to absolute overlay for now) */}
-            {showNewChat && (
-                <div className="absolute inset-0 bg-white z-50 flex flex-col animate-in slide-in-from-left duration-200">
-                    <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50">
-                        <button onClick={() => setShowNewChat(false)} className="p-2 -ml-2 hover:bg-gray-200 rounded-full">
-                            <ArrowLeft className="h-5 w-5 text-gray-700" />
-                        </button>
-                        <h2 className="font-bold text-lg">Nuevo Chat</h2>
-                    </div>
-                    <div className="p-4 border-b border-gray-100">
-                        <div className="relative">
+            {/* New Group Modal */}
+            {
+                showNewGroup && (
+                    <CreateGroupModal
+                        onClose={() => setShowNewGroup(false)}
+                        onCreateGroup={handleCreateGroup}
+                    />
+                )
+            }
+
+            {/* New Chat Modal */}
+            {
+                showNewChat && (
+                    <div className="border-b border-gray-200 bg-blue-50 p-4">
+                        <h3 className="mb-2 font-medium text-gray-900">Nuevo Chat</h3>
+                        <div className="flex gap-2">
                             <input
-                                autoFocus
                                 type="text"
-                                placeholder="Escribe un número (+57...)"
-                                className="w-full bg-gray-100 border-none rounded-xl py-3 pl-4 pr-12 font-medium"
+                                placeholder="+57 300 123 4567"
+                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                                 value={searchPhone}
                                 onChange={(e) => setSearchPhone(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearchContact()}
                             />
                             <button
                                 onClick={handleSearchContact}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-blue-600 rounded-lg text-white hover:bg-blue-700"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                             >
-                                <ArrowLeft className="h-4 w-4 rotate-180" />
+                                Buscar
                             </button>
                         </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tus Contactos</h3>
-                        <div className="space-y-2">
-                            {searchResults.length > 0 ? (
-                                searchResults.map(user => (
+
+                        {searchResults.length > 0 && (
+                            <div className="mt-2 space-y-2">
+                                {searchResults.map((user) => (
                                     <button
                                         key={user.id}
                                         onClick={() => handleStartChat(user.id)}
-                                        className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-blue-50 transition-all text-left"
+                                        className="w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left hover:bg-gray-50"
                                     >
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                                            {user.name.charAt(0)}
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                                            <User className="h-5 w-5 text-gray-500" />
                                         </div>
                                         <div>
-                                            <p className="font-bold text-gray-900">{user.name}</p>
-                                            <p className="text-xs text-gray-500">{user.phone}</p>
+                                            <p className="font-medium text-gray-900">{user.name}</p>
+                                            <p className="text-sm text-gray-500">{user.phone}</p>
                                         </div>
                                     </button>
-                                ))
-                            ) : (
-                                contacts.map(contact => (
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+
+            {/* Contacts List in New Chat */}
+            {
+                showNewChat && searchResults.length === 0 && (
+                    <div className="flex-1 overflow-y-auto bg-gray-50 p-2">
+                        <h4 className="mb-2 px-2 text-xs font-semibold text-gray-500 uppercase">Tus Contactos</h4>
+                        {contacts.length === 0 ? (
+                            <p className="px-2 text-sm text-gray-500">No tienes contactos aún.</p>
+                        ) : (
+                            <div className="space-y-1">
+                                {contacts.map((contact) => (
                                     <button
                                         key={contact.id}
                                         onClick={() => handleStartChat(contact.id)}
-                                        className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-all text-left"
+                                        className="w-full flex items-center gap-3 rounded-lg border border-transparent p-2 text-left hover:bg-white hover:shadow-sm transition-all"
                                     >
-                                        <div className={`h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm ${contact.isBot ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+                                        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${contact.isBot ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'} font-bold text-xs`}>
                                             {contact.avatar || contact.name?.charAt(0).toUpperCase()}
                                         </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">{contact.name}</p>
-                                            <p className="text-xs text-gray-500">{contact.company?.name || contact.phone}</p>
+                                        <div className="overflow-hidden">
+                                            <div className="flex items-center gap-1">
+                                                <p className="font-medium text-gray-900 text-sm truncate">{contact.name}</p>
+                                                {contact.isBot && <span className="text-[10px] bg-purple-100 text-purple-700 px-1 rounded">AI</span>}
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {contact.isBot ? contact.botPersonality : contact.company?.name}
+                                            </p>
                                         </div>
                                     </button>
-                                ))
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )
+            }
+
+            {/* Search */}
+            <div className="p-2">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre o celular..."
+                        className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 font-semibold placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* Selection Mode Banner */}
+            {
+                isSelectionMode && (
+                    <div className="bg-blue-100 px-4 py-2 flex items-center justify-between">
+                        <span className="text-sm font-medium text-blue-900">
+                            {selectedChats.length} seleccionado{selectedChats.length !== 1 ? 's' : ''}
+                        </span>
+                        <div className="flex items-center gap-3">
+                            {selectedChats.length > 0 && (
+                                <button
+                                    onClick={handleDeleteConversations}
+                                    className="text-red-600 hover:text-red-700 p-1 rounded hover:bg-red-50"
+                                    title="Eliminar seleccionados"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </button>
                             )}
+                            <button
+                                onClick={() => {
+                                    setIsSelectionMode(false);
+                                    setSelectedChats([]);
+                                }}
+                                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                                Cancelar
+                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {/* Modals */}
-            {showInvitationModal && <InvitationModal phone={invitedPhone} onClose={() => setShowInvitationModal(false)} />}
-            {showNewGroup && <CreateGroupModal onClose={() => setShowNewGroup(false)} onCreateGroup={handleCreateGroup} />}
-            {showGlobalSearch && <GlobalCompanySearch onClose={() => setShowGlobalSearch(false)} onStartChat={handleStartChat} />}
-            {showProfileEdit && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm">
-                        <h3 className="text-xl font-bold mb-6 text-center">Editar Perfil</h3>
-                        <div className="space-y-4">
-                            <div className="flex justify-center mb-6">
-                                <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center text-3xl font-bold text-gray-400">
-                                    {editName.charAt(0)}
-                                </div>
-                            </div>
-                            <input
-                                type="text"
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                placeholder="Tu nombre"
-                            />
-                            <input
-                                disabled
-                                type="text"
-                                className="w-full bg-gray-100 border-transparent rounded-xl px-4 py-3 font-medium text-gray-500"
-                                value={(session?.user as any)?.phone || ''}
-                            />
-                            <div className="grid grid-cols-2 gap-3 pt-2">
-                                <button onClick={() => setShowProfileEdit(false)} className="py-3 font-bold text-gray-500 hover:bg-gray-100 rounded-xl">Cancelar</button>
+            {/* Conversation List */}
+            <div className="flex-1 overflow-y-auto">
+                {loading ? (
+                    <div className="p-4 text-center text-gray-500">Cargando...</div>
+                ) : (
+                    <>
+                        {filteredConversations.length === 0 && searchTerm.length < 3 ? (
+                            <div className="p-8 text-center">
+                                <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
+                                <p className="mt-2 text-sm text-gray-500">
+                                    No hay conversaciones
+                                </p>
                                 <button
-                                    onClick={async () => {
-                                        setSavingProfile(true);
-                                        try {
-                                            await fetch('/api/user/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName }) });
-                                            window.location.reload();
-                                        } catch (e) { alert('Error'); } finally { setSavingProfile(false); }
-                                    }}
-                                    className="py-3 font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+                                    onClick={() => setShowNewChat(true)}
+                                    className="mt-4 text-sm text-blue-600 hover:text-blue-700"
                                 >
-                                    Guardar
+                                    Iniciar nuevo chat
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        ) : (
+                            filteredConversations.map((conv) => (
+                                <div
+                                    key={conv.id}
+                                    onClick={() => {
+                                        if (isSelectionMode) {
+                                            setSelectedChats(prev =>
+                                                prev.includes(conv.id)
+                                                    ? prev.filter(id => id !== conv.id)
+                                                    : [...prev, conv.id]
+                                            );
+                                        } else {
+                                            onSelectConversation(conv);
+                                        }
+                                    }}
+                                    className={`cursor-pointer border-b border-gray-100 px-4 py-3 hover:bg-gray-50 ${selectedId === conv.id ? "bg-blue-50" : ""
+                                        } ${selectedChats.includes(conv.id) ? "bg-blue-100" : ""
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            {isSelectionMode && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedChats.includes(conv.id)}
+                                                    onChange={() => { }}
+                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    title="Seleccionar chat"
+                                                />
+                                            )}
+                                            {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
+                                                <div className="relative h-12 w-12 flex-shrink-0">
+                                                    <img
+                                                        src={conv.otherUser.avatar || conv.otherUser.profilePicture}
+                                                        alt={conv.otherUser.name}
+                                                        className="h-12 w-12 rounded-full object-cover"
+                                                    />
+                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
+                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="relative h-12 w-12 flex-shrink-0">
+                                                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <span className="text-lg font-semibold text-blue-600">
+                                                            {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
+                                                        </span>
+                                                    </div>
+                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
+                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium text-gray-900 truncate">
+                                                    {conv.otherUser?.name || 'Usuario'}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 truncate">
+                                                    {conv.lastMessage || 'Sin mensajes'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                            {conv.lastMessageAt && (
+                                                <span className="text-xs text-gray-400" suppressHydrationWarning>
+                                                    {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            )}
+                                            {conv.unreadCount && conv.unreadCount > 0 && (
+                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                                                    {conv.unreadCount}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+
+                        {/* Global Search Results Inline */}
+                        {searchTerm.length >= 3 && (
+                            <div className="mt-4 border-t border-gray-100 p-2">
+                                <h4 className="px-3 mb-2 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                                    {isSearchingGlobal ? 'Buscando empresas...' : 'Marketplace de empresas'}
+                                </h4>
+                                {globalResults.length === 0 && !isSearchingGlobal && (
+                                    <p className="px-3 py-4 text-xs text-gray-500 italic">No se encontraron más resultados</p>
+                                )}
+                                <div className="space-y-1">
+                                    {globalResults.map((user) => (
+                                        <div
+                                            key={user.id}
+                                            onClick={() => handleStartChat(user.id)}
+                                            className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100"
+                                        >
+                                            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                                                <p className="text-[11px] text-gray-600 truncate">
+                                                    {user.companyName || 'Usuario'}
+                                                </p>
+                                            </div>
+                                            <div className="text-blue-600 bg-blue-100/50 p-2 rounded-lg">
+                                                <Plus className="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {/* Invitation Modal */}
+            {
+                showInvitationModal && (
+                    <InvitationModal
+                        phone={invitedPhone}
+                        onClose={() => setShowInvitationModal(false)}
+                    />
+                )
+            }
+
+            {/* Global Company Search Modal */}
+            {
+                showGlobalSearch && (
+                    <GlobalCompanySearch
+                        onClose={() => setShowGlobalSearch(false)}
+                        onStartChat={handleStartChat}
+                    />
+                )
+            }
         </div>
     );
 }
