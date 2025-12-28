@@ -79,7 +79,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
 
                 {/* Search Bar */}
                 <div className="p-6 border-b border-gray-200 bg-gray-50">
-                    <div className="flex gap-3">
+                    <div className="flex flex-col gap-3 md:flex-row">
                         <div className="flex-1 relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
@@ -95,7 +95,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                         <button
                             onClick={handleSearch}
                             disabled={loading || !searchQuery.trim()}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium w-full md:w-auto"
                         >
                             {loading ? "Buscando..." : "Buscar"}
                         </button>
