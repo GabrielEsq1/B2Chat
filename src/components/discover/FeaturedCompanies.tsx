@@ -77,63 +77,71 @@ export default function FeaturedCompanies() {
     }
 
     return (
-        <div>
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Empresas relevantes en tu mercado
-                </h2>
-                <p className="text-gray-600">
-                    Conecta directamente con empresas líderes en Colombia
-                </p>
+        <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
+            {/* Fixed Top Header */}
+            <div className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+                <div className="px-4 py-4">
+                    <h2 className="text-xl font-bold text-gray-900">
+                        Empresas relevantes en tu mercado
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Conecta directamente con empresas líderes en Colombia
+                    </p>
+                </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {companies.map((company) => (
-                    <div
-                        key={company.id}
-                        className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1"
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                                <Building2 className="h-6 w-6 text-blue-600" />
+            {/* Scrollable Content - Company Cards */}
+            <div className="flex-1 overflow-y-auto pt-32 pb-20 md:pb-4">
+                <div className="px-4 py-4">
+                    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+                        {companies.map((company) => (
+                            <div
+                                key={company.id}
+                                className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all hover:-translate-y-1"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <Building2 className="h-6 w-6 text-blue-600" />
+                                    </div>
+                                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                                        Perfil disponible
+                                    </span>
+                                </div>
+
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                    {company.name}
+                                </h3>
+
+                                <div className="space-y-2 mb-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <Building2 className="h-4 w-4" />
+                                        <span>{company.industry}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4" />
+                                        <span>{company.city}</span>
+                                    </div>
+                                </div>
+
+                                <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+                                    {company.description}
+                                </p>
+
+                                <p className="text-xs text-gray-400 mb-3">
+                                    Esta empresa aún no gestiona conversaciones desde B2BChat
+                                </p>
+
+                                <button
+                                    onClick={() => setSelectedCompany(company)}
+                                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                                >
+                                    Contactar por B2BChat
+                                    <ArrowRight className="h-4 w-4" />
+                                </button>
                             </div>
-                            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                                Perfil disponible
-                            </span>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {company.name}
-                        </h3>
-
-                        <div className="space-y-2 mb-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-2">
-                                <Building2 className="h-4 w-4" />
-                                <span>{company.industry}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <span>{company.city}</span>
-                            </div>
-                        </div>
-
-                        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                            {company.description}
-                        </p>
-
-                        <p className="text-xs text-gray-400 mb-3">
-                            Esta empresa aún no gestiona conversaciones desde B2BChat
-                        </p>
-
-                        <button
-                            onClick={() => setSelectedCompany(company)}
-                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 font-medium"
-                        >
-                            Contactar por B2BChat
-                            <ArrowRight className="h-4 w-4" />
-                        </button>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
 
             {/* Contact Modal */}
