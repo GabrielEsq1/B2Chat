@@ -19,3 +19,18 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* CRITICAL: Force all inputs to have BLACK text for visibility */
+@layer base {
+  input,
+  textarea,
+  select {
+    @apply text-gray-900 !important;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-gray-400 !important;
+  }
+}
+
