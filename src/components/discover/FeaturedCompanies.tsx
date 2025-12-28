@@ -19,6 +19,8 @@ export default function FeaturedCompanies() {
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [activeUsers, setActiveUsers] = useState<any[]>([]);
 
     useEffect(() => {
         fetchCompanies();
@@ -55,16 +57,32 @@ export default function FeaturedCompanies() {
             const data = await res.json();
 
             if (data.success) {
-                alert("✅ Invitación enviada exitosamente");
-                setSelectedCompany(null);
-                setMessage("");
+                // Show success landing page instead of alert
+                setShowSuccess(true);
+                fetchActiveUsers(); // Load active users for suggestions
             } else {
                 alert("❌ " + data.error);
+                setSelectedCompany(null);
+                setMessage("");
             }
         } catch (error) {
             alert("Error al enviar invitación");
+            setSelectedCompany(null);
+            setMessage("");
         } finally {
             setSending(false);
+        }
+    };
+
+    const fetchActiveUsers = async () => {
+        try {
+            const res = await fetch("/api/users/active?limit=10");
+            const data = await res.json();
+            if (data.users) {
+                setActiveUsers(data.users);
+            }
+        } catch (error) {
+            console.error("Error fetching active users:", error);
         }
     };
 
@@ -144,8 +162,89 @@ export default function FeaturedCompanies() {
                 </div>
             </div>
 
+            {/* Success Landing Page */}
+            {showSuccess && (
+                <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+                    <div className="max-w-2xl mx-auto p-6">
+                        {/* Header */}
+                        <div className="text-center mb-8 pt-8">
+                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Invitación Enviada!</h2>
+                            <p className="text-gray-600">Le notificaremos a <strong>{selectedCompany?.name}</strong> sobre tu interés</p>
+                        </div>
+
+                        {/* What Happens Next */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+                            <h3 className="font-bold text-blue-900 mb-2">📬 ¿Qué pasa ahora?</h3>
+                            <ul className="text-sm text-blue-800 space-y-1">
+                                <li>• La empresa recibirá tu mensaje por email</li>
+                                <li>• Si se registran en B2BChat, podrán responderte</li>
+                                <li>• Te notificaremos cuando acepten tu invitación</li>
+                            </ul>
+                        </div>
+
+                        {/* Active Users Section */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-3">💬 Mientras tanto, chatea con usuarios activos</h3>
+                            <p className="text-sm text-gray-600 mb-4">Estas personas ya están en B2BChat y pueden responder ahora mismo</p>
+
+                            {/* Horizontal Scroll */}
+                            <div className="overflow-x-auto pb-4 -mx-6 px-6">
+                                <div className="flex gap-4 min-w-max">
+                                    {activeUsers.map((user) => (
+                                        <div key={user.id} className="flex-shrink-0 w-40 bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow">
+                                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                {user.profilePicture ? (
+                                                    <img src={user.profilePicture} alt="" className="w-12 h-12 rounded-full object-cover" />
+                                                ) : (
+                                                    <span className="text-lg font-bold text-blue-600">{user.name?.charAt(0).toUpperCase()}</span>
+                                                )}
+                                            </div>
+                                            <h4 className="text-sm font-semibold text-gray-900 text-center mb-1 truncate">{user.name}</h4>
+                                            <p className="text-xs text-gray-500 text-center mb-3 truncate">{user.position || 'Usuario'}</p>
+                                            <button
+                                                onClick={() => {
+                                                    window.location.href = `/chat?userId=${user.id}`;
+                                                }}
+                                                className="w-full bg-blue-600 text-white text-xs py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                Chatear
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => window.location.href = '/chat'}
+                                className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium"
+                            >
+                                Ir al Chat
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowSuccess(false);
+                                    setSelectedCompany(null);
+                                    setMessage("");
+                                }}
+                                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 font-medium"
+                            >
+                                Seguir Explorando
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Contact Modal */}
-            {selectedCompany && (
+            {selectedCompany && !showSuccess && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-lg w-full p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">
