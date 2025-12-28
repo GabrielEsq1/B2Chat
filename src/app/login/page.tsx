@@ -44,6 +44,11 @@ export default function LoginPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-8">
+                    <div className="text-left mb-6">
+                        <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
+                            ← Volver al inicio
+                        </Link>
+                    </div>
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido</h1>
                         <p className="text-gray-600">Ingresa a B2Chat para gestionar tus campañas</p>
