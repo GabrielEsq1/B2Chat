@@ -55,3 +55,26 @@ body {
     color: #111827 !important;
   }
 }
+
+/* NUCLEAR OPTION: Override everything with max specificity */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+div input,
+div textarea,
+div select,
+form input,
+form textarea,
+form select {
+  color: #111827 !important;
+}
+
+/* Placeholders with nuclear specificity */
+::placeholder,
+::-webkit-input-placeholder,
+:-moz-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
