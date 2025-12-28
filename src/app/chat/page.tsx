@@ -35,12 +35,13 @@ function ChatContent() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ participantId: userId }),
             });
-            if (!res.ok) return;
-            const data = await res.json();
-            if (data.conversation) {
-                const conv = data.conversation;
-                const otherUser = conv.userAId === session?.user?.id ? conv.userB : conv.userA;
-                setSelectedConversation({ ...conv, otherUser });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.conversation) {
+                    const conv = data.conversation;
+                    const otherUser = conv.userAId === session?.user?.id ? conv.userB : conv.userA;
+                    setSelectedConversation({ ...conv, otherUser });
+                }
             }
         } catch (error) {
             console.error(error);
@@ -52,47 +53,67 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        <div className="flex h-screen w-full pt-16 bg-white overflow-hidden relative">
-            {/* 1. LEFT COLUMN: Chat List (320px) */}
-            <div className={`
-                ${selectedConversation ? 'hidden md:flex' : 'flex'} 
-                w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white z-20
-            `}>
+        /* MAIN CONTAINER: Explicit flex-row, h-screen, no wrapping */
+        <div className="flex flex-row h-screen w-full pt-16 bg-white overflow-hidden items-stretch">
+
+            {/* 1. LEFT SIDEBAR: Rigid 320px width on desktop */}
+            <div
+                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white z-20`}
+                style={{ minWidth: (typeof window !== 'undefined' && window.innerWidth >= 768) ? '320px' : 'auto' }}
+            >
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
                     selectedId={selectedConversation?.id}
                 />
             </div>
 
-            {/* 2. CENTER COLUMN: Messages (Fluid) */}
-            <main className={`
-                ${!selectedConversation ? 'hidden md:flex' : 'flex'} 
-                flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative z-10
-            `}>
+            {/* 2. CENTER AREA: Expands to fill, minimum width ensured */}
+            <main
+                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative z-10 border-r border-gray-200`}
+            >
                 {initializing ? (
-                    <div className="flex h-full items-center justify-center bg-gray-50">
-                        <div className="text-center">
-                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-                            <p className="text-gray-500">Iniciando conversación...</p>
+                    <div className="flex h-full items-center justify-center">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+                            <p className="text-gray-500 font-medium">Iniciando chat...</p>
                         </div>
                     </div>
-                ) : selectedConversation?.otherUser?.isBot ? (
-                    <AIChatWindow
-                        conversationId={selectedConversation.id}
-                        userId={session?.user?.id || ''}
-                        userName={session?.user?.name || 'Usuario'}
-                        onBack={() => setSelectedConversation(null)}
-                    />
                 ) : (
-                    <ChatWindow
-                        conversation={selectedConversation}
-                        onBack={() => setSelectedConversation(null)}
-                    />
+                    <>
+                        {!selectedConversation ? (
+                            <div className="flex h-full items-center justify-center bg-gray-50">
+                                <div className="text-center p-8">
+                                    <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-4xl">💬</span>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Tus Mensajes B2B</h2>
+                                    <p className="text-gray-500 max-w-xs mx-auto">
+                                        Selecciona una conversación para empezar a hacer negocios.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : selectedConversation?.otherUser?.isBot ? (
+                            <AIChatWindow
+                                conversationId={selectedConversation.id}
+                                userId={session?.user?.id || ''}
+                                userName={session?.user?.name || 'Usuario'}
+                                onBack={() => setSelectedConversation(null)}
+                            />
+                        ) : (
+                            <ChatWindow
+                                conversation={selectedConversation}
+                                onBack={() => setSelectedConversation(null)}
+                            />
+                        )}
+                    </>
                 )}
             </main>
 
-            {/* 3. RIGHT COLUMN: Marketplace/Ads (320px) - FORCED VISIBILITY ON DESKTOP */}
-            <aside className="hidden md:flex h-full w-80 flex-shrink-0 flex-col border-l border-gray-300 bg-gray-50 overflow-hidden shadow-2xl z-20">
+            {/* 3. RIGHT SIDEBAR: Marketplace - ABSOLUTELY FORCED ON MD+ */}
+            <aside
+                className="hidden md:flex w-80 h-full flex-shrink-0 flex-col bg-gray-100 shadow-xl z-20 border-l border-gray-300"
+                style={{ width: '320px', minWidth: '320px' }}
+            >
                 <InternalAdsPanel />
             </aside>
         </div>
@@ -101,7 +122,7 @@ function ChatContent() {
 
 export default function ChatPage() {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center">Cargando chat...</div>}>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center">Cargando B2Chat...</div>}>
             <ChatContent />
         </Suspense>
     );
