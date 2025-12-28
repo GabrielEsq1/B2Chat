@@ -81,34 +81,34 @@ export default function CampaignsManagerPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-6xl mx-auto px-4">
+        <div className="min-h-screen bg-gray-50 pt-16 pb-20 md:pb-8">
+            <div className="max-w-6xl mx-auto px-4 py-6">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-6">
                     <button
                         onClick={() => router.push('/ads-manager')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors text-sm"
                     >
-                        <ArrowLeft className="h-5 w-5" />
+                        <ArrowLeft className="h-4 w-4" />
                         Volver a Ads Manager
                     </button>
-                    <h1 className="text-3xl font-bold text-gray-900">Gestión de Campañas</h1>
-                    <p className="text-gray-600 mt-2">Pausa o activa tus campañas publicitarias</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Campañas</h1>
+                    <p className="text-sm md:text-base text-gray-600 mt-1">Gestiona tus campañas publicitarias</p>
                 </div>
 
-                {/* Campaigns Grid */}
+                {/* Campaigns List */}
                 {campaigns.length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+                    <div className="text-center py-16 bg-white rounded-xl shadow-sm">
                         <p className="text-gray-500 mb-4">No tienes campañas aún</p>
                         <button
                             onClick={() => router.push('/ads-manager/create')}
-                            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium"
                         >
-                            Crear Primera Campaña
+                            + Nueva Campaña
                         </button>
                     </div>
                 ) : (
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-4">
                         {campaigns.map((campaign) => (
                             <div
                                 key={campaign.id}
@@ -135,25 +135,31 @@ export default function CampaignsManagerPage() {
                                 </div>
 
                                 {/* Stats */}
-                                <div className="grid grid-cols-3 gap-4 mb-4">
-                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <Eye className="h-5 w-5 text-gray-400 mx-auto mb-1" />
-                                        <p className="text-xs text-gray-500">Impresiones</p>
-                                        <p className="text-lg font-bold text-gray-900">
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                            <span className="text-sm text-gray-600">Impresiones</span>
+                                        </div>
+                                        <span className="text-lg font-bold text-gray-900">
                                             {campaign.impressions.toLocaleString()}
-                                        </p>
+                                        </span>
                                     </div>
-                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <MousePointer className="h-5 w-5 text-gray-400 mx-auto mb-1" />
-                                        <p className="text-xs text-gray-500">Clicks</p>
-                                        <p className="text-lg font-bold text-gray-900">{campaign.clicks}</p>
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <MousePointer className="h-5 w-5 text-gray-400" />
+                                            <span className="text-sm text-gray-600">Clicks</span>
+                                        </div>
+                                        <span className="text-lg font-bold text-gray-900">{campaign.clicks}</span>
                                     </div>
-                                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                        <DollarSign className="h-5 w-5 text-gray-400 mx-auto mb-1" />
-                                        <p className="text-xs text-gray-500">Gastado</p>
-                                        <p className="text-lg font-bold text-gray-900">
+                                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <DollarSign className="h-5 w-5 text-gray-400" />
+                                            <span className="text-sm text-gray-600">Gastado</span>
+                                        </div>
+                                        <span className="text-lg font-bold text-gray-900">
                                             ${campaign.spent.toFixed(2)}
-                                        </p>
+                                        </span>
                                     </div>
                                 </div>
 
@@ -176,11 +182,11 @@ export default function CampaignsManagerPage() {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex gap-2">
+                                <div className="flex flex-col md:flex-row gap-2">
                                     <button
                                         onClick={() => toggleCampaignStatus(campaign.id, campaign.status)}
                                         disabled={toggling === campaign.id || campaign.status === 'DRAFT'}
-                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${campaign.status === 'ACTIVE'
+                                        className={`w-full md:flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${campaign.status === 'ACTIVE'
                                             ? 'bg-yellow-600 text-white hover:bg-yellow-700'
                                             : 'bg-green-600 text-white hover:bg-green-700'
                                             } disabled:opacity-50`}
@@ -199,13 +205,21 @@ export default function CampaignsManagerPage() {
                                     </button>
                                     <button
                                         onClick={() => router.push(`/ads-manager/campaigns/${campaign.id}`)}
-                                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                                        className="w-full md:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
                                     >
                                         Ver Detalles
                                     </button>
                                 </div>
                             </div>
                         ))}
+
+                        {/* Create New Campaign Button - BOTTOM */}
+                        <button
+                            onClick={() => router.push('/ads-manager/create')}
+                            className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium text-center flex items-center justify-center gap-2"
+                        >
+                            + Nueva Campaña
+                        </button>
                     </div>
                 )}
             </div>
