@@ -54,15 +54,15 @@ function ChatContent() {
 
     return (
         /* 
-           FORCE 3-COLUMN LAYOUT 
-           Using explicit flex-row and avoiding hidden on desktop 
+           FORCE 3-COLUMN LAYOUT Using CSS Grid
+           MD+ : Grid 320px | 1fr | 320px
+           Mobile: Flex/Block with visibility toggles
         */
-        <div className="flex flex-row h-screen w-full pt-16 bg-[#efeae2] overflow-hidden items-stretch">
+        <div className="h-screen w-full bg-[#efeae2] overflow-hidden pt-16 md:grid md:grid-cols-[320px_1fr_320px]">
 
-            {/* 1. LEFT: CHATS (320px) */}
+            {/* 1. LEFT: CHATS (320px on Desktop) */}
             <div
-                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white z-20`}
-                style={{ minWidth: '320px' }}
+                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col border-r border-gray-200 bg-white z-20`}
             >
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
@@ -72,7 +72,7 @@ function ChatContent() {
 
             {/* 2. CENTER: MESSAGES (Flexible Area) */}
             <main
-                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative z-10`}
+                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col bg-[#efeae2] relative z-10 overflow-hidden`}
             >
                 {initializing ? (
                     <div className="flex h-full items-center justify-center">
@@ -109,10 +109,9 @@ function ChatContent() {
                 )}
             </main>
 
-            {/* 3. RIGHT: ADS MARKETPLACE (320px) - ABSOLUTELY FORCED ON ALL VIEWPORTS >= 768px */}
+            {/* 3. RIGHT: ADS MARKETPLACE (320px) - Always visible on Desktop */}
             <aside
-                className="hidden md:flex w-80 h-full flex-shrink-0 flex-col bg-gray-50 border-l border-gray-200 shadow-2xl z-20"
-                style={{ width: '320px', minWidth: '320px' }}
+                className="hidden md:flex h-full flex-col bg-gray-50 border-l border-gray-200 shadow-2xl z-20"
             >
                 <div className="flex-1 flex flex-col h-full bg-slate-50">
                     <InternalAdsPanel />
