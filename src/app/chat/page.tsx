@@ -29,7 +29,6 @@ function ChatContent() {
     const initiateChat = async (userId: string) => {
         if (initializing) return;
         setInitializing(true);
-        console.log('[ChatPage] Initiating chat with userId:', userId);
         try {
             const res = await fetch('/api/conversations', {
                 method: 'POST',
@@ -37,47 +36,41 @@ function ChatContent() {
                 body: JSON.stringify({ participantId: userId }),
             });
 
-            if (!res.ok) {
-                const err = await res.json();
-                console.error("[ChatPage] Error initiating chat:", err);
-                alert(`Error al iniciar chat: ${err.error || 'Error desconocido'}`);
-                return;
-            }
+            if (!res.ok) return;
 
             const data = await res.json();
-            console.log('[ChatPage] Conversation created/found:', data);
             if (data.conversation) {
-                // Determine other user from the conversation data directly
                 const conv = data.conversation;
                 const otherUser = conv.userAId === session?.user?.id ? conv.userB : conv.userA;
-
-                const conversationToSet = {
-                    ...conv,
-                    otherUser
-                };
-                console.log('[ChatPage] Setting conversation:', conversationToSet);
-                setSelectedConversation(conversationToSet);
+                setSelectedConversation({ ...conv, otherUser });
             }
         } catch (error) {
             console.error("[ChatPage] Error initiating chat:", error);
-            alert("Error de conexión al iniciar el chat");
         } finally {
             setInitializing(false);
         }
     };
 
+    if (!mounted) return null;
+
     return (
-        <div className="flex h-screen pt-16 bg-white overflow-hidden">
-            {/* Left Sidebar */}
-            <div className={`${selectedConversation ? 'hidden lg:flex' : 'flex'} h-full w-full lg:w-80 flex-shrink-0 flex-col border-r border-gray-200 bg-white transition-all`}>
+        <div className="flex h-screen w-full pt-16 bg-white overflow-hidden">
+            {/* 1. Left Sidebar (Chats) - Hidden on mobile if a chat is open */}
+            <div className={`
+                ${selectedConversation ? 'hidden md:flex' : 'flex'} 
+                w-full md:w-80 h-full flex-shrink-0 flex-col border-r border-gray-200 bg-white
+            `}>
                 <ChatSidebar
                     onSelectConversation={setSelectedConversation}
                     selectedId={selectedConversation?.id}
                 />
             </div>
 
-            {/* Middle Chat Window */}
-            <div className={`${!selectedConversation ? 'hidden lg:flex' : 'flex'} flex-1 min-w-0 flex-col bg-[#efeae2] relative`}>
+            {/* 2. Middle Content (Chat Window) - Hidden on mobile if NO chat is open */}
+            <main className={`
+                ${!selectedConversation ? 'hidden md:flex' : 'flex'} 
+                flex-1 h-full min-w-0 flex-col bg-[#efeae2] relative
+            `}>
                 {initializing ? (
                     <div className="flex h-full items-center justify-center bg-gray-50">
                         <div className="text-center">
@@ -98,12 +91,12 @@ function ChatContent() {
                         onBack={() => setSelectedConversation(null)}
                     />
                 )}
-            </div>
+            </main>
 
-            {/* Right Ads Panel - Permanent on Desktop */}
-            <div className="hidden lg:flex h-full w-80 flex-shrink-0">
+            {/* 3. Right Sidebar (Ads) - Always visible on Desktop (md+) */}
+            <aside className="hidden md:flex h-full w-80 flex-shrink-0 border-l border-gray-200">
                 <InternalAdsPanel />
-            </div>
+            </aside>
         </div>
     );
 }
