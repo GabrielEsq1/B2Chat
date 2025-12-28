@@ -18,7 +18,7 @@ export default function FloatingAdsButton() {
                 <Sparkles className="h-6 w-6" />
             </button>
 
-            {/* Fullscreen Ads Panel - Mobile Only */}
+            {/* Mobile Ads Panel Overlay - SAME PANEL, just repositioned for mobile */}
             {showAds && (
                 <div className="md:hidden fixed inset-0 z-50 bg-white flex flex-col animate-in slide-in-from-right duration-300">
                     {/* Header */}
@@ -32,7 +32,7 @@ export default function FloatingAdsButton() {
                         </button>
                     </div>
 
-                    {/* Ads Content */}
+                    {/* THE SAME ADS PANEL COMPONENT */}
                     <div className="flex-1 overflow-hidden">
                         <InternalAdsPanel />
                     </div>
@@ -41,3 +41,4 @@ export default function FloatingAdsButton() {
         </>
     );
 }
+
