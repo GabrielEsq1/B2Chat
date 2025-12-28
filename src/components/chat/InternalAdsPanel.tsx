@@ -54,7 +54,7 @@ export default function InternalAdsPanel() {
 
     if (loading) {
         return (
-            <div className="hidden w-80 flex-col border-l border-gray-200 bg-white md:flex">
+            <div className="flex w-full flex-col border-l border-gray-200 bg-white">
                 <div className="border-b border-gray-200 p-4">
                     <h3 className="font-semibold text-gray-900">Novedades y Ofertas</h3>
                 </div>
