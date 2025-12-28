@@ -5,35 +5,37 @@ const prisma = new PrismaClient();
 
 async function createAdminUser() {
     try {
-        console.log('🔧 Creating admin user...');
+        console.log('🔧 Cleaning and creating admin user...');
 
         const adminEmail = 'admin@b2bchat.com';
-        const adminPassword = 'Admin123!'; // Change this after first login
-        const adminPhone = '+573026687991'; // Your WhatsApp number
+        const adminPassword = 'Admin123!';
+        const adminPhone = '+573026687991';
 
-        // Check if admin already exists
-        const existingAdmin = await prisma.user.findUnique({
-            where: { email: adminEmail }
+        // 1. Delete any existing user with that email OR phone to avoid conflicts
+        console.log(`🧹 Checking for conflicts with ${adminEmail} or ${adminPhone}...`);
+
+        await prisma.user.deleteMany({
+            where: {
+                OR: [
+                    { email: adminEmail },
+                    { phone: adminPhone }
+                ]
+            }
         });
 
-        if (existingAdmin) {
-            console.log('⚠️  Admin user already exists!');
-            console.log('📧 Email:', adminEmail);
-            console.log('🔑 Use existing password or reset it');
-            return;
-        }
+        console.log('✨ Cleanup complete.');
 
-        // Hash password
+        // 2. Hash password
         const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-        // Create admin user
+        // 3. Create fresh admin user
         const admin = await prisma.user.create({
             data: {
                 email: adminEmail,
-                password: hashedPassword,
+                passwordHash: hashedPassword,
                 name: 'Admin B2BChat',
                 phone: adminPhone,
-                role: 'ADMIN', // Set admin role
+                role: 'ADMIN',
                 isBot: false,
                 position: 'Administrator',
                 bio: 'Administrador principal de B2BChat',
@@ -50,12 +52,10 @@ async function createAdminUser() {
         console.log('📱 Phone:', adminPhone);
         console.log('👤 User ID:', admin.id);
         console.log('');
-        console.log('🔐 IMPORTANT: Change the password after first login!');
-        console.log('');
-        console.log('🔗 Login at: https://creatiendasgit1.vercel.app/login');
+        console.log('🔐 IMPORTANT: Use these credentials to login.');
 
     } catch (error) {
-        console.error('❌ Error creating admin user:', error);
+        console.error('❌ Error in admin setup:', error);
         throw error;
     } finally {
         await prisma.$disconnect();
@@ -64,10 +64,10 @@ async function createAdminUser() {
 
 createAdminUser()
     .then(() => {
-        console.log('✅ Script completed');
+        console.log('✅ Setup completed');
         process.exit(0);
     })
     .catch((error) => {
-        console.error('❌ Script failed:', error);
+        console.error('❌ Setup failed:', error);
         process.exit(1);
     });
