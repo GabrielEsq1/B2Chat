@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.B2BCHAT_STRG_CLOUDINARY_CLOUD || process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.B2BCHAT_STRG_CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.B2BCHAT_STRG_CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+});
 
 export async function POST(req: NextRequest) {
     try {
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Validate file type
-        const allowedImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+        const allowedImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
         const allowedVideoTypes = ["video/mp4", "video/webm", "video/quicktime"];
 
         if (type === "image" && !allowedImageTypes.includes(file.type)) {
@@ -62,33 +69,40 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Generate unique filename
-        const timestamp = Date.now();
-        const extension = file.name.split(".").pop();
-        const filename = `${session.user.id}_${timestamp}.${extension}`;
-
-        // Determine upload directory
-        const uploadDir = type === "image" ? "images" : "videos";
-        const uploadPath = join(process.cwd(), "public", "uploads", "campaigns", uploadDir, filename);
-
-        // Convert file to buffer and save
+        // Convert file to buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        await writeFile(uploadPath, buffer);
 
-        // Return public URL
-        const publicUrl = `/uploads/campaigns/${uploadDir}/${filename}`;
+        // Upload to Cloudinary
+        const uploadResult: any = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "b2bchat/campaigns",
+                    resource_type: type === "video" ? "video" : "image",
+                    filename_override: file.name,
+                    use_filename: true,
+                    unique_filename: true,
+                },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                }
+            );
+            uploadStream.end(buffer);
+        });
 
         return NextResponse.json({
             success: true,
-            url: publicUrl,
-            filename,
+            url: uploadResult.secure_url,
+            filename: uploadResult.original_filename,
             type,
+            public_id: uploadResult.public_id
         });
-    } catch (error) {
-        console.error("Error uploading file:", error);
+
+    } catch (error: any) {
+        console.error("Cloudinary campaign upload error:", error);
         return NextResponse.json(
-            { error: "Error al subir archivo" },
+            { error: "Error al subir archivo a la nube", details: error.message },
             { status: 500 }
         );
     }
