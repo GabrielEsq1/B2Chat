@@ -418,10 +418,10 @@ export default function CampaignForm({ onSuccess, onCancel }: CampaignFormProps)
                     </div>
                 </div>
 
-                {/* Right Column: Live Preview */}
-                <div className="w-full lg:w-80 xl:w-96 space-y-6">
-                    <div className="sticky top-6">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Vista Previa en Vivo</h3>
+                {/* Right Column: Live Preview - SMALLER */}
+                <div className="w-full lg:w-64 xl:w-72 space-y-6 flex-shrink-0">
+                    <div className="sticky top-20">
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Vista Previa</h3>
 
                         <div className="space-y-6">
                             {/* Feed Preview */}
