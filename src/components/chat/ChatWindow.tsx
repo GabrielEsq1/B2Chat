@@ -511,7 +511,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           <input
             type="text"
             placeholder="Escribe un mensaje"
-            className="flex-1 rounded-lg border-none bg-white py-2 px-4 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="flex-1 rounded-lg border-none bg-white py-2 px-4 text-sm text-gray-900 font-medium placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             value={newMessage}
             onChange={handleTyping}
           />

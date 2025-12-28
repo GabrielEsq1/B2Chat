@@ -109,7 +109,7 @@ export default function InternalAdsPanel() {
             )}
 
             {/* Desktop Sidebar */}
-            <div className="hidden w-80 flex-col border-l border-gray-200 bg-gray-50 md:flex shadow-inner overflow-hidden">
+            <div className="flex h-full w-full flex-col border-l border-gray-200 bg-gray-50 shadow-inner overflow-hidden">
                 {/* Fixed Header with Create Button */}
                 <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10 shadow-sm">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">

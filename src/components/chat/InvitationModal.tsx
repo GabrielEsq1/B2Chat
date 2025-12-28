@@ -74,7 +74,7 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                                 type="text"
                                 value={inviteLink}
                                 readOnly
-                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50"
+                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 font-medium bg-gray-50"
                             />
                             <button
                                 onClick={handleCopyLink}

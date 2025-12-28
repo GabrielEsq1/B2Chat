@@ -56,6 +56,8 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
 
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
     const [pusherClient, setPusherClient] = useState<any>(null);
+    const [globalResults, setGlobalResults] = useState<any[]>([]);
+    const [isSearchingGlobal, setIsSearchingGlobal] = useState(false);
 
     useEffect(() => {
         loadConversations();
@@ -102,6 +104,35 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (searchTerm.length < 3) {
+            setGlobalResults([]);
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(async () => {
+            setIsSearchingGlobal(true);
+            try {
+                const compRes = await fetch(`/api/companies/search?q=${encodeURIComponent(searchTerm)}`);
+                const compData = await compRes.json();
+                if (compData.companies) {
+                    const users = compData.companies.flatMap((c: any) => c.users.map((u: any) => ({
+                        ...u,
+                        companyName: c.name,
+                        isGlobal: true
+                    })));
+                    setGlobalResults(users.slice(0, 5));
+                }
+            } catch (error) {
+                console.error("Global search error:", error);
+            } finally {
+                setIsSearchingGlobal(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
 
     const loadConversations = async () => {
         try {
@@ -396,7 +427,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                     <input
                                         id="edit-name"
                                         type="text"
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 font-medium focus:border-blue-500 focus:outline-none"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
                                         placeholder="Tu nombre"
@@ -496,7 +527,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                             <input
                                 type="text"
                                 placeholder="+57 300 123 4567"
-                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none"
                                 value={searchPhone}
                                 onChange={(e) => setSearchPhone(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearchContact()}
@@ -573,8 +604,8 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Buscar conversaciones"
-                        className="w-full rounded-lg border-none bg-gray-100 py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-blue-500"
+                        placeholder="Buscar por nombre o celular..."
+                        className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 font-semibold placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -616,99 +647,137 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
             <div className="flex-1 overflow-y-auto">
                 {loading ? (
                     <div className="p-4 text-center text-gray-500">Cargando...</div>
-                ) : filteredConversations.length === 0 ? (
-                    <div className="p-8 text-center">
-                        <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
-                        <p className="mt-2 text-sm text-gray-500">
-                            {searchTerm ? 'No se encontraron conversaciones' : 'No hay conversaciones'}
-                        </p>
-                        <button
-                            onClick={() => setShowNewChat(true)}
-                            className="mt-4 text-sm text-blue-600 hover:text-blue-700"
-                        >
-                            Iniciar nuevo chat
-                        </button>
-                    </div>
                 ) : (
-                    filteredConversations.map((conv) => (
-                        <div
-                            key={conv.id}
-                            onClick={() => {
-                                if (isSelectionMode) {
-                                    setSelectedChats(prev =>
-                                        prev.includes(conv.id)
-                                            ? prev.filter(id => id !== conv.id)
-                                            : [...prev, conv.id]
-                                    );
-                                } else {
-                                    onSelectConversation(conv);
-                                }
-                            }}
-                            className={`cursor-pointer border-b border-gray-100 px-4 py-3 hover:bg-gray-50 ${selectedId === conv.id ? "bg-blue-50" : ""
-                                } ${selectedChats.includes(conv.id) ? "bg-blue-100" : ""
-                                }`}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                    {isSelectionMode && (
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedChats.includes(conv.id)}
-                                            onChange={() => { }}
-                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            title="Seleccionar chat"
-                                        />
-                                    )}
-                                    {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
-                                        <div className="relative h-12 w-12 flex-shrink-0">
-                                            <img
-                                                src={conv.otherUser.avatar || conv.otherUser.profilePicture}
-                                                alt={conv.otherUser.name}
-                                                className="h-12 w-12 rounded-full object-cover"
-                                            />
-                                            {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
-                                                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                    <>
+                        {filteredConversations.length === 0 && searchTerm.length < 3 ? (
+                            <div className="p-8 text-center">
+                                <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
+                                <p className="mt-2 text-sm text-gray-500">
+                                    No hay conversaciones
+                                </p>
+                                <button
+                                    onClick={() => setShowNewChat(true)}
+                                    className="mt-4 text-sm text-blue-600 hover:text-blue-700"
+                                >
+                                    Iniciar nuevo chat
+                                </button>
+                            </div>
+                        ) : (
+                            filteredConversations.map((conv) => (
+                                <div
+                                    key={conv.id}
+                                    onClick={() => {
+                                        if (isSelectionMode) {
+                                            setSelectedChats(prev =>
+                                                prev.includes(conv.id)
+                                                    ? prev.filter(id => id !== conv.id)
+                                                    : [...prev, conv.id]
+                                            );
+                                        } else {
+                                            onSelectConversation(conv);
+                                        }
+                                    }}
+                                    className={`cursor-pointer border-b border-gray-100 px-4 py-3 hover:bg-gray-50 ${selectedId === conv.id ? "bg-blue-50" : ""
+                                        } ${selectedChats.includes(conv.id) ? "bg-blue-100" : ""
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            {isSelectionMode && (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedChats.includes(conv.id)}
+                                                    onChange={() => { }}
+                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    title="Seleccionar chat"
+                                                />
                                             )}
-                                        </div>
-                                    ) : (
-                                        <div className="relative h-12 w-12 flex-shrink-0">
-                                            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <span className="text-lg font-semibold text-blue-600">
-                                                    {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
-                                                </span>
+                                            {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
+                                                <div className="relative h-12 w-12 flex-shrink-0">
+                                                    <img
+                                                        src={conv.otherUser.avatar || conv.otherUser.profilePicture}
+                                                        alt={conv.otherUser.name}
+                                                        className="h-12 w-12 rounded-full object-cover"
+                                                    />
+                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
+                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="relative h-12 w-12 flex-shrink-0">
+                                                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <span className="text-lg font-semibold text-blue-600">
+                                                            {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
+                                                        </span>
+                                                    </div>
+                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
+                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium text-gray-900 truncate">
+                                                    {conv.otherUser?.name || 'Usuario'}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 truncate">
+                                                    {conv.lastMessage || 'Sin mensajes'}
+                                                </p>
                                             </div>
-                                            {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
-                                                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                            {conv.lastMessageAt && (
+                                                <span className="text-xs text-gray-400" suppressHydrationWarning>
+                                                    {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            )}
+                                            {conv.unreadCount && conv.unreadCount > 0 && (
+                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                                                    {conv.unreadCount}
+                                                </span>
                                             )}
                                         </div>
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-gray-900 truncate">
-                                            {conv.otherUser?.name || 'Usuario'}
-                                        </h3>
-                                        <p className="text-sm text-gray-500 truncate">
-                                            {conv.lastMessage || 'Sin mensajes'}
-                                        </p>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                    {conv.lastMessageAt && (
-                                        <span className="text-xs text-gray-400" suppressHydrationWarning>
-                                            {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', {
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </span>
-                                    )}
-                                    {conv.unreadCount && conv.unreadCount > 0 && (
-                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                                            {conv.unreadCount}
-                                        </span>
-                                    )}
+                            ))
+                        )}
+
+                        {/* Global Search Results Inline */}
+                        {searchTerm.length >= 3 && (
+                            <div className="mt-4 border-t border-gray-100 p-2">
+                                <h4 className="px-3 mb-2 text-[10px] font-bold text-blue-600 uppercase tracking-wider">
+                                    {isSearchingGlobal ? 'Buscando empresas...' : 'Marketplace de empresas'}
+                                </h4>
+                                {globalResults.length === 0 && !isSearchingGlobal && (
+                                    <p className="px-3 py-4 text-xs text-gray-500 italic">No se encontraron más resultados</p>
+                                )}
+                                <div className="space-y-1">
+                                    {globalResults.map((user) => (
+                                        <div
+                                            key={user.id}
+                                            onClick={() => handleStartChat(user.id)}
+                                            className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-100"
+                                        >
+                                            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
+                                                <p className="text-[11px] text-gray-600 truncate">
+                                                    {user.companyName || 'Usuario'}
+                                                </p>
+                                            </div>
+                                            <div className="text-blue-600 bg-blue-100/50 p-2 rounded-lg">
+                                                <Plus className="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        )}
+                    </>
                 )}
             </div>
 
