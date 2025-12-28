@@ -32,7 +32,88 @@ export default function CreateCampaignPage() {
     // Calculate duration automatically
     const durationDays = Math.ceil(formData.totalBudget / formData.dailyBudget);
 
-    const handleNext = () => setStep(step + 1);
+    // Validation for each step
+    const validateStep = (currentStep: number): boolean => {
+        switch (currentStep) {
+            case 1: // Detalles
+                if (!formData.name.trim()) {
+                    alert('❌ Por favor ingresa el nombre de la campaña');
+                    return false;
+                }
+                if (!formData.objective) {
+                    alert('❌ Por favor selecciona un objetivo');
+                    return false;
+                }
+                return true;
+
+            case 2: // Segmentación
+                if (!formData.industry) {
+                    alert('❌ Por favor selecciona una industria');
+                    return false;
+                }
+                if (!formData.sector) {
+                    alert('❌ Por favor selecciona un sector');
+                    return false;
+                }
+                if (!formData.roles.trim()) {
+                    alert('❌ Por favor ingresa al menos un cargo');
+                    return false;
+                }
+                if (!formData.ageRange) {
+                    alert('❌ Por favor selecciona un rango de edad');
+                    return false;
+                }
+                if (!formData.gender) {
+                    alert('❌ Por favor selecciona un género');
+                    return false;
+                }
+                if (!formData.location.trim()) {
+                    alert('❌ Por favor ingresa una ubicación');
+                    return false;
+                }
+                return true;
+
+            case 3: // Presupuesto
+                if (formData.dailyBudget < 10000) {
+                    alert('❌ El presupuesto diario mínimo es $10,000 COP');
+                    return false;
+                }
+                if (formData.totalBudget < formData.dailyBudget) {
+                    alert('❌ El presupuesto total debe ser mayor al presupuesto diario');
+                    return false;
+                }
+                return true;
+
+            case 4: // Creativo
+                if (!formData.creativeUrl.trim()) {
+                    alert('❌ Por favor sube una imagen o video');
+                    return false;
+                }
+                if (!formData.creativeText.trim()) {
+                    alert('❌ Por favor ingresa el texto del anuncio');
+                    return false;
+                }
+                if (!formData.description.trim()) {
+                    alert('❌ Por favor ingresa una descripción');
+                    return false;
+                }
+                if (!formData.destinationUrl.trim()) {
+                    alert('❌ Por favor ingresa la URL de destino');
+                    return false;
+                }
+                return true;
+
+            default:
+                return true;
+        }
+    };
+
+    const handleNext = () => {
+        if (validateStep(step)) {
+            setStep(step + 1);
+        }
+    };
+
     const handleBack = () => setStep(step - 1);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
