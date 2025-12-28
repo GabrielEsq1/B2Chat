@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.B2BCHAT_STRG_CLOUDINARY_CLOUD || process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.B2BCHAT_STRG_CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.B2BCHAT_STRG_CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+});
 
 export async function POST(req: NextRequest) {
     try {
@@ -17,6 +24,7 @@ export async function POST(req: NextRequest) {
 
         const formData = await req.formData();
         const file = formData.get("file") as File;
+        const type = formData.get("type") as string || "general";
 
         if (!file) {
             return NextResponse.json(
@@ -53,44 +61,39 @@ export async function POST(req: NextRequest) {
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const folder = type === "campaign" ? "b2bchat/campaigns" : "b2bchat/chat";
 
-        // Determine folder based on type or request param
-        const type = formData.get("type") as string || "general";
-        const folder = type === "campaign" ? "campaigns" : "chat";
-
-        // Generate unique filename
-        const timestamp = Date.now();
-        const extension = file.name.split(".").pop();
-        const filename = `${session.user.id}_${timestamp}.${extension}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
-
-        // Ensure directory exists (simple check, assuming public/uploads exists or using recursive mkdir if needed)
-        // For now, we'll assume the structure exists or node's writeFile might fail if dir doesn't exist.
-        // Better to use a helper to ensure dir, but for this environment we'll stick to the path.
-        // We'll update the path to include the folder.
-        const filepath = path.join(uploadDir, filename);
-
-        // Ensure directory exists
-        await mkdir(uploadDir, { recursive: true });
-
-        // Save file
-        await writeFile(filepath, buffer);
-
-        // Return public URL
-        // Return public URL
-        const url = `/uploads/${folder}/${filename}`;
+        // Upload to Cloudinary using a Promise wrapper
+        const uploadResult: any = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: folder,
+                    resource_type: "auto", // Automatically detect image/video/raw
+                    filename_override: file.name,
+                    use_filename: true,
+                    unique_filename: true,
+                },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                }
+            );
+            uploadStream.end(buffer);
+        });
 
         return NextResponse.json({
             success: true,
-            url,
-            filename,
+            url: uploadResult.secure_url,
+            filename: uploadResult.original_filename,
             type: file.type,
             size: file.size,
+            public_id: uploadResult.public_id
         });
-    } catch (error) {
-        console.error("Error uploading file:", error);
+
+    } catch (error: any) {
+        console.error("Cloudinary upload error:", error);
         return NextResponse.json(
-            { error: "Error al subir el archivo" },
+            { error: "Error al subir el archivo a la nube", details: error.message },
             { status: 500 }
         );
     }
