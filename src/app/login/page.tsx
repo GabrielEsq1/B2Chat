@@ -31,7 +31,7 @@ export default function LoginPage() {
                 setError("Credenciales inválidas. Verifica tu email/teléfono y contraseña.");
                 setLoading(false);
             } else {
-                router.push("/chat");
+                router.push("/dashboard");
                 router.refresh();
             }
         } catch (err) {

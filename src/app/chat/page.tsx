@@ -53,11 +53,11 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        <div className="h-screen w-full bg-white overflow-hidden pt-16">
-            <div className="w-full h-full flex flex-col relative">
-                {/* 1. LEFT: CHATS list (Toggle based on selectedConversation) */}
+        <div className="h-screen w-full bg-[#f0f2f5] overflow-hidden pt-16 flex">
+            <div className="w-full h-full flex flex-col md:flex-row relative">
+                {/* 1. LEFT: CHATS list (Always visible on Desktop, Toggle on Mobile) */}
                 <div
-                    className={`${selectedConversation ? 'hidden' : 'flex'} h-full flex-col border-r border-gray-200 bg-white`}
+                    className={`${selectedConversation ? 'hidden' : 'flex'} md:flex h-full w-full md:w-[350px] lg:w-[400px] flex-col border-r border-gray-200 bg-white z-20`}
                 >
                     <ChatSidebar
                         onSelectConversation={setSelectedConversation}
@@ -65,9 +65,9 @@ function ChatContent() {
                     />
                 </div>
 
-                {/* 2. CENTER: MESSAGES window */}
+                {/* 2. RIGHT: MESSAGES window (Always visible on Desktop, Toggle on Mobile) */}
                 <main
-                    className={`${!selectedConversation ? 'hidden' : 'flex'} h-full flex-col bg-[#efeae2] relative overflow-hidden`}
+                    className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex flex-1 h-full flex-col bg-[#efeae2] relative overflow-hidden`}
                 >
                     {initializing ? (
                         <div className="flex h-full items-center justify-center">
@@ -76,15 +76,20 @@ function ChatContent() {
                     ) : (
                         <>
                             {!selectedConversation ? (
-                                <div className="flex h-full items-center justify-center">
-                                    <div className="text-center p-12 bg-white/50 backdrop-blur-md rounded-3xl shadow-xl border border-white/20">
-                                        <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-lg">
-                                            <span className="text-4xl">💬</span>
+                                <div className="hidden md:flex h-full items-center justify-center bg-[#f0f2f5] border-l border-gray-200">
+                                    <div className="text-center max-w-md p-8">
+                                        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <span className="text-5xl text-gray-400">💬</span>
                                         </div>
-                                        <h2 className="text-2xl font-black text-gray-900 mb-2">B2BChat Messenger</h2>
-                                        <p className="text-gray-600 font-medium">
-                                            Selecciona un contacto para iniciar.
+                                        <h2 className="text-3xl font-light text-gray-600 mb-4">B2BChat para Escritorio</h2>
+                                        <p className="text-gray-500 leading-relaxed">
+                                            Envía y recibe mensajes sin necesidad de mantener tu teléfono conectado.
+                                            Usa B2BChat en hasta 4 dispositivos vinculados a la vez.
                                         </p>
+                                        <div className="mt-12 flex items-center justify-center gap-2 text-gray-400 text-sm">
+                                            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                                            Encripción de extremo a extremo
+                                        </div>
                                     </div>
                                 </div>
                             ) : selectedConversation?.otherUser?.isBot ? (
