@@ -535,7 +535,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
-                        <div className="flex flex-col gap-2 md:flex-row">
+                        <div className="flex flex-col gap-2">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                 <input
@@ -549,7 +549,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                             </div>
                             <button
                                 onClick={handleSearchContact}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 w-full md:w-auto"
+                                className="rounded-lg bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 w-full"
                             >
                                 Buscar
                             </button>
@@ -563,8 +563,12 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                         onClick={() => handleStartChat(user.id)}
                                         className="w-full flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-left hover:bg-gray-50 transition-colors shadow-sm"
                                     >
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">
-                                            {user.avatar || user.name?.charAt(0).toUpperCase()}
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold flex-shrink-0 overflow-hidden">
+                                            {user.avatar ? (
+                                                <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                                            ) : (
+                                                user.name?.charAt(0).toUpperCase()
+                                            )}
                                         </div>
                                         <div className="flex-1 overflow-hidden">
                                             <p className="font-medium text-gray-900 truncate">{user.name}</p>
@@ -611,8 +615,12 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                         onClick={() => handleStartChat(contact.id)}
                                         className="w-full flex items-center gap-3 rounded-lg border border-transparent p-2 text-left hover:bg-white hover:shadow-sm transition-all"
                                     >
-                                        <div className={`flex h-8 w-8 items-center justify-center rounded-full ${contact.isBot ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'} font-bold text-xs`}>
-                                            {contact.avatar || contact.name?.charAt(0).toUpperCase()}
+                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${contact.isBot ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'} font-bold text-xs flex-shrink-0 overflow-hidden`}>
+                                            {contact.avatar ? (
+                                                <img src={contact.avatar} alt={contact.name} className="h-full w-full object-cover" />
+                                            ) : (
+                                                contact.name?.charAt(0).toUpperCase()
+                                            )}
                                         </div>
                                         <div className="overflow-hidden">
                                             <div className="flex items-center gap-1">

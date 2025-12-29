@@ -19,7 +19,7 @@ export default function RootLayout({
             <body className="antialiased">
                 <Providers>
                     <AppNavbar />
-                    <div className="pb-16 md:pb-0"> {/* Add padding for bottom nav */}
+                    <div className="pt-16 pb-16 md:pb-0"> {/* Add padding for fixed top nav and bottom nav */}
                         {children}
                     </div>
                     <MobileBottomNav />
