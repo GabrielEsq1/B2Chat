@@ -27,9 +27,10 @@ interface Conversation {
 interface ChatSidebarProps {
     onSelectConversation: (conversation: Conversation) => void;
     selectedId?: string;
+    isFullWidth?: boolean;
 }
 
-export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSidebarProps) {
+export default function ChatSidebar({ onSelectConversation, selectedId, isFullWidth = false }: ChatSidebarProps) {
     const router = useRouter();
     const { data: session } = useSession();
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -681,45 +682,48 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
             }
 
             {/* Conversation List */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-4">
                 {loading ? (
                     <div className="p-4 text-center text-gray-500">Cargando...</div>
                 ) : (
                     <>
                         {filteredConversations.length === 0 && searchTerm.length < 3 ? (
-                            <div className="p-8 text-center">
-                                <MessageSquare className="mx-auto h-12 w-12 text-gray-300" />
+                            <div className="p-8 text-center bg-white rounded-2xl shadow-sm border border-gray-100 max-w-md mx-auto mt-10">
+                                <MessageSquare className="mx-auto h-12 w-12 text-blue-200" />
+                                <h3 className="mt-4 text-lg font-bold text-gray-900">No hay conversaciones</h3>
                                 <p className="mt-2 text-sm text-gray-500">
-                                    No hay conversaciones
+                                    Parece que aún no has iniciado ninguna charla. ¡Empieza una ahora!
                                 </p>
                                 <button
                                     onClick={() => setShowNewChat(true)}
-                                    className="mt-4 text-sm text-blue-600 hover:text-blue-700"
+                                    className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-all shadow-md active:scale-95"
                                 >
+                                    <Plus className="h-5 w-5" />
                                     Iniciar nuevo chat
                                 </button>
                             </div>
                         ) : (
-                            filteredConversations.map((conv) => (
-                                <div
-                                    key={conv.id}
-                                    onClick={() => {
-                                        if (isSelectionMode) {
-                                            setSelectedChats(prev =>
-                                                prev.includes(conv.id)
-                                                    ? prev.filter(id => id !== conv.id)
-                                                    : [...prev, conv.id]
-                                            );
-                                        } else {
-                                            onSelectConversation(conv);
-                                        }
-                                    }}
-                                    className={`cursor-pointer border-b border-gray-100 px-4 py-3 hover:bg-gray-50 ${selectedId === conv.id ? "bg-blue-50" : ""
-                                        } ${selectedChats.includes(conv.id) ? "bg-blue-100" : ""
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className={`${isFullWidth ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-1'}`}>
+                                {filteredConversations.map((conv) => (
+                                    <div
+                                        key={conv.id}
+                                        onClick={() => {
+                                            if (isSelectionMode) {
+                                                setSelectedChats(prev =>
+                                                    prev.includes(conv.id)
+                                                        ? prev.filter(id => id !== conv.id)
+                                                        : [...prev, conv.id]
+                                                );
+                                            } else {
+                                                onSelectConversation(conv);
+                                            }
+                                        }}
+                                        className={`cursor-pointer group flex flex-col p-4 rounded-2xl transition-all border ${selectedId === conv.id
+                                            ? "bg-blue-600 border-blue-600 text-white shadow-lg"
+                                            : "bg-white border-gray-100 hover:border-blue-200 hover:shadow-md"
+                                            } ${selectedChats.includes(conv.id) ? "ring-2 ring-blue-500" : ""}`}
+                                    >
+                                        <div className="flex items-center gap-4 mb-3">
                                             {isSelectionMode && (
                                                 <input
                                                     type="checkbox"
@@ -729,57 +733,64 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                                                     title="Seleccionar chat"
                                                 />
                                             )}
-                                            {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
-                                                <div className="relative h-12 w-12 flex-shrink-0">
+                                            <div className="relative h-14 w-14 flex-shrink-0">
+                                                {conv.otherUser?.avatar || conv.otherUser?.profilePicture ? (
                                                     <img
                                                         src={conv.otherUser.avatar || conv.otherUser.profilePicture}
                                                         alt={conv.otherUser.name}
-                                                        className="h-12 w-12 rounded-full object-cover"
+                                                        className="h-14 w-14 rounded-full object-cover shadow-sm"
                                                     />
-                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
-                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="relative h-12 w-12 flex-shrink-0">
-                                                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                                        <span className="text-lg font-semibold text-blue-600">
-                                                            {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
-                                                        </span>
+                                                ) : (
+                                                    <div className={`h-14 w-14 rounded-full flex items-center justify-center font-bold text-xl shadow-sm ${selectedId === conv.id ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600'}`}>
+                                                        {conv.otherUser?.name?.charAt(0).toUpperCase() || '?'}
                                                     </div>
-                                                    {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
-                                                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                )}
+                                                {conv.otherUser?.id && onlineUsers.has(conv.otherUser.id) && (
+                                                    <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full bg-green-500 ring-2 ring-white"></span>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between mb-0.5">
+                                                    <h3 className={`font-bold truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900 text-lg'}`}>
+                                                        {conv.otherUser?.name || 'Usuario'}
+                                                    </h3>
+                                                    {conv.lastMessageAt && (
+                                                        <span className={`text-[10px] font-medium whitespace-nowrap ${selectedId === conv.id ? 'text-blue-100' : 'text-gray-400'}`} suppressHydrationWarning>
+                                                            {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </span>
                                                     )}
                                                 </div>
-                                            )}
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium text-gray-900 truncate">
-                                                    {conv.otherUser?.name || 'Usuario'}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 truncate">
-                                                    {conv.lastMessage || 'Sin mensajes'}
-                                                </p>
+                                                <div className="flex items-center justify-between">
+                                                    <p className={`text-sm truncate font-medium ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>
+                                                        {conv.lastMessage || 'Empieza a chatear...'}
+                                                    </p>
+                                                    {conv.unreadCount && conv.unreadCount > 0 && (
+                                                        <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black ${selectedId === conv.id ? 'bg-white text-blue-600' : 'bg-blue-600 text-white'}`}>
+                                                            {conv.unreadCount}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                            {conv.lastMessageAt && (
-                                                <span className="text-xs text-gray-400" suppressHydrationWarning>
-                                                    {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
+                                        {isFullWidth && (
+                                            <div className="mt-auto pt-3 border-t border-gray-50/10 flex items-center justify-between">
+                                                <span className={`text-[11px] font-semibold flex items-center gap-1.5 ${selectedId === conv.id ? 'text-blue-100' : 'text-blue-600'}`}>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${selectedId === conv.id ? 'bg-blue-100' : 'bg-blue-600'}`}></div>
+                                                    Activo ahora
                                                 </span>
-                                            )}
-                                            {conv.unreadCount && conv.unreadCount > 0 && (
-                                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                                                    {conv.unreadCount}
-                                                </span>
-                                            )}
-                                        </div>
+                                                <button className={`p-1.5 rounded-lg transition-colors ${selectedId === conv.id ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-gray-50 text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}>
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))
-                        )}
+                                ))}
+                            </div>
+                        )
+                        }
 
                         {/* Global Search Results Inline */}
                         {searchTerm.length >= 3 && (
