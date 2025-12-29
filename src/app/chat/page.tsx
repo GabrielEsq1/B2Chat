@@ -54,73 +54,57 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        /* 
-           FORCE 3-COLUMN LAYOUT Using CSS Grid
-           Desktop/Tablet: Grid 320px | 1fr | 320px (Ads always visible)
-           Mobile: Flex with floating button
-        */
-        <div className="h-screen w-full bg-[#efeae2] overflow-hidden pt-16 md:grid md:grid-cols-[320px_1fr_320px]">
+        <div className="h-screen w-full bg-[#efeae2] overflow-hidden pt-16 flex justify-center">
+            <div className="w-full max-w-2xl h-full flex flex-col bg-white shadow-2xl relative">
+                {/* 1. LEFT: CHATS list (Toggle based on selectedConversation) */}
+                <div
+                    className={`${selectedConversation ? 'hidden' : 'flex'} h-full flex-col border-r border-gray-200 bg-white`}
+                >
+                    <ChatSidebar
+                        onSelectConversation={setSelectedConversation}
+                        selectedId={selectedConversation?.id}
+                    />
+                </div>
 
-            {/* 1. LEFT: CHATS (320px on Desktop) */}
-            <div
-                className={`${selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col border-r border-gray-200 bg-white`}
-            >
-                <ChatSidebar
-                    onSelectConversation={setSelectedConversation}
-                    selectedId={selectedConversation?.id}
-                />
-            </div>
-
-            {/* 2. CENTER: MESSAGES (Flexible Area) */}
-            <main
-                className={`${!selectedConversation ? 'hidden' : 'flex'} md:flex h-full flex-col bg-[#efeae2] relative overflow-hidden`}
-            >
-                {initializing ? (
-                    <div className="flex h-full items-center justify-center">
-                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-                    </div>
-                ) : (
-                    <>
-                        {!selectedConversation ? (
-                            <div className="flex h-full items-center justify-center">
-                                <div className="text-center p-12 bg-white/50 backdrop-blur-md rounded-3xl shadow-xl border border-white/20">
-                                    <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-lg">
-                                        <span className="text-4xl">💬</span>
+                {/* 2. CENTER: MESSAGES window */}
+                <main
+                    className={`${!selectedConversation ? 'hidden' : 'flex'} h-full flex-col bg-[#efeae2] relative overflow-hidden`}
+                >
+                    {initializing ? (
+                        <div className="flex h-full items-center justify-center">
+                            <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+                        </div>
+                    ) : (
+                        <>
+                            {!selectedConversation ? (
+                                <div className="flex h-full items-center justify-center">
+                                    <div className="text-center p-12 bg-white/50 backdrop-blur-md rounded-3xl shadow-xl border border-white/20">
+                                        <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-lg">
+                                            <span className="text-4xl">💬</span>
+                                        </div>
+                                        <h2 className="text-2xl font-black text-gray-900 mb-2">B2BChat Messenger</h2>
+                                        <p className="text-gray-600 font-medium">
+                                            Selecciona un contacto para iniciar.
+                                        </p>
                                     </div>
-                                    <h2 className="text-2xl font-black text-gray-900 mb-2">B2BChat Messenger</h2>
-                                    <p className="text-gray-600 font-medium">
-                                        Selecciona un contacto para iniciar.
-                                    </p>
                                 </div>
-                            </div>
-                        ) : selectedConversation?.otherUser?.isBot ? (
-                            <AIChatWindow
-                                conversationId={selectedConversation.id}
-                                userId={session?.user?.id || ''}
-                                userName={session?.user?.name || 'Usuario'}
-                                onBack={() => setSelectedConversation(null)}
-                            />
-                        ) : (
-                            <ChatWindow
-                                conversation={selectedConversation}
-                                onBack={() => setSelectedConversation(null)}
-                            />
-                        )}
-                    </>
-                )}
-            </main>
-
-
-            {/* 3. RIGHT: ADS MARKETPLACE (320px) - ALWAYS VISIBLE ON DESKTOP */}
-            <aside
-                className="hidden md:flex h-full flex-col bg-white relative"
-                style={{ zIndex: 30 }}
-            >
-                <InternalAdsPanel />
-            </aside>
-
-            {/* Floating Ads Button - Mobile Only - POSITIONED ABOVE SEND BUTTON */}
-            <FloatingAdsButton />
+                            ) : selectedConversation?.otherUser?.isBot ? (
+                                <AIChatWindow
+                                    conversationId={selectedConversation.id}
+                                    userId={session?.user?.id || ''}
+                                    userName={session?.user?.name || 'Usuario'}
+                                    onBack={() => setSelectedConversation(null)}
+                                />
+                            ) : (
+                                <ChatWindow
+                                    conversation={selectedConversation}
+                                    onBack={() => setSelectedConversation(null)}
+                                />
+                            )}
+                        </>
+                    )}
+                </main>
+            </div>
         </div>
     );
 }
