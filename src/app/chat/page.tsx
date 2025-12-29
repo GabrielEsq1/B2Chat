@@ -53,8 +53,8 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        <div className="h-screen w-full bg-[#efeae2] overflow-hidden pt-16 flex justify-center">
-            <div className="w-full max-w-2xl h-full flex flex-col bg-white shadow-2xl relative">
+        <div className="h-screen w-full bg-white overflow-hidden pt-16">
+            <div className="w-full h-full flex flex-col relative">
                 {/* 1. LEFT: CHATS list (Toggle based on selectedConversation) */}
                 <div
                     className={`${selectedConversation ? 'hidden' : 'flex'} h-full flex-col border-r border-gray-200 bg-white`}
