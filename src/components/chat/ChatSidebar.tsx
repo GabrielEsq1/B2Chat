@@ -297,7 +297,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
     );
 
     return (
-        <div className="flex h-full w-full lg:w-80 flex-col border-r border-gray-200 bg-white">
+        <div className="flex h-full w-full flex-col border-r border-gray-200 bg-white">
             {/* Header */}
             <div className="flex items-center justify-between bg-gray-50 px-4 py-3 border-b border-gray-200">
                 <div className="flex items-center gap-2">
@@ -412,10 +412,6 @@ export default function ChatSidebar({ onSelectConversation, selectedId }: ChatSi
                 </div>
             </div>
 
-            {/* Fast Ads Bar - Always Visible on Mobile & Desktop */}
-            <div className="w-full">
-                <FastAdsBar />
-            </div>
 
             {/* Profile Edit Modal */}
             {
