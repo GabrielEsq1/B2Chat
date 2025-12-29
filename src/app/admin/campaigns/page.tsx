@@ -486,12 +486,19 @@ export default function AdminCampaignsPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-2">
                                                     <button
+                                                        onClick={() => router.push(`/admin/campaigns/review/${campaign.id}`)}
+                                                        className="p-2 bg-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-200 transition-colors"
+                                                        title="Ver revisión detallada"
+                                                    >
+                                                        <Search className="h-4 w-4" />
+                                                    </button>
+                                                    <button
                                                         onClick={() => {
                                                             setSelectedCampaign(campaign);
                                                             setViewModalOpen(true);
                                                         }}
                                                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-                                                        title="Ver detalles"
+                                                        title="Vista rápida"
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </button>

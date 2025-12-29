@@ -6,6 +6,7 @@ import {
     MessageSquare, Users, Zap, TrendingUp, Clock, Shield,
     Check, ArrowRight, Play, Star, Building2
 } from "lucide-react";
+import BlogSection from "@/components/home/BlogSection";
 
 export default function LandingPage() {
     const router = useRouter();
@@ -349,6 +350,8 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            <BlogSection />
 
             {/* Final CTA */}
             <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-700">
