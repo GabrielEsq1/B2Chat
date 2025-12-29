@@ -6,8 +6,7 @@ import { useSession } from "next-auth/react";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { AIChatWindow } from "@/components/chat/AIChatWindow";
-import InternalAdsPanel from "@/components/chat/InternalAdsPanel";
-import FloatingAdsButton from "@/components/chat/FloatingAdsButton";
+
 
 function ChatContent() {
     const searchParams = useSearchParams();

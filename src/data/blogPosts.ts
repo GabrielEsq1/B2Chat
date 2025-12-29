@@ -1,11 +1,3 @@
-```
-/*
-- [ ] Simplify src/app/chat/page.tsx layout (remove grid and ads)
-- [ ] Update src/components/chat/ChatSidebar.tsx (remove ads bar and width limits)
-- [ ] Center chat layout on desktop
-- [ ] Verify unified experience on all screen sizes
-*/
-
 export interface BlogPost {
     id: string;
     slug: string;
