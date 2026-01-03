@@ -9,11 +9,14 @@ export async function GET(req: NextRequest) {
         const session = await getServerSession(authOptions);
 
         if (!session?.user?.id) {
+            console.log("[API/Conversations] Unauthorized access attempt");
             return NextResponse.json(
                 { error: "No autenticado" },
                 { status: 401 }
             );
         }
+
+        console.log(`[API/Conversations] Fetching for userId: ${session.user.id}`);
 
         const conversations = await prisma.conversation.findMany({
             where: {
@@ -73,6 +76,8 @@ export async function GET(req: NextRequest) {
                 updatedAt: "desc",
             },
         });
+
+        console.log(`[API/Conversations] Found ${conversations.length} conversations for user ${session.user.id}`);
 
         // Format conversations with other user info or group info
         const formattedConversations = conversations.map((conv: any) => {
