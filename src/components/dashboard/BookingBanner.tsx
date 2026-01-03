@@ -21,8 +21,8 @@ export default function BookingBanner() {
                     </div>
                 </div>
             </div>
-            <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-[#00C853] group-hover:text-white transition-colors">
-                <ArrowRight className="h-4 w-4" />
+            <div className="h-8 w-8 bg-[#00C853] text-white rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ArrowRight className="h-4 w-4 stroke-[3]" />
             </div>
         </a>
     );

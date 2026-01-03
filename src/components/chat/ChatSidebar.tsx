@@ -102,7 +102,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 pusher.unsubscribe('presence-global');
             };
         });
-    }, []);
+    }, [session?.user?.id]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -944,6 +944,21 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         </div>
                                     </div>
                                 ))}
+                                {filteredConversations.length === 0 && searchTerm === "" && (
+                                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                                        <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
+                                            <MessageSquare className="h-8 w-8" />
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-900 mb-1">No tienes chats recientes</p>
+                                        <p className="text-xs text-gray-500 mb-6">Explora el marketplace para conectar con empresas y agentes.</p>
+                                        <button
+                                            onClick={() => router.push('/dashboard')}
+                                            className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                                        >
+                                            Explorar Marketplace
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
