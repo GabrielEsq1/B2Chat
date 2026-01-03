@@ -80,7 +80,7 @@ export default function HubPage() {
             title: "MADOCO XXI Ecommerce",
             category: "Marketing Strategy",
             link: "https://www.behance.net/gallery/240789497/MADOCO-XXI-Ecommerce-direccion-de-marketng-digital",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/f0d5ce240789497.Y3JvcCwxMzIxLDEwMzMsMCww.png"
+            image: "/images/projects/madoco.png"
         }
     ];
 
