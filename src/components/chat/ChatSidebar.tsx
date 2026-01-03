@@ -121,14 +121,22 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             try {
                 const compRes = await fetch(`/api/companies/search?q=${encodeURIComponent(searchTerm)}`);
                 const compData = await compRes.json();
-                if (compData.companies) {
-                    const users = compData.companies.flatMap((c: any) => c.users.map((u: any) => ({
-                        ...u,
-                        companyName: c.name,
-                        isGlobal: true
-                    })));
-                    setGlobalResults(users.slice(0, 5));
-                }
+                // The API returns { localResults: [], externalResults: [] }
+                // We want to prioritize local results, then external.
+                const allResults = [
+                    ...(compData.localResults || []),
+                    ...(compData.externalResults || [])
+                ].map((u: any) => ({
+                    ...u,
+                    companyName: u.company || u.companyName || (u.isLocal ? "Empresa B2Chat" : u.source),
+                    isGlobal: true,
+                    // Ensure we have a consistent ID format
+                    id: u.id,
+                    name: u.name,
+                    avatar: u.avatar || u.image || "",
+                }));
+
+                setGlobalResults(allResults.slice(0, 5));
             } catch (error) {
                 console.error("Global search error:", error);
             } finally {

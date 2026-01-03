@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, User, Phone, Lock, Building2 } from "lucide-react";
+import { Loader2, User, Phone, Lock, Building2, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -16,6 +16,7 @@ export default function RegisterPage() {
         confirmPassword: ""
     });
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,12 +46,15 @@ export default function RegisterPage() {
 
             if (!data.success) {
                 setError(data.error || "Error al registrarse");
+                setLoading(false);
             } else {
-                router.push("/login?registered=true");
+                setSuccess("¡Cuenta creada correctamente! Redirigiendo al login...");
+                setTimeout(() => {
+                    router.push("/login?registered=true");
+                }, 1500);
             }
         } catch (err) {
             setError("Ocurrió un error de conexión");
-        } finally {
             setLoading(false);
         }
     };
@@ -71,8 +75,15 @@ export default function RegisterPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center">
+                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center animate-in fade-in slide-in-from-top-2">
                                 {error}
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="bg-green-50 text-green-600 p-3 rounded-lg text-sm text-center flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-2">
+                                <CheckCircle className="h-4 w-4" />
+                                {success}
                             </div>
                         )}
 
