@@ -1,6 +1,14 @@
 import { Resend } from 'resend';
-const resend = new Resend(process.env.RESEND_API_KEY);
 import { prisma } from './prisma';
+
+// Use a getter to avoid crashing at build time if the API key is missing
+let resendInstance: Resend | null = null;
+const getResend = () => {
+  if (!resendInstance && process.env.RESEND_API_KEY) {
+    resendInstance = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendInstance;
+};
 
 interface SendMessageEmailProps {
   to: string;
@@ -21,6 +29,11 @@ export async function sendNewMessageNotification({
   }
 
   try {
+    const resend = getResend();
+    if (!resend) {
+      return { success: false, error: 'Resend client not initialized' };
+    }
+
     const { data, error } = await resend.emails.send({
       from: 'B2BChat <notifications@b2bchat.io>', // Note: Needs verified domain in production
       to: [to],
