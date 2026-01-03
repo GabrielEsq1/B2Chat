@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
+import FastAdsBar from "./FastAdsBar";
 
 interface Message {
   id: string;
@@ -481,6 +482,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Ads Bar */}
+      <div className="flex-shrink-0">
+        <FastAdsBar />
       </div>
 
       {/* Inline Search Bar */}
