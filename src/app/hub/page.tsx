@@ -47,22 +47,40 @@ export default function HubPage() {
 
     const portfolio = [
         {
-            title: "Digital Ecosystem Strategy",
+            title: "Creatiendas | Tiendas opensource via Whastapp",
+            category: "Open Source SaaS",
+            link: "https://www.behance.net/gallery/240789301/Creatiendas-Tiendas-opensource-via-Whastapp",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/1e952a240789301.Y3JvcCwxMzIxLDEwMzMsMCww.png"
+        },
+        {
+            title: "Creadas El Shopify de WhatsApp",
+            category: "E-commerce SaaS",
+            link: "https://www.behance.net/gallery/240377601/Creadas-El-Shopify-de-WhatsApp-para-latinoamericanos",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/920c38240377601.Y3JvcCwxMTgzLDkyNiwzNjMsMA.png"
+        },
+        {
+            title: "EcoGuard | Limpia Tu Ciudad",
+            category: "Environmental Tech",
+            link: "https://www.behance.net/gallery/240375557/EcoGuard-Limpia-Tu-Ciudad-Gana-Dinero-Real",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/9c3d6b240375557.Y3JvcCwxMDg3LDg1MSwzMzMsMA.png"
+        },
+        {
+            title: "AirOil Recycler™",
+            category: "Industrial Innovation",
+            link: "https://www.behance.net/gallery/240080311/AirOil-Recycler-Recuperador-de-Hidrocarburos",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/a459f8240080311.Y3JvcCwxMzA5LDEwMjQsMTEzLDA.jpeg"
+        },
+        {
+            title: "AGUAGEN: Energía Limpia",
+            category: "Clean Tech",
+            link: "https://www.behance.net/gallery/239946315/AGUAGEN-Energia-al-alcance-de-todos",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/aec769239946315.Y3JvcCwxMDI0LDgwMCwwLDE4NQ.png"
+        },
+        {
+            title: "MADOCO XXI Ecommerce",
             category: "Marketing Strategy",
-            link: "https://www.behance.net/gabrielesq9d8d",
-            image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800"
-        },
-        {
-            title: "Paid Media Campaigns",
-            category: "Performance",
-            link: "https://www.behance.net/gabrielesq9d8d",
-            image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800"
-        },
-        {
-            title: "Brand Identity Hub",
-            category: "Branding",
-            link: "https://www.behance.net/gabrielesq9d8d",
-            image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800"
+            link: "https://www.behance.net/gallery/240789497/MADOCO-XXI-Ecommerce-direccion-de-marketng-digital",
+            image: "https://mir-s3-cdn-cf.behance.net/projects/404/f0d5ce240789497.Y3JvcCwxMzIxLDEwMzMsMCww.png"
         }
     ];
 
