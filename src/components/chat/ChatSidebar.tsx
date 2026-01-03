@@ -43,6 +43,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
     const { data: session } = useSession();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
     const [showNewGroup, setShowNewGroup] = useState(false);
@@ -154,12 +155,26 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
 
     const loadConversations = async () => {
         try {
-            const res = await fetch('/api/conversations');
+            setLoading(true);
+            setError(null);
+            // Adding timestamp and cache: 'no-store' to avoid stale results or 401s from cache
+            const res = await fetch(`/api/conversations?t=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Pragma': 'no-cache',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+
             const data = await res.json();
+
+            if (data.error) {
+                setError(data.error);
+                return;
+            }
 
             if (data.conversations) {
                 const processedConversations = data.conversations.map((conv: any) => {
-                    // API already returns otherUser, so use it directly
                     return {
                         id: conv.id,
                         otherUser: conv.otherUser || null,
@@ -175,17 +190,19 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     };
                 });
 
-                // Sort: Pinned first, then by lastMessageAt
                 const sorted = processedConversations.sort((a: any, b: any) => {
                     if (a.isPinned && !b.isPinned) return -1;
                     if (!a.isPinned && b.isPinned) return 1;
-                    return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+                    const dateA = new Date(a.lastMessageAt).getTime();
+                    const dateB = new Date(b.lastMessageAt).getTime();
+                    return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
                 });
 
                 setConversations(sorted);
             }
         } catch (error) {
             console.error('Error loading conversations:', error);
+            setError('Error de conexión');
         } finally {
             setLoading(false);
         }
@@ -759,6 +776,20 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('common.loading')}</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-red-50 rounded-[2rem] border-2 border-dashed border-red-200">
+                        <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600">
+                            <X className="h-8 w-8" />
+                        </div>
+                        <p className="text-sm font-bold text-red-900 mb-1">No se pudieron cargar los chats</p>
+                        <p className="text-xs text-red-500 mb-6">{error === 'No autenticado' ? 'Tu sesión ha expirado.' : 'Hubo un error al conectar con el servidor.'}</p>
+                        <button
+                            onClick={() => loadConversations()}
+                            className="px-6 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
+                        >
+                            Reintentar
+                        </button>
                     </div>
                 ) : (
                     <>
