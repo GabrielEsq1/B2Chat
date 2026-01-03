@@ -228,30 +228,14 @@ export default function DashboardPage() {
                         className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
                     >
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+                            <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl">
                                 <Users className="h-6 w-6 text-white" />
                             </div>
-                            <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                            <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Contactos</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Red de Negocios</h3>
                         <p className="text-gray-600 text-sm">
-                            Gestiona tu red de contactos empresariales
-                        </p>
-                    </Link>
-
-                    <Link
-                        href="/contacts?tab=discover"
-                        className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl">
-                                <Users className="h-6 w-6 text-white" />
-                            </div>
-                            <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Descubrir Personas</h3>
-                        <p className="text-gray-600 text-sm">
-                            Explora usuarios, bots IA y expande tu red B2B
+                            Gestiona tus contactos, descubre profesionales y expande tu red de influencia B2B.
                         </p>
                     </Link>
 
