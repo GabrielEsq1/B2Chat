@@ -369,14 +369,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     </button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowGlobalSearch(true)}
-                        className="rounded-full p-2 hover:bg-gray-200 text-green-600"
-                        title="Marketplace de empresas (3000+)"
-                        aria-label="Buscar empresas"
-                    >
-                        <Globe className="h-5 w-5" />
-                    </button>
+                    {/* Redundant Globe button removed as main scanner now handles global search */}
                     <button
                         onClick={() => setShowNewChat(!showNewChat)}
                         className="rounded-full p-2 hover:bg-gray-200 text-blue-600"
