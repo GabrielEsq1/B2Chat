@@ -3,6 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useRef, useEffect } from 'react';
 import { Send, Loader2, Bot, ArrowLeft, X } from 'lucide-react';
+import FastAdsBar from './FastAdsBar';
 
 interface AIChatWindowProps {
     conversationId: string;
@@ -55,6 +56,11 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                         </p>
                     </div>
                 </div>
+            </div>
+
+            {/* Ads Bar */}
+            <div className="flex-shrink-0">
+                <FastAdsBar />
             </div>
 
             {/* Messages */}

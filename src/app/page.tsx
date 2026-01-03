@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     MessageSquare, Users, Zap, TrendingUp, Clock, Shield,
-    Check, ArrowRight, Play, Star, Building2
+    Check, ArrowRight, Play, Star, Building2, Megaphone,
+    ChevronLeft, ChevronRight
 } from "lucide-react";
+import { useEffect } from "react";
 import BlogSection from "@/components/home/BlogSection";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
@@ -22,8 +24,101 @@ export default function LandingPage() {
             description: "Reduce tiempos de respuesta y aumenta cierres con conversaciones enfocadas en negocios, no chats informales.",
             metric: "+40% más cierres"
         },
-        // ... (rest of array same)
+        {
+            icon: <Users className="h-6 w-6" />,
+            title: "Conexiones Verificadas",
+            description: "Interactúa solo con empresas reales y perfiles validados por nuestra red profesional.",
+            metric: "100% Verificado"
+        },
+        {
+            icon: <Zap className="h-6 w-6" />,
+            title: "Automatización con IA",
+            description: "Tu asistente inteligente trabaja 24/7 respondiendo dudas y pre-calificando leads comerciales.",
+            metric: "Atención 24/7"
+        },
+        {
+            icon: <Megaphone className="h-6 w-6" />,
+            title: "Gestor de Anuncios B2B",
+            description: "Publica historias empresariales y llega directamente a los tomadores de decisión de tu industria.",
+            metric: "5x más alcance"
+        },
+        {
+            icon: <Building2 className="h-6 w-6" />,
+            title: "Integración Ecosistema",
+            description: "Sincroniza tu tienda y productos para cerrar ventas directamente desde el flujo del chat.",
+            metric: "Venta Directa"
+        },
+        {
+            icon: <Shield className="h-6 w-6" />,
+            title: "Seguridad y Privacidad",
+            description: "Tus conversaciones comerciales están cifradas y protegidas con estándares de nivel empresarial.",
+            metric: "Datos Protegidos"
+        }
     ];
+
+    const testimonials = [
+        {
+            name: "María Rodríguez",
+            role: "CEO, InnovateTech Colombia",
+            text: "Desde que usamos B2BChat, nuestras conversaciones con proveedores se cerraron 40% más rápido. La IA filtra los leads reales y podemos enfocarnos solo en oportunidades que generan ingresos.",
+            avatar: "MR"
+        },
+        {
+            name: "Juan Carlos Pérez",
+            role: "Director Comercial, Maquinaria Norte",
+            text: "La integración con CreaTiendas nos ha permitido vender repuestos directamente por el chat. Es la herramienta que nos faltaba para digitalizar nuestra relación con minoristas.",
+            avatar: "JP"
+        },
+        {
+            name: "Elena Gómez",
+            role: "Fundadora, BioTextiles",
+            text: "Descubrir proveedores verificados en la plataforma nos dio la seguridad que necesitábamos para expandir nuestra cadena de suministro nacional.",
+            avatar: "EG"
+        },
+        {
+            name: "Ricardo Silva",
+            role: "Gerente, Logística Global",
+            text: "El gestor de anuncios es increíble. Publicamos una historia sobre nuestro nuevo servicio de carga y en 24 horas teníamos 10 empresas interesadas chateando con nosotros.",
+            avatar: "RS"
+        },
+        {
+            name: "Sofia Mendez",
+            role: "Marketing, AgroDigital",
+            text: "Lo que más nos gusta es que es un entorno profesional. No hay spam, solo empresas que realmente quieren hacer negocios. La productividad subió un 50%.",
+            avatar: "SM"
+        },
+        {
+            name: "Carlos Ruiz",
+            role: "Gerente de Operaciones, MetalForma",
+            text: "El tiempo que ahorramos filtrando leads con la IA de B2BChat nos ha permitido duplicar nuestra capacidad de atención al cliente sin contratar más personal.",
+            avatar: "CR"
+        },
+        {
+            name: "Ana Milena",
+            role: "Directora de Compras, RetailPlus",
+            text: "Encontrar proveedores confiables solía tomarnos semanas. Ahora, con los perfiles verificados, cerramos acuerdos en días con total seguridad.",
+            avatar: "AM"
+        },
+        {
+            name: "Fernando Soto",
+            role: "Socio Fundador, TechDist",
+            text: "B2BChat es el LinkedIn de las negociaciones en tiempo real. Es directo, eficiente y las herramientas de monetización son muy justas para el valor que entregan.",
+            avatar: "FS"
+        }
+    ];
+
+    const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [testimonials.length]);
+
+    const nextTestimonial = () => setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    const prevTestimonial = () => setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+
 
     const steps = [
         { number: "1", title: t('home.how_it_works_subtitle'), desc: "Sin tarjeta, sin costos ocultos" }, // Approximation
@@ -43,7 +138,7 @@ export default function LandingPage() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-lg font-bold text-gray-900 leading-none">B2BChat</span>
-                                <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-500 hover:text-blue-600 font-medium mt-0.5">
+                                <a href="https://creatiendasgit1.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-500 hover:text-blue-600 font-medium mt-0.5">
                                     {t('ecosystem.seal')}
                                 </a>
                             </div>
@@ -315,7 +410,7 @@ export default function LandingPage() {
                         </div>
 
                         {/* CreaTiendas */}
-                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-purple-500/50 transition-all cursor-pointer" onClick={() => window.open('https://creatiendas.com', '_blank')}>
+                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-purple-500/50 transition-all cursor-pointer" onClick={() => window.open('https://creatiendasgit1.vercel.app/', '_blank')}>
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <Building2 className="w-24 h-24" />
                             </div>
@@ -334,27 +429,73 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Testimonial */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-                        <h2 className="text-center font-semibold mb-4 text-gray-400 uppercase tracking-widest text-xs">{t('home.testimonials_title')}</h2>
-                        <div className="flex gap-1 mb-4">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <Star key={star} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                            ))}
+            {/* Testimonial Carousel */}
+            <section className="py-20 bg-gray-50 overflow-hidden">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-center font-black mb-4 text-blue-600 uppercase tracking-[0.3em] text-xs">
+                            {t('home.testimonials_title')}
+                        </h2>
+                        <h3 className="text-3xl font-bold text-gray-900">Credibilidad Probada</h3>
+                    </div>
+
+                    <div className="relative group">
+                        {/* Carousel Content */}
+                        <div className="relative bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8 md:p-12 min-h-[350px] flex flex-col justify-center transition-all duration-500">
+                            <div className="absolute top-8 left-8 text-blue-100">
+                                <svg className="w-20 h-20 fill-current opacity-20" viewBox="0 0 24 24">
+                                    <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V3L21.017 3V15C21.017 18.3137 18.3307 21 15.017 21H14.017ZM3.0166 21L3.0166 18C3.0166 16.8954 3.91203 16 5.0166 16H8.0166C8.56888 16 9.0166 15.5523 9.0166 15V9C9.0166 8.44772 8.56888 8 8.0166 8H5.0166C3.91203 8 3.0166 7.10457 3.0166 6V3L10.0166 3V15C10.0166 18.3137 7.3303 21 4.0166 21H3.0166Z" />
+                                </svg>
+                            </div>
+
+                            <div className="relative z-10">
+                                <div className="flex gap-1 mb-8">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star key={star} className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                                    ))}
+                                </div>
+
+                                <div className="animate-in fade-in slide-in-from-right-8 duration-700" key={currentTestimonial}>
+                                    <blockquote className="text-xl md:text-2xl text-gray-800 font-medium mb-10 italic leading-relaxed">
+                                        "{testimonials[currentTestimonial].text}"
+                                    </blockquote>
+
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
+                                            {testimonials[currentTestimonial].avatar}
+                                        </div>
+                                        <div>
+                                            <div className="font-black text-gray-900 text-lg">{testimonials[currentTestimonial].name}</div>
+                                            <div className="text-sm font-bold text-blue-600 uppercase tracking-wider">{testimonials[currentTestimonial].role}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <blockquote className="text-lg text-gray-700 mb-4">
-                            "Desde que usamos B2BChat, nuestras conversaciones con proveedores se cerraron 40% más rápido. La IA filtra los leads reales y podemos enfocarnos solo en oportunidades que generan ingresos."
-                        </blockquote>
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                                MR
-                            </div>
-                            <div>
-                                <div className="font-semibold text-gray-900">María Rodríguez</div>
-                                <div className="text-sm text-gray-500">CEO, InnovateTech Colombia</div>
-                            </div>
+
+                        {/* Navigation Arrows */}
+                        <button
+                            onClick={prevTestimonial}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 md:-translate-x-12 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:scale-110 transition-all border border-gray-100 z-20 md:opacity-0 group-hover:opacity-100"
+                        >
+                            <ChevronLeft className="w-8 h-8" />
+                        </button>
+                        <button
+                            onClick={nextTestimonial}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 md:translate-x-12 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-2xl flex items-center justify-center text-gray-400 hover:text-blue-600 hover:scale-110 transition-all border border-gray-100 z-20 md:opacity-0 group-hover:opacity-100"
+                        >
+                            <ChevronRight className="w-8 h-8" />
+                        </button>
+
+                        {/* Dots */}
+                        <div className="flex justify-center gap-3 mt-10">
+                            {testimonials.map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentTestimonial(idx)}
+                                    className={`h-2 rounded-full transition-all duration-300 ${idx === currentTestimonial ? 'w-10 bg-blue-600 shadow-lg shadow-blue-200' : 'w-2 bg-gray-300 hover:bg-gray-400'}`}
+                                />
+                            ))}
                         </div>
                     </div>
                 </div>

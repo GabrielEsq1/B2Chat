@@ -71,10 +71,10 @@ export default function AppNavbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Logo */}
-                    <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <div className="flex items-center gap-2 cursor-default">
                         <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg shadow-md" />
                         <span className="text-xl font-bold text-gray-900">B2BChat</span>
-                    </Link>
+                    </div>
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-1">
