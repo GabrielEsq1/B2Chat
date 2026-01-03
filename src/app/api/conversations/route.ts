@@ -18,7 +18,6 @@ export async function GET(req: NextRequest) {
 
         console.log(`[API/Conversations] Fetching for userId: ${session.user.id}`);
 
-
         const conversations = await prisma.conversation.findMany({
             where: {
                 OR: [
@@ -76,7 +75,6 @@ export async function GET(req: NextRequest) {
             orderBy: {
                 updatedAt: "desc",
             },
-            take: 100, // EMERGENCY FIX: Limit to 100 most recent conversations to prevent 5MB overflow
         });
 
         console.log(`[API/Conversations] Found ${conversations.length} conversations for user ${session.user.id}`);

@@ -35,7 +35,6 @@ export async function GET() {
                 id: creative.campaignId, // Use campaign ID for linking if needed, or creative.id
                 title: creative.title || creative.campaign.name,
                 image: creative.imageUrl || "/placeholder.png",
-                mobileImage: creative.imageUrl || "/placeholder.png",
                 description: creative.description || "Oferta especial",
                 link: creative.destinationUrl || "#",
                 cta: creative.ctaLabel || "Ver Más",
