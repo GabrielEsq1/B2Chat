@@ -5,10 +5,12 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Phone, Lock, ArrowRight, Mail, User, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         phone: "",
@@ -19,9 +21,9 @@ function LoginContent() {
 
     useEffect(() => {
         if (searchParams?.get("registered") === "true") {
-            setSuccess("¡Cuenta creada exitosamente! Por favor inicia sesión.");
+            setSuccess(t('auth.success.account_created'));
         }
-    }, [searchParams]);
+    }, [searchParams, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,17 +38,17 @@ function LoginContent() {
             });
 
             if (res?.error) {
-                setError("Credenciales inválidas. Verifica tu email/teléfono y contraseña.");
+                setError(t('auth.errors.invalid_credentials'));
                 setLoading(false);
             } else {
-                setSuccess("¡Inicio de sesión exitoso! Redirigiendo...");
+                setSuccess(t('auth.success.login_redirect'));
                 setTimeout(() => {
                     router.push("/dashboard");
                     router.refresh();
                 }, 1000);
             }
         } catch (err) {
-            setError("Ocurrió un error al intentar ingresar.");
+            setError(t('auth.errors.generic'));
             setLoading(false);
         }
     };
@@ -56,12 +58,12 @@ function LoginContent() {
             <div className="p-8">
                 <div className="text-left mb-6">
                     <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
-                        ← Volver al inicio
+                        ← {t('auth.back_to_home')}
                     </Link>
                 </div>
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Bienvenido</h1>
-                    <p className="text-gray-600">Ingresa a B2Chat para gestionar tus campañas</p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('auth.login_title')}</h1>
+                    <p className="text-gray-600">{t('auth.login_subtitle')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -80,7 +82,7 @@ function LoginContent() {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Email o Teléfono
+                            {t('auth.email_phone_label')}
                         </label>
                         <div className="relative">
                             <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -88,7 +90,7 @@ function LoginContent() {
                                 type="text"
                                 required
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                placeholder="usuario@empresa.com o +57..."
+                                placeholder={t('auth.email_phone_placeholder')}
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             />
@@ -98,13 +100,13 @@ function LoginContent() {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <label className="block text-sm font-medium text-gray-700">
-                                Contraseña
+                                {t('auth.password_label')}
                             </label>
                             <Link
                                 href="/forgot-password"
                                 className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                             >
-                                ¿Olvidaste tu contraseña?
+                                {t('auth.forgot_password_link')}
                             </Link>
                         </div>
                         <div className="relative">
@@ -113,7 +115,7 @@ function LoginContent() {
                                 type="password"
                                 required
                                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                placeholder="••••••••"
+                                placeholder={t('auth.password_placeholder')}
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             />
@@ -129,7 +131,7 @@ function LoginContent() {
                             <Loader2 className="h-5 w-5 animate-spin" />
                         ) : (
                             <>
-                                Iniciar Sesión
+                                {t('auth.login_btn')}
                                 <ArrowRight className="h-5 w-5" />
                             </>
                         )}
@@ -137,10 +139,10 @@ function LoginContent() {
                 </form>
 
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                    <p className="text-gray-500 text-xs mb-4">¿No tienes una cuenta? <Link href="/register" className="text-blue-600 hover:text-blue-800 font-bold">Regístrate aquí</Link></p>
+                    <p className="text-gray-500 text-xs mb-4">{t('auth.no_account')} <Link href="/register" className="text-blue-600 hover:text-blue-800 font-bold">{t('auth.register_here')}</Link></p>
                     <Link href="/hub" className="inline-flex items-center gap-2 text-[10px] text-gray-400 hover:text-blue-600 font-medium transition-colors">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                        Parte de GNOSIS
+                        {t('home.footer_mockup_seal_gnosis', { defaultValue: 'Parte de GNOSIS' })}
                     </Link>
                 </div>
             </div>

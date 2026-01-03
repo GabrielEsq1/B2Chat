@@ -17,12 +17,54 @@ export interface Translation {
         finish: string;
         close: string;
         pending: string;
+        confirm: string;
+        success: string;
     };
     auth: {
         login_btn: string;
         register_btn: string;
         try_free: string;
         welcome: string;
+        login_title: string;
+        login_subtitle: string;
+        register_title: string;
+        register_subtitle: string;
+        email_phone_label: string;
+        email_phone_placeholder: string;
+        password_label: string;
+        password_placeholder: string;
+        confirm_password_label: string;
+        confirm_password_placeholder: string;
+        forgot_password_link: string;
+        forgot_password: {
+            title: string;
+            description: string;
+            phone_label: string;
+            support_hint: string;
+            whatsapp_message: string;
+            back_to_login: string;
+            contact_support: string;
+        };
+        no_account: string;
+        has_account: string;
+        login_here: string;
+        register_here: string;
+        name_label: string;
+        company_label: string;
+        company_placeholder: string;
+        phone_label: string;
+        phone_placeholder: string;
+        errors: {
+            invalid_credentials: string;
+            passwords_mismatch: string;
+            generic: string;
+            connection: string;
+        };
+        success: {
+            account_created: string;
+            login_redirect: string;
+            register_redirect: string;
+        };
     };
     home: {
         hero_title: string;
@@ -30,14 +72,57 @@ export interface Translation {
         cta_primary: string;
         cta_secondary: string;
         trusted_by: string;
+        hero_check1: string;
+        hero_check2: string;
+        hero_check3: string;
         benefits_title: string;
         benefits_subtitle: string;
+        benefits: {
+            title: string;
+            desc: string;
+            metric: string;
+        }[];
         how_it_works_title: string;
         how_it_works_subtitle: string;
+        steps: {
+            title: string;
+            desc: string;
+        }[];
         testimonials_title: string;
+        testimonials_subtitle: string;
+        testimonials: {
+            name: string;
+            role: string;
+            text: string;
+        }[];
+        social_proof: {
+            companies: string;
+            closures: string;
+            time: string;
+        };
         cta_final_title: string;
         cta_final_subtitle: string;
+        cta_final_btn: string;
+        cta_final_hint: string;
+        booking_banner: string;
+        visit_hub: string;
         footer_rights: string;
+        mockup: {
+            verified: string;
+            industry: string;
+            msg1: string;
+            msg2: string;
+            ai_tag: string;
+            typing: string;
+            footer: string;
+        };
+        about_title: string;
+        about_items: {
+            security: string;
+            b2b: string;
+            network: string;
+            integration: string;
+        };
     };
     dashboard: {
         welcome: string;
@@ -58,6 +143,100 @@ export interface Translation {
             create_store: string;
         };
     };
+    chat: {
+        sidebar: {
+            recent_chats: string;
+            search_placeholder: string;
+            new_chat: string;
+            new_group: string;
+            my_profile: string;
+            starred_messages_title: string;
+            select_chats: string;
+            cancel_selection: string;
+            settings: string;
+            sign_out: string;
+            global_network: string;
+            scanning: string;
+            no_global_results: string;
+            independent_user: string;
+            delete_confirm: string;
+            delete_success: string;
+            selection_count: string;
+            group_suffix: string;
+            empty_hint: string;
+        };
+        window: {
+            online: string;
+            offline: string;
+            typing: string;
+            input_placeholder: string;
+            loading: string;
+            no_messages: string;
+            select_chat: string;
+            member: string;
+            starred_title: string;
+            unstar_title: string;
+            whatsapp_confirm: string;
+            whatsapp_success: string;
+            options: {
+                info: string;
+                mute: string;
+                delete: string;
+                search: string;
+                more: string;
+            };
+            email_toast: {
+                title: string;
+                body: string;
+            };
+        };
+        modals: {
+            profile: {
+                title: string;
+                name_label: string;
+                phone_label: string;
+                success: string;
+            };
+            group: {
+                title: string;
+                subtitle: string;
+                name_label: string;
+                name_placeholder: string;
+                desc_label: string;
+                desc_placeholder: string;
+                participants: string;
+                create_btn: string;
+                creating: string;
+                validation_error: string;
+            };
+            invitation: {
+                title: string;
+                not_registered: string;
+                hint: string;
+                link_label: string;
+                copy_success: string;
+                whatsapp_btn: string;
+            };
+        };
+        sidebar_title: string;
+        search_placeholder: string;
+        new_chat: string;
+        no_messages: string;
+        type_message: string;
+        send: string;
+        online: string;
+        offline: string;
+        last_seen: string;
+        email_sent_toast: string;
+        actions: {
+            pin: string;
+            unpin: string;
+            favorite: string;
+            unfavorite: string;
+            delete: string;
+            mute: string;
+        };
+    };
     ads: {
         title: string;
         subtitle: string;
@@ -71,6 +250,7 @@ export interface Translation {
             active: string;
             rejected: string;
             paused: string;
+            payment_pending: string;
         };
         wizard: {
             steps: {

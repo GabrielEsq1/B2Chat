@@ -9,7 +9,7 @@ export const en: Translation = {
         back: 'Back',
         delete: 'Delete',
         edit: 'Edit',
-        search: 'Search...',
+        search: 'Search',
         filter: 'Filter',
         view_more: 'View more',
         next: 'Next',
@@ -17,12 +17,54 @@ export const en: Translation = {
         finish: 'Finish',
         close: 'Close',
         pending: 'Pending',
+        confirm: 'Confirm',
+        success: 'Success',
     },
     auth: {
         login_btn: 'Sign In',
-        register_btn: 'Try for Free',
+        register_btn: 'Create Account',
         try_free: 'Try for Free',
-        welcome: 'Welcome back',
+        welcome: 'Welcome back!',
+        login_title: 'Welcome',
+        login_subtitle: 'Sign in to B2Chat to manage your campaigns',
+        register_title: 'Create Account',
+        register_subtitle: 'Join B2Chat and scale your business',
+        email_phone_label: 'Email or Phone',
+        email_phone_placeholder: 'user@company.com or +57...',
+        password_label: 'Password',
+        password_placeholder: '••••••••',
+        confirm_password_label: 'Confirm Password',
+        confirm_password_placeholder: 'Repeat your password',
+        forgot_password_link: 'Forgot your password?',
+        forgot_password: {
+            title: "Recover Access",
+            description: "For your security, account recovery is managed personally through our WhatsApp support.",
+            phone_label: "Your Phone Number",
+            support_hint: "We will contact you to verify your identity and manually assign a new password.",
+            whatsapp_message: "Hi, I need to recover my password. My account number is: {phone}",
+            back_to_login: "Back to Login",
+            contact_support: "Contact Support on WhatsApp"
+        },
+        no_account: "Don't have an account?",
+        has_account: 'Already have an account?',
+        login_here: 'Sign In',
+        register_here: 'Register here',
+        name_label: 'Name',
+        company_label: 'Company',
+        company_placeholder: 'Company name',
+        phone_label: 'Phone',
+        phone_placeholder: '+57 300 ...',
+        errors: {
+            invalid_credentials: 'Invalid credentials. Check your email/phone and password.',
+            passwords_mismatch: 'Passwords do not match',
+            generic: 'An error occurred while trying to log in.',
+            connection: 'A connection error occurred',
+        },
+        success: {
+            account_created: 'Account created successfully! Please sign in.',
+            login_redirect: 'Login successful! Redirecting...',
+            register_redirect: 'Account created successfully! Redirecting to login...',
+        },
     },
     home: {
         hero_title: 'Close more B2B deals from a single business chat',
@@ -30,14 +72,97 @@ export const en: Translation = {
         cta_primary: 'Try for Free (no card)',
         cta_secondary: 'Watch it work in 60s',
         trusted_by: 'Over 1,000 active companies',
+        hero_check1: 'Setup in 3 min',
+        hero_check2: 'No spam',
+        hero_check3: 'Immediate verification',
         benefits_title: 'How does it make you more money?',
         benefits_subtitle: 'Every feature is designed to increase revenue and reduce operational costs',
+        benefits: [
+            {
+                title: 'Smart Business Chat',
+                desc: 'Reduce response times and increase closures with business-focused conversations.',
+                metric: '+40% more closures'
+            },
+            {
+                title: 'Verified Connections',
+                desc: 'Interact only with real companies and profiles validated by our professional network.',
+                metric: '100% Verified'
+            },
+            {
+                title: 'AI Automation',
+                desc: 'Your smart assistant works 24/7 answering questions and pre-qualifying business leads.',
+                metric: '24/7 Support'
+            },
+            {
+                title: 'B2B Ads Manager',
+                desc: 'Publish business stories and reach decision-makers directly.',
+                metric: '5x more reach'
+            },
+            {
+                title: 'Ecosystem Integration',
+                desc: 'Sync your store and products to close sales directly from the chat flow.',
+                metric: 'Direct Sale'
+            },
+            {
+                title: 'Security and Privacy',
+                desc: 'Your business conversations are encrypted and protected with enterprise-level standards.',
+                metric: 'Data Protected'
+            }
+        ],
         how_it_works_title: 'How to Start',
         how_it_works_subtitle: 'Start closing deals in less than 5 minutes',
+        steps: [
+            { title: 'Create your free account', desc: 'No card required, no hidden costs' },
+            { title: 'Create your business profile', desc: 'Verification in less than 3 minutes' },
+            { title: 'Start chatting', desc: 'Connect with verified companies today' }
+        ],
         testimonials_title: 'What our clients say',
+        testimonials_subtitle: 'Proven Credibility',
+        testimonials: [
+            {
+                name: "Maria Rodriguez",
+                role: "CEO, InnovateTech Colombia",
+                text: "Since using B2BChat, our conversations with suppliers closed 40% faster. The AI filters out real leads."
+            },
+            {
+                name: "Juan Carlos Perez",
+                role: "Commercial Director, Machinery North",
+                text: "Integration with CreaTiendas has allowed us to sell parts directly through chat. It's what we were missing."
+            },
+            {
+                name: "Elena Gomez",
+                role: "Founder, BioTextiles",
+                text: "Discovering verified suppliers on the platform gave us the security we needed to expand."
+            }
+        ],
+        social_proof: {
+            companies: 'Active Companies',
+            closures: 'More Monthly Closures',
+            time: 'Time Saved'
+        },
         cta_final_title: 'Start for free today and convert more conversations into deals',
         cta_final_subtitle: 'Thousands of B2B companies are already closing more deals. What are you waiting for?',
+        cta_final_btn: 'Try B2BChat for Free',
+        cta_final_hint: 'No hidden costs · No spam · No credit card required',
+        booking_banner: 'LIMITED SPOTS · Book your FREE Onboarding',
+        visit_hub: 'Visit Hub',
         footer_rights: 'All rights reserved.',
+        mockup: {
+            verified: 'Verified',
+            industry: 'Software Development',
+            msg1: 'Hi, we saw your profile. Do you represent a development company?',
+            msg2: 'Sure! We specialize in B2B solutions. What do you need?',
+            ai_tag: 'AI',
+            typing: 'Typing...',
+            footer: '✨ This is what closing a deal from B2BChat looks like'
+        },
+        about_title: 'Designed for companies that sell, negotiate and grow in LATAM',
+        about_items: {
+            security: 'Enterprise Security',
+            b2b: '100% B2B',
+            network: 'LATAM Network',
+            integration: 'Creatiendas Integration'
+        }
     },
     dashboard: {
         welcome: 'Hello, {name}! 👋',
@@ -58,6 +183,100 @@ export const en: Translation = {
             create_store: 'Create My Store',
         },
     },
+    chat: {
+        sidebar: {
+            recent_chats: 'Recent Chats',
+            search_placeholder: 'Search your chats or explore the marketplace...',
+            new_chat: 'New chat',
+            new_group: 'New group',
+            my_profile: 'My Profile',
+            starred_messages_title: 'Starred messages',
+            select_chats: 'Select chats',
+            cancel_selection: 'Cancel selection',
+            settings: 'Settings',
+            sign_out: 'Sign out',
+            global_network: 'B2BChat Global Network (3000+)',
+            scanning: 'Scanning database...',
+            no_global_results: 'No more global results found',
+            independent_user: 'Independent User',
+            delete_confirm: 'Are you sure you want to delete {count} conversations?',
+            delete_success: 'Conversations deleted successfully',
+            selection_count: 'selected',
+            group_suffix: 'members',
+            empty_hint: 'Start the conversation...',
+        },
+        window: {
+            online: 'Online',
+            offline: 'Offline',
+            typing: 'Typing...',
+            input_placeholder: 'Type a message',
+            loading: 'Loading messages...',
+            no_messages: 'No messages. Send the first one!',
+            select_chat: 'Select a conversation to start chatting',
+            member: 'Member',
+            starred_title: 'Star message',
+            unstar_title: 'Unstar message',
+            whatsapp_confirm: 'Send this chat to {name}\'s WhatsApp?',
+            whatsapp_success: '✅ Message sent to WhatsApp',
+            options: {
+                info: 'Contact info',
+                mute: 'Mute notifications',
+                delete: 'Delete chat',
+                search: 'Search in chat',
+                more: 'More options',
+            },
+            email_toast: {
+                title: 'Notification Sent',
+                body: 'Email sent to {email}',
+            },
+        },
+        modals: {
+            profile: {
+                title: 'Edit Profile',
+                name_label: 'Full Name',
+                phone_label: 'Phone (Non-editable)',
+                success: 'Profile updated successfully',
+            },
+            group: {
+                title: 'New Group',
+                subtitle: 'Create a group to connect with your team',
+                name_label: 'Group Name *',
+                name_placeholder: 'Ex: Sales Team',
+                desc_label: 'Description (optional)',
+                desc_placeholder: 'Describe the purpose of the group...',
+                participants: 'Participants *',
+                create_btn: 'Create Group',
+                creating: 'Creating...',
+                validation_error: 'Please enter a name and select at least one contact',
+            },
+            invitation: {
+                title: 'Invite Contact',
+                not_registered: 'is not registered on B2BChat.',
+                hint: 'Invite them to join and start connecting! 🚀',
+                link_label: 'Invitation Link',
+                copy_success: '✓ Link copied to clipboard',
+                whatsapp_btn: 'Send via WhatsApp',
+            },
+        },
+        sidebar_title: 'Messages',
+        search_placeholder: 'Search chats...',
+        new_chat: 'New Chat',
+        no_messages: 'No messages',
+        type_message: 'Type a message...',
+        send: 'Send',
+        online: 'Connected',
+        offline: 'Disconnected',
+        last_seen: 'Last seen',
+        email_sent_toast: 'Notification sent via email',
+        actions: {
+            pin: 'Pin',
+            unpin: 'Unpin',
+            favorite: 'Star',
+            unfavorite: 'Unstar',
+            delete: 'Delete',
+            mute: 'Mute',
+        }
+    },
     ads: {
         title: 'Ads Manager',
         subtitle: 'Create and manage your advertising campaigns',
@@ -71,6 +290,7 @@ export const en: Translation = {
             active: 'Active',
             rejected: 'Rejected',
             paused: 'Paused',
+            payment_pending: 'Payment Pending',
         },
         wizard: {
             steps: {

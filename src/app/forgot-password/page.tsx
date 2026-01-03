@@ -3,19 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ForgotPasswordPage() {
+    const { t } = useLanguage();
     const [phone, setPhone] = useState("");
 
     const handleWhatsAppRedirect = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // El número de soporte definido
         const supportNumber = "3026687991"; // Número proporcionado por el usuario
-        
-        const message = `Hola, necesito recuperar mi contraseña. Mi número de cuenta es: ${phone}`;
+
+        const message = t('auth.forgot_password.whatsapp_message', { phone });
         const whatsappUrl = `https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`;
-        
+
         window.open(whatsappUrl, "_blank");
     };
 
@@ -26,16 +28,16 @@ export default function ForgotPasswordPage() {
                     <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                         <MessageCircle className="w-8 h-8 text-green-600" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">Recuperar Acceso</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('auth.forgot_password.title')}</h1>
                     <p className="text-gray-600 mt-2">
-                        Para tu seguridad, la recuperación de cuenta se gestiona personalmente a través de nuestro soporte en WhatsApp.
+                        {t('auth.forgot_password.description')}
                     </p>
                 </div>
 
                 <form onSubmit={handleWhatsAppRedirect} className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tu Número de Teléfono
+                            {t('auth.forgot_password.phone_label')}
                         </label>
                         <input
                             type="tel"
@@ -53,17 +55,17 @@ export default function ForgotPasswordPage() {
                         className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         <MessageCircle className="w-5 h-5" />
-                        Contactar Soporte en WhatsApp
+                        {t('auth.forgot_password.contact_support')}
                     </button>
-                    
+
                     <p className="text-xs text-center text-gray-500">
-                        Te contactaremos para verificar tu identidad y asignarte una nueva contraseña manualmente.
+                        {t('auth.forgot_password.support_hint')}
                     </p>
                 </form>
 
                 <div className="mt-6 text-center">
                     <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-                        Volver al Login
+                        {t('auth.forgot_password.back_to_login')}
                     </Link>
                 </div>
             </div>
