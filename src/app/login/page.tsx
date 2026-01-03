@@ -136,11 +136,12 @@ function LoginContent() {
                     </button>
                 </form>
 
-                <div className="mt-8 text-center text-sm text-gray-600">
-                    ¿No tienes una cuenta?{" "}
-                    <Link href="/register" className="text-blue-600 hover:text-blue-800 font-bold">
-                        Regístrate aquí
-                    </Link>
+                <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                    <p className="text-gray-500 text-xs mb-4">¿No tienes una cuenta? <Link href="/register" className="text-blue-600 hover:text-blue-800 font-bold">Regístrate aquí</Link></p>
+                    <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] text-gray-400 hover:text-blue-600 font-medium transition-colors">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                        Parte de Enterprise Hub
+                    </a>
                 </div>
             </div>
         </div>

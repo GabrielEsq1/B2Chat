@@ -93,6 +93,8 @@ export async function GET(req: NextRequest) {
                     } : null,
                     updatedAt: conv.updatedAt,
                     group: conv.group,
+                    isPinned: conv.isPinned,
+                    isFavorite: conv.isFavorite,
                 };
             }
 
@@ -107,6 +109,8 @@ export async function GET(req: NextRequest) {
                     isRead: lastMessage.readAt !== null,
                 } : null,
                 updatedAt: conv.updatedAt,
+                isPinned: conv.isPinned,
+                isFavorite: conv.isFavorite,
             };
         });
 

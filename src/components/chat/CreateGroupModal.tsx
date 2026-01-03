@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Users, Plus, Check } from "lucide-react";
+import { X, Users, Plus, Check, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Contact {
@@ -13,15 +13,19 @@ interface Contact {
 interface CreateGroupModalProps {
     onClose: () => void;
     onCreateGroup: (name: string, description: string, memberIds: string[]) => void;
+    initialSelectedIds?: string[];
 }
 
-export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroupModalProps) {
+export default function CreateGroupModal({ onClose, onCreateGroup, initialSelectedIds = [] }: CreateGroupModalProps) {
     const [groupName, setGroupName] = useState("");
     const [description, setDescription] = useState("");
     const [contacts, setContacts] = useState<Contact[]>([]);
-    const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+    const [selectedContacts, setSelectedContacts] = useState<string[]>(initialSelectedIds);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const [globalResults, setGlobalResults] = useState<Contact[]>([]);
 
     useEffect(() => {
         loadContacts();
@@ -47,6 +51,32 @@ export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroup
                 ? prev.filter(id => id !== contactId)
                 : [...prev, contactId]
         );
+    };
+
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (query.length < 3) {
+            setGlobalResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            const res = await fetch(`/api/companies/search?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            if (data.localResults) {
+                setGlobalResults(data.localResults.map((u: any) => ({
+                    id: u.id,
+                    name: u.name,
+                    phone: u.phone,
+                    avatar: u.avatar || u.profilePicture
+                })));
+            }
+        } catch (error) {
+            console.error('Error searching users:', error);
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     const handleCreate = async () => {
@@ -132,42 +162,53 @@ export default function CreateGroupModal({ onClose, onCreateGroup }: CreateGroup
                             </label>
                         </div>
 
+                        <div className="mb-4 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar contactos o nuevas personas..."
+                                value={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none"
+                            />
+                        </div>
+
                         {loading ? (
                             <div className="text-center py-8 text-gray-500">
                                 Cargando contactos...
                             </div>
-                        ) : contacts.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">
-                                <Users className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                                <p>No tienes contactos disponibles</p>
-                            </div>
                         ) : (
-                            <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
-                                {contacts.map((contact) => (
-                                    <button
-                                        key={contact.id}
-                                        onClick={() => toggleContact(contact.id)}
-                                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${selectedContacts.includes(contact.id)
-                                            ? 'bg-blue-50 border-2 border-blue-500'
-                                            : 'bg-white border-2 border-transparent hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                            <span className="text-sm font-bold text-gray-600">
+                            <div className="space-y-1.5 max-h-64 overflow-y-auto border border-gray-100 rounded-2xl p-2 bg-gray-50/50">
+                                {(searchQuery.length >= 3 ? globalResults : contacts).length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-200">
+                                        <Users className="h-10 w-10 mx-auto mb-2 text-gray-200" />
+                                        <p className="text-sm font-bold text-gray-400">No se encontraron resultados</p>
+                                    </div>
+                                ) : (
+                                    (searchQuery.length >= 3 ? globalResults : contacts).map((contact) => (
+                                        <button
+                                            key={contact.id}
+                                            onClick={() => toggleContact(contact.id)}
+                                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${selectedContacts.includes(contact.id)
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                                : 'bg-white border border-gray-100 hover:border-blue-200 hover:shadow-md'
+                                                }`}
+                                        >
+                                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold ${selectedContacts.includes(contact.id) ? 'bg-white/20' : 'bg-blue-50 text-blue-600'}`}>
                                                 {contact.name.charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1 text-left">
-                                            <p className="font-medium text-gray-900">{contact.name}</p>
-                                            <p className="text-sm text-gray-500">{contact.phone}</p>
-                                        </div>
-                                        {selectedContacts.includes(contact.id) && (
-                                            <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center">
-                                                <Check className="h-4 w-4 text-white" />
                                             </div>
-                                        )}
-                                    </button>
-                                ))}
+                                            <div className="flex-1 text-left min-w-0">
+                                                <p className={`font-bold text-sm truncate ${selectedContacts.includes(contact.id) ? 'text-white' : 'text-gray-900'}`}>{contact.name}</p>
+                                                <p className={`text-[10px] font-black uppercase tracking-wider ${selectedContacts.includes(contact.id) ? 'text-blue-100' : 'text-gray-400'}`}>{contact.phone}</p>
+                                            </div>
+                                            {selectedContacts.includes(contact.id) && (
+                                                <div className="h-6 w-6 rounded-lg bg-white/20 flex items-center justify-center">
+                                                    <Check className="h-4 w-4 text-white stroke-[4]" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))
+                                )}
                             </div>
                         )}
                     </div>

@@ -19,6 +19,8 @@ interface Conversation {
     name?: string; // Group name
     avatar?: string; // Group or user avatar
     memberCount?: number; // Group only
+    isPinned?: boolean;
+    isFavorite?: boolean;
     otherUser?: {
         id: string;
         name: string;
@@ -63,6 +65,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
     const [pusherClient, setPusherClient] = useState<any>(null);
     const [globalResults, setGlobalResults] = useState<any[]>([]);
     const [isSearchingGlobal, setIsSearchingGlobal] = useState(false);
+    const [initialGroupMembers, setInitialGroupMembers] = useState<string[]>([]);
 
     useEffect(() => {
         loadConversations();
@@ -165,9 +168,19 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         name: conv.name,
                         avatar: conv.avatar,
                         memberCount: conv.memberCount,
+                        isPinned: conv.isPinned,
+                        isFavorite: conv.isFavorite,
                     };
                 });
-                setConversations(processedConversations);
+
+                // Sort: Pinned first, then by lastMessageAt
+                const sorted = processedConversations.sort((a: any, b: any) => {
+                    if (a.isPinned && !b.isPinned) return -1;
+                    if (!a.isPinned && b.isPinned) return 1;
+                    return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime();
+                });
+
+                setConversations(sorted);
             }
         } catch (error) {
             console.error('Error loading conversations:', error);
@@ -308,6 +321,38 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             console.error('Error deleting conversations:', error);
             alert('Error al eliminar conversaciones');
         }
+    };
+
+    const handleBatchUpdate = async (updates: { isPinned?: boolean, isFavorite?: boolean }) => {
+        try {
+            await Promise.all(selectedChats.map(id =>
+                fetch(`/api/conversations/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                })
+            ));
+            setSelectedChats([]);
+            setIsSelectionMode(false);
+            loadConversations();
+        } catch (error) {
+            console.error('Error updating conversations:', error);
+            alert('Error al actualizar conversaciones');
+        }
+    };
+
+    const handleBatchCreateGroup = () => {
+        const userIds = conversations
+            .filter(c => selectedChats.includes(c.id) && c.type === 'USER_USER' && c.otherUser)
+            .map(c => c.otherUser!.id);
+
+        if (userIds.length === 0) {
+            alert('Selecciona chats individuales para crear un grupo');
+            return;
+        }
+
+        setInitialGroupMembers(userIds);
+        setShowNewGroup(true);
     };
 
     const fetchStarredMessages = async () => {
@@ -604,8 +649,12 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             {
                 showNewGroup && (
                     <CreateGroupModal
-                        onClose={() => setShowNewGroup(false)}
+                        onClose={() => {
+                            setShowNewGroup(false);
+                            setInitialGroupMembers([]);
+                        }}
                         onCreateGroup={handleCreateGroup}
+                        initialSelectedIds={initialGroupMembers}
                     />
                 )
             }
@@ -624,13 +673,35 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         </div>
                         <div className="flex items-center gap-3">
                             {selectedChats.length > 0 && (
-                                <button
-                                    onClick={handleDeleteConversations}
-                                    className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-xs font-black transition-all shadow-lg active:scale-95 border border-red-400"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                    ELIMINAR
-                                </button>
+                                <>
+                                    <button
+                                        onClick={() => handleBatchUpdate({ isPinned: true })}
+                                        className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-blue-400"
+                                    >
+                                        FIJAR
+                                    </button>
+                                    <button
+                                        onClick={() => handleBatchUpdate({ isFavorite: true })}
+                                        className="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-yellow-400"
+                                    >
+                                        <Star className="h-4 w-4" />
+                                        DESTACAR
+                                    </button>
+                                    <button
+                                        onClick={handleBatchCreateGroup}
+                                        className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-indigo-400"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        GRUPO
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteConversations}
+                                        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-red-400"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        ELIMINAR
+                                    </button>
+                                </>
                             )}
                             <button
                                 onClick={() => {
@@ -794,11 +865,15 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                     <h3 className={`font-black tracking-tight truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900 text-lg'}`}>
                                                         {conv.type === "GROUP" ? conv.name : (conv.otherUser?.name || 'Sin nombre')}
                                                     </h3>
-                                                    {conv.lastMessageAt && (
-                                                        <span className={`text-[10px] font-black uppercase opacity-60 shrink-0 ${selectedId === conv.id ? 'text-white' : 'text-gray-400'}`}>
-                                                            {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                                                        </span>
-                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        {conv.isPinned && <span title="Fijado" className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
+                                                        {conv.isFavorite && <Star className={`h-3 w-3 fill-yellow-400 text-yellow-500 shadow-sm`} />}
+                                                        {conv.lastMessageAt && (
+                                                            <span className={`text-[10px] font-black uppercase opacity-60 shrink-0 ${selectedId === conv.id ? 'text-white' : 'text-gray-400'}`}>
+                                                                {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-2">
                                                     <p className={`text-sm truncate font-bold leading-tight opacity-80 ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>

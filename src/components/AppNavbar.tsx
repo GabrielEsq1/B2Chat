@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import CreditBalance from "./monetization/CreditBalance";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AppNavbar() {
     const { data: session } = useSession();
+    const { t } = useLanguage();
     const pathname = usePathname();
     const router = useRouter();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,7 +75,12 @@ export default function AppNavbar() {
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-default">
                         <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg shadow-md" />
-                        <span className="text-xl font-bold text-gray-900">B2BChat</span>
+                        <div className="flex flex-col">
+                            <span className="text-xl font-bold text-gray-900 leading-none">B2BChat</span>
+                            <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="text-[9px] text-gray-500 hover:text-blue-600 font-medium transition-colors">
+                                {t('ecosystem.seal')}
+                            </a>
+                        </div>
                     </div>
 
                     {/* Desktop Navigation */}
