@@ -121,7 +121,7 @@ export default function DashboardPage() {
                                 alt="GNOSIS Logo"
                                 width={120}
                                 height={120}
-                                className="relative rounded-3xl shadow-2xl transform group-hover:rotate-6 transition-transform duration-500 bg-white p-2"
+                                className="relative rounded-3xl shadow-2xl transition-transform duration-500 bg-white p-2"
                             />
                         </div>
 
@@ -295,9 +295,9 @@ export default function DashboardPage() {
                                 </div>
                                 <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-pink-600 transition-colors" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">{t('ecosystem.cta_cross')}</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">{t('dashboard.cta_cross_title')}</h3>
                             <p className="text-gray-600 text-sm z-10 relative">
-                                {t('ecosystem.diagram.step2')}
+                                {t('dashboard.cta_cross_text')}
                             </p>
                         </a>
                     )}

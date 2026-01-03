@@ -109,6 +109,7 @@ export interface Translation {
         booking_btn: string;
         visit_hub: string;
         footer_rights: string;
+        footer_mockup_seal_gnosis: string;
         mockup: {
             verified: string;
             industry: string;
@@ -144,6 +145,8 @@ export interface Translation {
             store: string;
             create_store: string;
         };
+        cta_cross_title: string;
+        cta_cross_text: string;
     };
     chat: {
         sidebar: {
@@ -166,6 +169,7 @@ export interface Translation {
             selection_count: string;
             group_suffix: string;
             empty_hint: string;
+            search_error_short: string;
         };
         window: {
             online: string;
