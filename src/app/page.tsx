@@ -41,7 +41,12 @@ export default function LandingPage() {
                             <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center">
                                 <MessageSquare className="h-5 w-5 text-white" />
                             </div>
-                            <span className="text-lg font-bold text-gray-900">B2BChat</span>
+                            <div className="flex flex-col">
+                                <span className="text-lg font-bold text-gray-900 leading-none">B2BChat</span>
+                                <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-500 hover:text-blue-600 font-medium mt-0.5">
+                                    {t('ecosystem.seal')}
+                                </a>
+                            </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <LanguageSwitcher />
@@ -269,6 +274,62 @@ export default function LandingPage() {
                             {t('home.cta_final_title')}
                             <ArrowRight className="h-5 w-5" />
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Ecosystem Section */}
+            <section className="py-20 bg-gray-900 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium mb-6 border border-blue-500/20">
+                            <Building2 className="w-3 h-3" />
+                            Enterprise Hub
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4">{t('ecosystem.title')}</h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+                            {t('ecosystem.description')}
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-8 items-center max-w-5xl mx-auto">
+                        {/* B2BChat */}
+                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-blue-500/50 transition-all">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <MessageSquare className="w-24 h-24" />
+                            </div>
+                            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
+                                <MessageSquare className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3">B2BChat</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                                {t('ecosystem.diagram.step1')}
+                            </p>
+                        </div>
+
+                        {/* Connection Arrow */}
+                        <div className="flex flex-col items-center justify-center gap-2 text-blue-500 opacity-50 md:rotate-0 rotate-90 my-4 md:my-0">
+                            <div className="w-full h-px bg-gradient-to-r from-transparent via-current to-transparent max-w-[100px]" />
+                            <ArrowRight className="w-6 h-6 animate-pulse" />
+                            <div className="w-full h-px bg-gradient-to-r from-transparent via-current to-transparent max-w-[100px]" />
+                        </div>
+
+                        {/* CreaTiendas */}
+                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-purple-500/50 transition-all cursor-pointer" onClick={() => window.open('https://creatiendas.com', '_blank')}>
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Building2 className="w-24 h-24" />
+                            </div>
+                            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
+                                <Building2 className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-3">CreaTiendas</h3>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                                {t('ecosystem.diagram.step2')}
+                            </p>
+                            <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                                Visitar Hub <ArrowRight className="w-3 h-3" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

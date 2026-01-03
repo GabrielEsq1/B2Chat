@@ -244,25 +244,28 @@ export default function DashboardPage() {
                         </a>
                     ) : (
                         <a
-                            href="https://creatiendasgit1.vercel.app/"
+                            href="https://creatiendas.com"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
+                            className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group relative overflow-hidden"
                         >
+                            <div className="absolute top-0 right-0 p-2 opacity-10">
+                                <TrendingUp className="w-24 h-24" />
+                            </div>
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl">
                                     <Store className="h-6 w-6 text-white" />
                                 </div>
                                 <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-pink-600 transition-colors" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Crear Mi Tienda</h3>
-                            <p className="text-gray-600 text-sm">
-                                Crea tu tienda online en Creatiendas
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">{t('ecosystem.cta_cross')}</h3>
+                            <p className="text-gray-600 text-sm z-10 relative">
+                                {t('ecosystem.diagram.step2')}
                             </p>
                         </a>
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

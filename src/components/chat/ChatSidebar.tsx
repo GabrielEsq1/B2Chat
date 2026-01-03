@@ -858,11 +858,12 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 )}
             </div>
 
-            {/* Modals area */}
-            <InvitationModal
-                phone={invitedPhone}
-                onClose={() => setShowInvitationModal(false)}
-            />
+            {showInvitationModal && (
+                <InvitationModal
+                    phone={invitedPhone}
+                    onClose={() => setShowInvitationModal(false)}
+                />
+            )}
 
             {showGlobalSearch && (
                 <GlobalCompanySearch
