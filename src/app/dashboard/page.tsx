@@ -14,6 +14,7 @@ import {
     Store,
 } from "lucide-react";
 import StoriesRail from "@/components/ads/StoriesRail";
+import BookingBanner from "@/components/dashboard/BookingBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface UserStore {
@@ -94,13 +95,16 @@ export default function DashboardPage() {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Welcome Section */}
-                <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">
-                        {t('dashboard.welcome', { name: session?.user?.name?.split(' ')[0] || '' })}
-                    </h2>
-                    <p className="text-blue-100">
-                        {t('dashboard.subtitle')}
-                    </p>
+                <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold text-white mb-2">
+                            {t('dashboard.welcome', { name: session?.user?.name?.split(' ')[0] || '' })}
+                        </h2>
+                        <p className="text-blue-100">
+                            {t('dashboard.subtitle')}
+                        </p>
+                    </div>
+                    <BookingBanner />
                 </div>
 
                 {/* Stories Rail */}
