@@ -658,7 +658,7 @@ export default function CreateCampaignPage() {
                             Atrás
                         </button>
                     )}
-                    {step < 5 && (
+                    {step < 6 && (
                         <button
                             onClick={handleNext}
                             className="ml-auto rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"

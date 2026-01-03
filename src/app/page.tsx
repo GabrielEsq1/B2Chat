@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import BlogSection from "@/components/home/BlogSection";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import BookingBanner from "@/components/dashboard/BookingBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function LandingPage() {
@@ -58,29 +59,6 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-white font-sans selection:bg-blue-100 selection:text-blue-900">
-            {/* Navigation Overlay (Booking Banner) */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-3 border-b border-gray-200 hidden sm:block relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30"></div>
-                <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <p className="text-sm font-medium text-gray-700">
-                            <span className="font-bold text-gray-900">{t('home.booking_banner')}</span>
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => window.open('https://meet.brevo.com/gabriel-esquivia', '_blank')}
-                        className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wide transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                        {t('home.booking_btn')}
-                        <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                </div>
-            </div>
 
             {/* Navigation */}
             <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -124,9 +102,12 @@ export default function LandingPage() {
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         {/* Left: Value Prop */}
                         <div className="text-left relative z-10">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                {t('home.trusted_by')}
+                            <div className="inline-flex flex-col sm:flex-row items-center gap-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    {t('home.trusted_by')}
+                                </div>
+                                <BookingBanner />
                             </div>
 
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1] mb-8 tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
