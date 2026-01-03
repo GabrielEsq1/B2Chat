@@ -18,92 +18,82 @@ export async function GET(req: NextRequest) {
 
         console.log(`[API/Conversations] Fetching for userId: ${session.user.id}`);
 
-
+        // ULTRA-MINIMAL QUERY: Fetch only conversation IDs first to prevent P6009
         const conversations = await prisma.conversation.findMany({
             where: {
                 OR: [
                     { userAId: session.user.id },
                     { userBId: session.user.id },
-                    {
-                        group: {
-                            members: {
-                                some: { userId: session.user.id }
-                            }
-                        }
-                    }
                 ],
             },
-            include: {
-                userA: {
-                    select: {
-                        id: true,
-                        name: true,
-                        phone: true,
-                        avatar: true,
-                        isBot: true,
-                    },
-                },
-                userB: {
-                    select: {
-                        id: true,
-                        name: true,
-                        phone: true,
-                        avatar: true,
-                        isBot: true,
-                    },
-                },
-                group: {
-                    select: {
-                        id: true,
-                        name: true,
-                        avatar: true,
-                        // REMOVED: members include - causes massive payload
-                    }
-                },
-                messages: {
-                    orderBy: {
-                        createdAt: "desc",
-                    },
-                    take: 1,
-                },
+            select: {
+                id: true,
+                type: true,
+                userAId: true,
+                userBId: true,
+                groupId: true,
+                isPinned: true,
+                isFavorite: true,
+                updatedAt: true,
             },
             orderBy: {
                 updatedAt: "desc",
             },
-            take: 20, // CRITICAL: Strict limit to prevent 5MB overflow
+            take: 10, // ULTRA-MINIMAL: Only 10 most recent
         });
 
         console.log(`[API/Conversations] Found ${conversations.length} conversations for user ${session.user.id}`);
 
-        // Format conversations with other user info or group info
-        const formattedConversations = conversations.map((conv: any) => {
+        // Fetch user and message data separately for each conversation
+        const formattedConversations = await Promise.all(conversations.map(async (conv: any) => {
             const isGroup = conv.type === "GROUP";
-            const lastMessage = conv.messages[0];
 
-            if (isGroup && conv.group) {
-                return {
-                    id: conv.id,
-                    type: "GROUP",
-                    name: conv.group.name,
-                    avatar: conv.group.avatar,
-                    memberCount: conv.group.members.length,
-                    lastMessage: lastMessage ? {
-                        text: lastMessage.text,
-                        createdAt: lastMessage.createdAt,
-                        isRead: lastMessage.readAt !== null,
-                    } : null,
-                    updatedAt: conv.updatedAt,
-                    group: conv.group,
-                    isPinned: conv.isPinned,
-                    isFavorite: conv.isFavorite,
-                };
+            // Fetch other user data if USER_USER conversation
+            let otherUser = null;
+            if (!isGroup) {
+                const otherUserId = conv.userAId === session.user.id ? conv.userBId : conv.userAId;
+                otherUser = await prisma.user.findUnique({
+                    where: { id: otherUserId },
+                    select: {
+                        id: true,
+                        name: true,
+                        phone: true,
+                        avatar: true,
+                        isBot: true,
+                    }
+                });
             }
 
-            const otherUser = conv.userAId === session.user.id ? conv.userB : conv.userA;
+            // Fetch last message
+            const lastMessage = await prisma.message.findFirst({
+                where: { conversationId: conv.id },
+                orderBy: { createdAt: "desc" },
+                select: {
+                    text: true,
+                    createdAt: true,
+                    readAt: true,
+                }
+            });
+
+            // Fetch group data if GROUP conversation
+            let groupData = null;
+            if (isGroup && conv.groupId) {
+                groupData = await prisma.group.findUnique({
+                    where: { id: conv.groupId },
+                    select: {
+                        id: true,
+                        name: true,
+                        avatar: true,
+                    }
+                });
+            }
+
             return {
                 id: conv.id,
-                type: "USER_USER",
+                type: conv.type,
                 otherUser,
+                name: groupData?.name,
+                avatar: groupData?.avatar,
                 lastMessage: lastMessage ? {
                     text: lastMessage.text,
                     createdAt: lastMessage.createdAt,
@@ -113,7 +103,7 @@ export async function GET(req: NextRequest) {
                 isPinned: conv.isPinned,
                 isFavorite: conv.isFavorite,
             };
-        });
+        }));
 
         return NextResponse.json({ conversations: formattedConversations });
     } catch (error) {

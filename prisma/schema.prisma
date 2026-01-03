@@ -12,24 +12,24 @@ model Company {
   id                     String              @id @default(uuid())
   name                   String
   taxId                  String?
-  whatsappPaymentEnabled Boolean             @default(false)
-  whatsappNumber         String?
-  isActivated            Boolean             @default(false)
-  activatedAt            DateTime?
-  activationMethod       String?
-  publicInfo             Json?
-  invitationsSent        Int                 @default(0)
-  lastInvitationSent     DateTime?
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
+  whatsappNumber         String?
+  whatsappPaymentEnabled Boolean             @default(false)
+  activatedAt            DateTime?
+  activationMethod       String?
+  invitationsSent        Int                 @default(0)
+  isActivated            Boolean             @default(false)
+  lastInvitationSent     DateTime?
+  publicInfo             Json?
   adCampaigns            AdCampaign[]
   connectionsAsA         CompanyConnection[] @relation("CompanyA")
   connectionsAsB         CompanyConnection[] @relation("CompanyB")
+  invitations            CompanyInvitation[]
   conversationsAsA       Conversation[]      @relation("CompanyA")
   conversationsAsB       Conversation[]      @relation("CompanyB")
   subscription           Subscription?
   users                  User[]
-  invitations            CompanyInvitation[]
 }
 
 model User {
@@ -38,7 +38,6 @@ model User {
   phone                  String              @unique
   email                  String?             @unique
   passwordHash           String
-  role                   String              @default("USUARIO")
   companyId              String?
   avatar                 String?
   bio                    String?
@@ -55,20 +54,21 @@ model User {
   otpCode                String?
   otpExpiresAt           DateTime?
   creditBalance          Float               @default(10.0)
+  role                   String              @default("USUARIO")
   planType               String              @default("FREE")
   campaigns              AdCampaign[]
-  walletTransactions     Transaction[]       @relation("UserTransactions")
+  sentInvitations        CompanyInvitation[] @relation("SentInvitations")
   conversationsAsA       Conversation[]      @relation("UserA")
   conversationsAsB       Conversation[]      @relation("UserB")
   creditTransactions     CreditTransaction[]
   receivedFriendRequests FriendRequest[]     @relation("ReceiverUser")
   sentFriendRequests     FriendRequest[]     @relation("RequesterUser")
-  sentInvitations        CompanyInvitation[] @relation("SentInvitations")
   createdGroups          Group[]
   groupMemberships       GroupMember[]
   sentMessages           Message[]
   stores                 Store[]
   subscription           Subscription?
+  walletTransactions     Transaction[]       @relation("UserTransactions")
   company                Company?            @relation(fields: [companyId], references: [id])
 }
 
@@ -76,10 +76,10 @@ model CreditTransaction {
   id          String   @id @default(uuid())
   userId      String
   amount      Float
-  type        String
   description String
   referenceId String?
   createdAt   DateTime @default(now())
+  type        String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -87,9 +87,9 @@ model CompanyConnection {
   id         String   @id @default(uuid())
   companyAId String
   companyBId String
-  status     String   @default("PENDING")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  status     String   @default("PENDING")
   companyA   Company  @relation("CompanyA", fields: [companyAId], references: [id])
   companyB   Company  @relation("CompanyB", fields: [companyBId], references: [id])
 
@@ -98,16 +98,16 @@ model CompanyConnection {
 
 model Conversation {
   id         String    @id @default(uuid())
-  type       String
   companyAId String?
   companyBId String?
   userAId    String?
   userBId    String?
   groupId    String?
-  isPinned   Boolean   @default(false)
-  isFavorite Boolean   @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  type       String
+  isFavorite Boolean   @default(false)
+  isPinned   Boolean   @default(false)
   companyA   Company?  @relation("CompanyA", fields: [companyAId], references: [id])
   companyB   Company?  @relation("CompanyB", fields: [companyBId], references: [id])
   group      Group?    @relation(fields: [groupId], references: [id])
@@ -145,16 +145,15 @@ model GroupMember {
 model Transaction {
   id             String   @id @default(cuid())
   userId         String
-  type           String // SEND, RECEIVE, DEPOSIT, WITHDRAW
+  type           String
   amount         Float
   recipientPhone String?
-  status         String // PENDING, APPROVED, REJECTED
-  externalId     String? // Nequi transaction ID
+  status         String
+  externalId     String?
   description    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  user User @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation("UserTransactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([status])
@@ -168,48 +167,45 @@ model Message {
   text           String
   attachmentUrl  String?
   readAt         DateTime?
-  isStarred      Boolean      @default(false)
   createdAt      DateTime     @default(now())
+  isStarred      Boolean      @default(false)
+  emailLogs      EmailLog[]
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderUserId], references: [id])
-  emailLogs      EmailLog[]
 }
 
 model AdCampaign {
-  id           String       @id @default(uuid())
-  companyId    String
-  userId       String
-  name         String
-  objective    String
-  status       String       @default("DRAFT")
-  industry     String?
-  sector       String?
-  targetRoles  String?
-  dailyBudget  Float
-  durationDays Int
-  totalBudget  Float
-  spent        Float        @default(0)
-  creativeType String
-  creativeUrl  String?
-  creativeText String?
-  impressions  Int          @default(0)
-  clicks       Int          @default(0)
-  conversions  Int          @default(0)
-  startDate    DateTime?
-  endDate      DateTime?
-  
-  // Story Ads & Payment Fields
-  type            String    @default("STORY") // STORY, FEED_POST
-  paymentStatus   String    @default("PENDING_PAYMENT") // PENDING_PAYMENT, PAIMENT_VERIFICATION, PAID, REJECTED
-  paymentMethod   String?   // NEQUI, WHATSAPP, MANUAL
+  id              String       @id @default(uuid())
+  companyId       String
+  userId          String
+  name            String
+  objective       String
+  status          String       @default("DRAFT")
+  industry        String?
+  sector          String?
+  targetRoles     String?
+  dailyBudget     Float
+  durationDays    Int
+  totalBudget     Float
+  spent           Float        @default(0)
+  creativeType    String
+  creativeUrl     String?
+  creativeText    String?
+  impressions     Int          @default(0)
+  clicks          Int          @default(0)
+  conversions     Int          @default(0)
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  paymentMethod   String?
   paymentProofUrl String?
-  transactionRef  String?   // External transaction ID or Nequi Ref
-
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  company      Company      @relation(fields: [companyId], references: [id])
-  user         User         @relation(fields: [userId], references: [id])
-  creatives    AdCreative[]
+  paymentStatus   String       @default("PENDING_PAYMENT")
+  transactionRef  String?
+  type            String       @default("STORY")
+  company         Company      @relation(fields: [companyId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
+  creatives       AdCreative[]
 }
 
 model AdCreative {
@@ -223,12 +219,9 @@ model AdCreative {
   ageRange         String?
   gender           String?
   location         String?
-  type             String     @default("IMAGE") // IMAGE, VIDEO
-  mediaType        String     @default("IMAGE") // Redundant but explicit for Story: IMAGE, VIDEO
+  type             String     @default("IMAGE")
   videoUrl         String?
   videoDuration    Int?
-  duration         Int        @default(5) // Duration in seconds (5s image, Ns video)
-  order            Int        @default(0) // Order in the story sequence
   isActive         Boolean    @default(true)
   approvalStatus   String     @default("PENDING")
   displayOrder     Int        @default(0)
@@ -237,6 +230,9 @@ model AdCreative {
   impressionsCount Int        @default(0)
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
+  duration         Int        @default(5)
+  mediaType        String     @default("IMAGE")
+  order            Int        @default(0)
   campaign         AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   stats            AdStats?
 }
@@ -266,13 +262,13 @@ model Subscription {
   id                   String    @id @default(uuid())
   userId               String    @unique
   companyId            String?   @unique
-  plan                 String    @default("FREE")
   stripeCustomerId     String?
   stripeSubscriptionId String?
   status               String    @default("active")
   currentPeriodEnd     DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+  plan                 String    @default("FREE")
   company              Company?  @relation(fields: [companyId], references: [id])
   user                 User      @relation(fields: [userId], references: [id])
 }
@@ -311,9 +307,9 @@ model FriendRequest {
   id          String   @id @default(uuid())
   requesterId String
   receiverId  String
-  status      String   @default("PENDING")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  status      String   @default("PENDING")
   receiver    User     @relation("ReceiverUser", fields: [receiverId], references: [id], onDelete: Cascade)
   requester   User     @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
 
@@ -329,18 +325,13 @@ model CompanyInvitation {
   sentAt       DateTime  @default(now())
   viewedAt     DateTime?
   acceptedAt   DateTime?
-
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  sender  User    @relation("SentInvitations", fields: [senderUserId], references: [id], onDelete: Cascade)
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sender       User      @relation("SentInvitations", fields: [senderUserId], references: [id], onDelete: Cascade)
 
   @@index([companyId])
   @@index([senderUserId])
   @@index([status])
 }
-
-// Enums converted to String for SQLite compatibility
-
-// Original enums: Role, ConnectionStatus, ConversationType, PlanType, TransactionType, FriendRequestStatus
 
 model EmailLog {
   id             String    @id @default(uuid())
@@ -349,13 +340,12 @@ model EmailLog {
   senderUserId   String?
   recipientEmail String
   subject        String
-  status         String    @default("SENT") // SENT, DELIVERED, OPENED, CLICKED, BOUNCED, COMPLAINT
+  status         String    @default("SENT")
   openedAt       DateTime?
   clickedAt      DateTime?
   error          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-
   message        Message?  @relation(fields: [messageId], references: [id])
 
   @@index([recipientEmail])
