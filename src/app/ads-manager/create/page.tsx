@@ -584,113 +584,65 @@ export default function CreateCampaignPage() {
                             </div>
                         </div>
 
-                        {/* Payment Approval Explanation */}
-                        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                                <span className="text-lg">ℹ️</span>
-                                {t('ads.wizard.payment.title')}
+                        {/* Payment Instructions */}
+                        <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h3 className="text-sm font-semibold text-green-900 mb-2 flex items-center gap-2">
+                                <Check className="h-5 w-5" />
+                                <span>¡Información Verificada Correctamente!</span>
                             </h3>
-                            <div className="text-xs text-blue-800 space-y-2">
+                            <div className="text-sm text-green-800 space-y-2">
                                 <p>
-                                    <strong>1.</strong> Revisa los datos de tu campaña arriba.
+                                    Tu campaña tiene toda la información necesaria. Solo falta un paso para activarla.
                                 </p>
                                 <p>
-                                    <strong>2.</strong> En el siguiente paso podrás subir tu comprobante de pago.
+                                    Haz clic en <strong>Siguiente</strong> para coordinar el pago.
                                 </p>
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Step 6: Payment Proof */}
+                {/* Step 6: Payment */}
                 {step === 6 && (
                     <div className="rounded-lg bg-white p-6 shadow-sm">
-                        <h2 className="mb-6 text-lg font-medium text-gray-900">{t('ads.wizard.payment.title')}</h2>
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">Finalizar y Pagar</h2>
 
-                        <div className="mb-6 text-center">
-                            <p className="text-sm text-gray-600 mb-4">{t('ads.wizard.payment.instructions')}</p>
-
-                            {/* Nequi QR Placeholder */}
-                            <div className="mx-auto w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-4 border-2 border-dashed border-gray-400">
-                                <span className="text-gray-500 font-bold">QR Nequi Aquí</span>
+                        <div className="mb-8 text-center bg-gray-50 rounded-xl p-8 border border-gray-100">
+                            <div className="mx-auto h-20 w-20 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                                <DollarSign className="h-10 w-10 text-blue-600" />
                             </div>
-                            <p className="text-xs text-gray-500">Cuenta Nequi: 302 668 7991</p>
+
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">¡Campaña casi lista!</h3>
+                            <p className="text-gray-600 mb-8 max-w-lg mx-auto">
+                                Para activar tu campaña, coordinamos el pago de forma segura a través de WhatsApp. Un asesor te enviará los datos de Nequi/Bancolombia.
+                            </p>
+
+                            <a
+                                href={`https://wa.me/573026687991?text=${encodeURIComponent(`Hola, acabo de crear la campaña "${formData.name}" por valor de $${formData.totalBudget.toLocaleString('es-CO')} y quiero realizar el pago.`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#128C7E] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 mb-4"
+                            >
+                                <Users className="h-6 w-6" />
+                                Pagar con Asesor (WhatsApp)
+                            </a>
+
+                            <p className="text-xs text-gray-400 mt-4">
+                                Horario de atención: 24/7
+                            </p>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center hover:bg-gray-50">
-                                <input
-                                    type="file"
-                                    id="proof-upload"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
-                                        setFormData({ ...formData, uploading: true });
-                                        try {
-                                            const uploadData = new FormData();
-                                            uploadData.append('file', file);
-                                            uploadData.append('type', 'image'); // Explicit type
-
-                                            const response = await fetch('/api/upload', {
-                                                method: 'POST',
-                                                body: uploadData,
-                                            });
-                                            const data = await response.json();
-                                            if (data.success) {
-                                                setFormData({ ...formData, paymentProofUrl: data.url, uploading: false });
-                                            } else {
-                                                console.error("Proof upload error:", data);
-                                                alert(`Error: ${data.details || data.error || 'Falló la subida'}`);
-                                                setFormData({ ...formData, uploading: false });
-                                            }
-                                        } catch (error) {
-                                            console.error("Proof upload exception:", error);
-                                            alert("Error de conexión al subir comprobante");
-                                            setFormData({ ...formData, uploading: false });
-                                        }
-                                    }}
-                                    disabled={formData.uploading}
-                                />
-                                <label htmlFor="proof-upload" className="cursor-pointer">
-                                    {formData.uploading ? (
-                                        <div>
-                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-                                            <p className="mt-2 text-sm text-gray-600">Subiendo...</p>
-                                        </div>
-                                    ) : formData.paymentProofUrl ? (
-                                        <div>
-                                            <Check className="mx-auto h-12 w-12 text-green-500" />
-                                            <p className="mt-2 text-sm text-green-600">Comprobante subido</p>
-                                            <img src={formData.paymentProofUrl} alt="Proof" className="mx-auto mt-4 max-h-40 rounded" />
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.preventDefault(); setFormData({ ...formData, paymentProofUrl: "" }); }}
-                                                className="mt-2 text-sm text-blue-600 hover:text-blue-700"
-                                            >
-                                                Cambiar
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                                            <p className="mt-2 text-sm text-gray-600">
-                                                {t('ads.wizard.payment.upload_proof')}
-                                            </p>
-                                        </div>
-                                    )}
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="mt-6">
+                        <div className="mt-6 border-t pt-6 bg-blue-50 p-6 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 mb-2">¿Ya contactaste al asesor?</h4>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Si ya iniciaste el chat o realizaste el pago, haz clic en finalizar para guardar tu campaña. El administrador la aprobará en breve.
+                            </p>
                             <button
                                 onClick={handleCreateCampaign}
-                                disabled={loading || !formData.paymentProofUrl}
-                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                disabled={loading}
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                             >
-                                {loading ? 'Enviando...' : '✅ Confirmar Pago y Enviar a Revisión'}
+                                {loading ? 'Procesando...' : 'Finalizar y Enviar a Revisión'}
                             </button>
                         </div>
                     </div>
