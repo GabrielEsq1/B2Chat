@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendNewMessageNotification } from "@/lib/email";
 
 /**
  * POST /api/messages/send
@@ -32,6 +33,10 @@ export async function POST(req: NextRequest) {
                     { userAId: session.user.id },
                     { userBId: session.user.id }
                 ]
+            },
+            include: {
+                userA: { select: { id: true, email: true, name: true, isBot: true } },
+                userB: { select: { id: true, email: true, name: true, isBot: true } }
             }
         });
 
@@ -63,10 +68,31 @@ export async function POST(req: NextRequest) {
             data: { updatedAt: new Date() }
         });
 
-        // 6. Return
+        // 6. Send email notification
+        let emailSent = false;
+        try {
+            const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
+            if (otherUser?.email && !otherUser.isBot) {
+                const baseUrl = process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL ||
+                    (req.headers.get('origin') || 'http://localhost:3000');
+
+                await sendNewMessageNotification({
+                    to: otherUser.email,
+                    senderName: session.user.name || 'Un usuario',
+                    messageText: text,
+                    conversationLink: `${baseUrl}/chat/${conversationId}`
+                });
+                emailSent = true;
+            }
+        } catch (emailErr) {
+            console.error('[SEND] Email failed:', emailErr);
+        }
+
+        // 7. Return
         return NextResponse.json({
             success: true,
-            message
+            message,
+            emailSent
         });
 
     } catch (error: any) {

@@ -188,6 +188,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         });
 
         // Send email notification to recipient(s)
+        let emailSent = false;
         try {
             const baseUrl = process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL ||
                 (req.headers.get('origin') || 'http://localhost:3000');
@@ -204,14 +205,13 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                                 messageText: text || (file ? `Archivo: ${file.name}` : ''),
                                 conversationLink: `${baseUrl}/chat/${params.id}`
                             });
+                            emailSent = true;
                         }
                     }
                 }
             } else {
                 // Direct message: Send to the other user
                 const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
-                // We need to fetch the email because it might not be in the initial conversation query (if we didn't select it)
-                // Actually conversation.userA/userB were fetched but without email. Let's ensure we have it.
                 const recipient = await prisma.user.findUnique({
                     where: { id: otherUser?.id },
                     select: { email: true, name: true, isBot: true }
@@ -224,6 +224,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                         messageText: text || (file ? `Archivo: ${file.name}` : ''),
                         conversationLink: `${baseUrl}/chat/${params.id}`
                     });
+                    emailSent = true;
                 }
             }
         } catch (emailError) {
@@ -280,7 +281,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
             });
         }
 
-        return NextResponse.json({ message });
+        return NextResponse.json({ message, emailSent });
     } catch (error) {
         console.error("Error sending message:", error);
         return NextResponse.json(
