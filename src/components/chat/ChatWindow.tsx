@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X } from "lucide-react";
+import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X, Mail } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
 import FastAdsBar from "./FastAdsBar";
@@ -257,6 +257,8 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     setShowEmojiPicker(false);
   };
 
+  const [emailToast, setEmailToast] = useState<{ show: boolean, recipientEmail: string } | null>(null);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -293,6 +295,15 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
 
       if (res.ok) {
         const data = await res.json();
+
+        // Show email sent notification if applicable
+        if (data.emailSent) {
+          setEmailToast({
+            show: true,
+            recipientEmail: conversation.otherUser?.email || 'el destinatario'
+          });
+          setTimeout(() => setEmailToast(null), 5000);
+        }
 
         // Emit to Socket.IO so others receive it
         if (socket) {
@@ -514,7 +525,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         </div>
       )}
 
-      {/* Toast Notification */}
+      {/* Toast Notification for incoming messages */}
       {toast?.show && (
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
           <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 min-w-[300px] max-w-md">
@@ -532,11 +543,30 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                 onClick={() => setToast(null)}
                 className="text-gray-400 hover:text-gray-600 flex-shrink-0"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-4 h-4" />
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Sent Notification */}
+      {emailToast?.show && (
+        <div className="absolute bottom-24 right-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-blue-600 text-white rounded-xl shadow-xl px-5 py-3 border border-blue-500/30 flex items-center gap-3 backdrop-blur-sm">
+            <div className="bg-white/20 p-1.5 rounded-lg">
+              <Mail className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider opacity-80">Notificación Enviada</p>
+              <p className="text-sm font-medium">Correo enviado a {emailToast.recipientEmail}</p>
+            </div>
+            <button
+              onClick={() => setEmailToast(null)}
+              className="ml-2 hover:bg-white/10 p-1 rounded-md transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}
