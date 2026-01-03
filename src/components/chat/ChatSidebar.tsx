@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2, Loader2, Check, Star, Users } from "lucide-react";
+import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2, Loader2, Check, Star, Users, VolumeX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import InvitationModal from "./InvitationModal";
 import CreateGroupModal from "./CreateGroupModal";
@@ -381,10 +381,13 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
         }
     }, [showStarredMessages]);
 
-    const filteredConversations = conversations.filter(conv =>
-        conv.otherUser?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        conv.otherUser?.phone?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredConversations = conversations.filter(conv => {
+        if (!searchTerm) return true;
+        const term = searchTerm.toLowerCase();
+        const name = conv.type === 'GROUP' ? conv.name : conv.otherUser?.name;
+        const phone = conv.otherUser?.phone;
+        return (name?.toLowerCase() || "").includes(term) || (phone?.toLowerCase() || "").includes(term);
+    });
 
     return (
         <div className="flex h-full w-full flex-col border-r border-gray-200 bg-white overflow-hidden">
@@ -865,19 +868,14 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                     <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-4 border-white"></span>
                                                 )}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between gap-2 mb-1">
+                                            <div className="flex-1 min-w-0 relative">
+                                                <div className="flex items-center justify-between gap-2 mb-1 pr-6">
                                                     <h3 className={`font-black tracking-tight truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900 text-lg'}`}>
                                                         {conv.type === "GROUP" ? conv.name : (conv.otherUser?.name || t('chat.sidebar.no_name', { defaultValue: 'Sin nombre' }))}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
                                                         {conv.isPinned && <span title={t('chat.actions.pin')} className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
                                                         {conv.isFavorite && <Star className={`h-3 w-3 fill-yellow-400 text-yellow-500 shadow-sm`} />}
-                                                        {conv.lastMessageAt && (
-                                                            <span className={`text-[10px] font-black uppercase opacity-60 shrink-0 ${selectedId === conv.id ? 'text-white' : 'text-gray-400'}`}>
-                                                                {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                                                            </span>
-                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-2">
@@ -889,6 +887,58 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                             {conv.unreadCount}
                                                         </span>
                                                     )}
+                                                </div>
+                                                {/* Context Menu Trigger */}
+                                                <div className="absolute top-0 right-0 -mt-1 -mr-2">
+                                                    <div className="relative group/menu">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                            }}
+                                                            className={`p-1 rounded-full hover:bg-black/10 transition-colors ${selectedId === conv.id ? 'text-white/80 hover:text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </button>
+                                                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 hidden group-hover/menu:block">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    alert(t('chat.info_contact', { defaultValue: 'Info. del contacto' }));
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                            >
+                                                                <User className="h-4 w-4" />
+                                                                {t('chat.info_contact', { defaultValue: 'Info. del contacto' })}
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    alert(t('chat.mute_notifications', { defaultValue: 'Silenciar notificaciones' }));
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                            >
+                                                                <VolumeX className="h-4 w-4" />
+                                                                {t('chat.mute_notifications', { defaultValue: 'Silenciar notificaciones' })}
+                                                            </button>
+                                                            <button
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    if (confirm(t('chat.delete_confirm', { defaultValue: '¿Eliminar chat?' }))) {
+                                                                        await fetch('/api/conversations', {
+                                                                            method: 'DELETE',
+                                                                            headers: { 'Content-Type': 'application/json' },
+                                                                            body: JSON.stringify({ conversationIds: [conv.id] })
+                                                                        });
+                                                                        loadConversations();
+                                                                    }
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                                {t('chat.actions.delete')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -944,19 +994,23 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 )}
             </div>
 
-            {showInvitationModal && (
-                <InvitationModal
-                    phone={invitedPhone}
-                    onClose={() => setShowInvitationModal(false)}
-                />
-            )}
+            {
+                showInvitationModal && (
+                    <InvitationModal
+                        phone={invitedPhone}
+                        onClose={() => setShowInvitationModal(false)}
+                    />
+                )
+            }
 
-            {showGlobalSearch && (
-                <GlobalCompanySearch
-                    onClose={() => setShowGlobalSearch(false)}
-                    onStartChat={handleStartChat}
-                />
-            )}
-        </div>
+            {
+                showGlobalSearch && (
+                    <GlobalCompanySearch
+                        onClose={() => setShowGlobalSearch(false)}
+                        onStartChat={handleStartChat}
+                    />
+                )
+            }
+        </div >
     );
 }
