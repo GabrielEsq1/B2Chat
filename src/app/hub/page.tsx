@@ -128,7 +128,7 @@ export default function HubPage() {
                         <div className="relative">
                             <div className="aspect-square bg-gray-100 rounded-3xl overflow-hidden shadow-2xl relative group">
                                 <Image
-                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800"
+                                    src="/images/gabriel-esquivia.jpg"
                                     alt="Gabriel Esquivia"
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
