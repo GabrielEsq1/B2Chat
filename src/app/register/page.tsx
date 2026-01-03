@@ -174,10 +174,10 @@ export default function RegisterPage() {
 
                     <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                         <p className="text-gray-500 text-xs mb-4">¿Ya tienes cuenta? <Link href="/login" className="text-green-600 hover:text-green-800 font-bold">Inicia Sesión</Link></p>
-                        <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] text-gray-400 hover:text-green-600 font-medium transition-colors">
+                        <Link href="/hub" className="inline-flex items-center gap-2 text-[10px] text-gray-400 hover:text-green-600 font-medium transition-colors">
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            Parte de Enterprise Hub
-                        </a>
+                            Parte de GNOSIS
+                        </Link>
                     </div>
                 </div>
             </div>

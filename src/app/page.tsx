@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
     MessageSquare, Users, Zap, TrendingUp, Clock, Shield,
     Check, ArrowRight, Play, Star, Building2, Megaphone,
@@ -138,9 +139,9 @@ export default function LandingPage() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-lg font-bold text-gray-900 leading-none">B2BChat</span>
-                                <a href="https://creatiendasgit1.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-500 hover:text-blue-600 font-medium mt-0.5">
+                                <Link href="/hub" className="text-[10px] text-gray-500 hover:text-blue-600 font-medium mt-0.5">
                                     {t('ecosystem.seal')}
-                                </a>
+                                </Link>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">

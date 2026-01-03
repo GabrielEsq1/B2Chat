@@ -125,4 +125,14 @@ export interface Translation {
         };
         cta_cross: string;
     };
+    hub: {
+        hero_title: string;
+        hero_subtitle: string;
+        ceo_name: string;
+        ceo_title: string;
+        ceo_summary: string;
+        experience_title: string;
+        portfolio_title: string;
+        view_project: string;
+    };
 }

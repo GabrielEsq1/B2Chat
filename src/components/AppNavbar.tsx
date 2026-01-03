@@ -77,9 +77,9 @@ export default function AppNavbar() {
                         <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg shadow-md" />
                         <div className="flex flex-col">
                             <span className="text-xl font-bold text-gray-900 leading-none">B2BChat</span>
-                            <a href="https://creatiendas.com" target="_blank" rel="noopener noreferrer" className="text-[9px] text-gray-500 hover:text-blue-600 font-medium transition-colors">
+                            <Link href="/hub" className="text-[9px] text-gray-500 hover:text-blue-600 font-medium transition-colors">
                                 {t('ecosystem.seal')}
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
