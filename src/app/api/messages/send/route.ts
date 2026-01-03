@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendNewMessageNotification } from "@/lib/email";
+import { chatWithAI } from "@/lib/apis/huggingface";
 
 /**
  * POST /api/messages/send
@@ -88,10 +89,45 @@ export async function POST(req: NextRequest) {
             console.error('[SEND] Email failed:', emailErr);
         }
 
+        // 7. Handle AI Bot Response
+        let aiResponse = null;
+        const otherUserForBot = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
+
+        if (otherUserForBot?.isBot) {
+            try {
+                const history = await prisma.message.findMany({
+                    where: { conversationId },
+                    orderBy: { createdAt: 'desc' },
+                    take: 5
+                });
+                const historyTexts = history.reverse().map((m: any) => m.text);
+
+                const aiText = await chatWithAI(text, historyTexts);
+                if (aiText) {
+                    aiResponse = await prisma.message.create({
+                        data: {
+                            conversationId,
+                            senderUserId: otherUserForBot.id,
+                            text: aiText
+                        },
+                        include: { sender: { select: { id: true, name: true, avatar: true } } }
+                    });
+
+                    await prisma.conversation.update({
+                        where: { id: conversationId },
+                        data: { updatedAt: new Date() }
+                    });
+                }
+            } catch (aiError) {
+                console.error('[SEND] AI error:', aiError);
+            }
+        }
+
         // 7. Return
         return NextResponse.json({
             success: true,
             message,
+            aiResponse,
             emailSent
         });
 
