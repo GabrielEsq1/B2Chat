@@ -50,31 +50,31 @@ export default function HubPage() {
             title: "Creatiendas | Tiendas opensource via Whastapp",
             category: "Open Source SaaS",
             link: "https://www.behance.net/gallery/240789301/Creatiendas-Tiendas-opensource-via-Whastapp",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/1e952a240789301.Y3JvcCwxMzIxLDEwMzMsMCww.png"
+            image: "/images/projects/creatiendas.png"
         },
         {
             title: "Creadas El Shopify de WhatsApp",
             category: "E-commerce SaaS",
             link: "https://www.behance.net/gallery/240377601/Creadas-El-Shopify-de-WhatsApp-para-latinoamericanos",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/920c38240377601.Y3JvcCwxMTgzLDkyNiwzNjMsMA.png"
+            image: "/images/projects/creadas.png"
         },
         {
             title: "EcoGuard | Limpia Tu Ciudad",
             category: "Environmental Tech",
             link: "https://www.behance.net/gallery/240375557/EcoGuard-Limpia-Tu-Ciudad-Gana-Dinero-Real",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/9c3d6b240375557.Y3JvcCwxMDg3LDg1MSwzMzMsMA.png"
+            image: "/images/projects/ecoguard.png"
         },
         {
             title: "AirOil Recycler™",
             category: "Industrial Innovation",
             link: "https://www.behance.net/gallery/240080311/AirOil-Recycler-Recuperador-de-Hidrocarburos",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/a459f8240080311.Y3JvcCwxMzA5LDEwMjQsMTEzLDA.jpeg"
+            image: "/images/projects/airoil.png"
         },
         {
             title: "AGUAGEN: Energía Limpia",
             category: "Clean Tech",
             link: "https://www.behance.net/gallery/239946315/AGUAGEN-Energia-al-alcance-de-todos",
-            image: "https://mir-s3-cdn-cf.behance.net/projects/404/aec769239946315.Y3JvcCwxMDI0LDgwMCwwLDE4NQ.png"
+            image: "/images/projects/aguagen.png"
         },
         {
             title: "MADOCO XXI Ecommerce",
