@@ -1,9 +1,6 @@
 # Task List
 
 - [x] Analyze Socket.io implementation <!-- id: 0 -->
-# Task List
-
-- [x] Analyze Socket.io implementation <!-- id: 0 -->
     - [x] Check `src/pages/api/socket/io.ts`
     - [x] Check client-side socket connection (Provider/Hook)
     - [x] Verify message sending emits socket events
@@ -23,6 +20,19 @@
 # Feature Implementation
 
 - [x] Implement Admin Configuration Page (`/admin/configuracion`) <!-- id: 10 -->
+
+# New Features: Internationalization & Story Ads (2026 Launch)
+
+- [x] **Internationalization (i18n)**
+  - [x] Context & Switcher
+  - [x] Dictionaries (ES/EN)
+  - [x] Landing Page Refactor
+
+- [x] **Story Ads System**
+  - [x] Database Schema Updates (Stories + Payments)
+  - [x] Frontend Core (`StoryViewer`, `StoriesRail`)
+  - [x] Ad Creation Wizard v2 (i18n + Payment Proof)
+  - [x] Admin Review with Proof Viewer
 
 # Deployment & Handoff
 

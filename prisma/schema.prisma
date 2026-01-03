@@ -166,6 +166,7 @@ model Message {
   text           String
   attachmentUrl  String?
   readAt         DateTime?
+  isStarred      Boolean      @default(false)
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderUserId], references: [id])
@@ -193,6 +194,14 @@ model AdCampaign {
   conversions  Int          @default(0)
   startDate    DateTime?
   endDate      DateTime?
+  
+  // Story Ads & Payment Fields
+  type            String    @default("STORY") // STORY, FEED_POST
+  paymentStatus   String    @default("PENDING_PAYMENT") // PENDING_PAYMENT, PAIMENT_VERIFICATION, PAID, REJECTED
+  paymentMethod   String?   // NEQUI, WHATSAPP, MANUAL
+  paymentProofUrl String?
+  transactionRef  String?   // External transaction ID or Nequi Ref
+
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   company      Company      @relation(fields: [companyId], references: [id])
@@ -211,9 +220,12 @@ model AdCreative {
   ageRange         String?
   gender           String?
   location         String?
-  type             String     @default("IMAGE")
+  type             String     @default("IMAGE") // IMAGE, VIDEO
+  mediaType        String     @default("IMAGE") // Redundant but explicit for Story: IMAGE, VIDEO
   videoUrl         String?
   videoDuration    Int?
+  duration         Int        @default(5) // Duration in seconds (5s image, Ns video)
+  order            Int        @default(0) // Order in the story sequence
   isActive         Boolean    @default(true)
   approvalStatus   String     @default("PENDING")
   displayOrder     Int        @default(0)

@@ -53,7 +53,7 @@ function ChatContent() {
     if (!mounted) return null;
 
     return (
-        <div className="h-screen w-full bg-[#f0f2f5] overflow-hidden flex">
+        <div className="h-[calc(100vh-64px)] w-full bg-[#f0f2f5] overflow-hidden flex">
             <div className="w-full h-full flex flex-col md:flex-row relative">
                 {/* 1. LEFT: CHATS list (Full width if no selection, Sidebar if selection) */}
                 <div

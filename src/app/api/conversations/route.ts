@@ -20,6 +20,13 @@ export async function GET(req: NextRequest) {
                 OR: [
                     { userAId: session.user.id },
                     { userBId: session.user.id },
+                    {
+                        group: {
+                            members: {
+                                some: { userId: session.user.id }
+                            }
+                        }
+                    }
                 ],
             },
             include: {
@@ -41,6 +48,20 @@ export async function GET(req: NextRequest) {
                         isBot: true,
                     },
                 },
+                group: {
+                    include: {
+                        members: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 messages: {
                     orderBy: {
                         createdAt: "desc",
@@ -53,13 +74,32 @@ export async function GET(req: NextRequest) {
             },
         });
 
-        // Format conversations with other user info
-        const formattedConversations = conversations.map(conv => {
-            const otherUser = conv.userAId === session.user.id ? conv.userB : conv.userA;
+        // Format conversations with other user info or group info
+        const formattedConversations = conversations.map((conv: any) => {
+            const isGroup = conv.type === "GROUP";
             const lastMessage = conv.messages[0];
 
+            if (isGroup && conv.group) {
+                return {
+                    id: conv.id,
+                    type: "GROUP",
+                    name: conv.group.name,
+                    avatar: conv.group.avatar,
+                    memberCount: conv.group.members.length,
+                    lastMessage: lastMessage ? {
+                        text: lastMessage.text,
+                        createdAt: lastMessage.createdAt,
+                        isRead: lastMessage.readAt !== null,
+                    } : null,
+                    updatedAt: conv.updatedAt,
+                    group: conv.group,
+                };
+            }
+
+            const otherUser = conv.userAId === session.user.id ? conv.userB : conv.userA;
             return {
                 id: conv.id,
+                type: "USER_USER",
                 otherUser,
                 lastMessage: lastMessage ? {
                     text: lastMessage.text,
@@ -220,8 +260,14 @@ export async function DELETE(req: NextRequest) {
             );
         }
 
-        // Verify ownership/participation before deleting
-        // We delete only if user is part of the conversation
+        // 1. Delete all messages associated with these conversations first
+        await prisma.message.deleteMany({
+            where: {
+                conversationId: { in: conversationIds }
+            }
+        });
+
+        // 2. Delete the conversations themselves
         const result = await prisma.conversation.deleteMany({
             where: {
                 id: { in: conversationIds },

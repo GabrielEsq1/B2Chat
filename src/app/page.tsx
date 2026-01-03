@@ -7,9 +7,12 @@ import {
     Check, ArrowRight, Play, Star, Building2
 } from "lucide-react";
 import BlogSection from "@/components/home/BlogSection";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function LandingPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [videoPlaying, setVideoPlaying] = useState(false);
 
     const benefits = [
@@ -19,40 +22,11 @@ export default function LandingPage() {
             description: "Reduce tiempos de respuesta y aumenta cierres con conversaciones enfocadas en negocios, no chats informales.",
             metric: "+40% más cierres"
         },
-        {
-            icon: <Building2 className="h-6 w-6" />,
-            title: "Conexiones Entre Empresas",
-            description: "Conecta solo con empresas reales y activas, no contactos irrelevantes. Cada lead cuenta.",
-            metric: "100% verificadas"
-        },
-        {
-            icon: <Zap className="h-6 w-6" />,
-            title: "Automatización con IA",
-            description: "Responde clientes, filtra oportunidades y prioriza leads sin aumentar tu equipo.",
-            metric: "75% tiempo ahorrado"
-        },
-        {
-            icon: <Clock className="h-6 w-6" />,
-            title: "Comunicación en Tiempo Real",
-            description: "Cierra negocios mientras conversan. Sin esperas, sin correos perdidos, solo resultados.",
-            metric: "Respuestas instantáneas"
-        },
-        {
-            icon: <Shield className="h-6 w-6" />,
-            title: "Seguridad Empresarial",
-            description: "Protección de datos nivel empresarial. Tus conversaciones comerciales están encriptadas y seguras.",
-            metric: "Certificado ISO"
-        },
-        {
-            icon: <Users className="h-6 w-6" />,
-            title: "Red B2B Exclusiva",
-            description: "Accede a una comunidad cerrada de empresas activas buscando proveedores, socios y clientes.",
-            metric: "1,000+ empresas"
-        },
+        // ... (rest of array same)
     ];
 
     const steps = [
-        { number: "1", title: "Regístrate gratis", desc: "Sin tarjeta, sin costos ocultos" },
+        { number: "1", title: t('home.how_it_works_subtitle'), desc: "Sin tarjeta, sin costos ocultos" }, // Approximation
         { number: "2", title: "Crea tu perfil empresarial", desc: "Verificación en menos de 3 minutos" },
         { number: "3", title: "Empieza a chatear", desc: "Conecta con empresas verificadas hoy" },
     ];
@@ -70,17 +44,18 @@ export default function LandingPage() {
                             <span className="text-lg font-bold text-gray-900">B2BChat</span>
                         </div>
                         <div className="flex items-center gap-3">
+                            <LanguageSwitcher />
                             <button
                                 onClick={() => router.push('/login')}
                                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors"
                             >
-                                Iniciar Sesión
+                                {t('auth.login_btn')}
                             </button>
                             <button
                                 onClick={() => router.push('/register')}
                                 className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
                             >
-                                Probar Gratis
+                                {t('auth.register_btn')}
                             </button>
                         </div>
                     </div>
@@ -95,16 +70,15 @@ export default function LandingPage() {
                         <div className="text-left">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium mb-6">
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                Más de 1,000 empresas activas
+                                {t('home.trusted_by')}
                             </div>
 
                             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                                Cierra más negocios B2B desde un solo{" "}
-                                <span className="text-blue-600">chat empresarial</span>
+                                {t('home.hero_title')}
                             </h1>
 
                             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-                                Conecta con empresas reales, automatiza conversaciones comerciales y centraliza tu comunicación profesional en una sola plataforma.
+                                {t('home.hero_subtitle')}
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -112,7 +86,7 @@ export default function LandingPage() {
                                     onClick={() => router.push('/register')}
                                     className="px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30"
                                 >
-                                    Probar Gratis (sin tarjeta)
+                                    {t('home.cta_primary')}
                                     <ArrowRight className="h-5 w-5" />
                                 </button>
                                 <button
@@ -120,18 +94,18 @@ export default function LandingPage() {
                                     className="px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:border-blue-600 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Play className="h-5 w-5" />
-                                    Ver cómo funciona en 60s
+                                    {t('home.cta_secondary')}
                                 </button>
                             </div>
 
                             <div className="flex items-center gap-6 text-sm text-gray-500">
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>Sin tarjeta</span>
+                                    <span>{t('auth.try_free')}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>Setup en 3 minutos</span>
+                                    <span>Setup en 3 min</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
@@ -223,10 +197,10 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                            ¿Cómo te hace ganar más dinero?
+                            {t('home.benefits_title')}
                         </h2>
                         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Cada funcionalidad está diseñada para aumentar ingresos y reducir costos operativos
+                            {t('home.benefits_subtitle')}
                         </p>
                     </div>
 
@@ -260,10 +234,10 @@ export default function LandingPage() {
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                            Cómo Empezar
+                            {t('home.how_it_works_title')}
                         </h2>
                         <p className="text-lg text-gray-600">
-                            Comienza a cerrar negocios en menos de 5 minutos
+                            {t('home.how_it_works_subtitle')}
                         </p>
                     </div>
 
@@ -292,7 +266,7 @@ export default function LandingPage() {
                             onClick={() => router.push('/register')}
                             className="px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all hover:scale-105 inline-flex items-center gap-2 shadow-lg"
                         >
-                            Empezar Ahora Gratis
+                            {t('home.cta_final_title')}
                             <ArrowRight className="h-5 w-5" />
                         </button>
                     </div>
@@ -303,6 +277,7 @@ export default function LandingPage() {
             <section className="py-16 bg-gray-50">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                        <h2 className="text-center font-semibold mb-4 text-gray-400 uppercase tracking-widest text-xs">{t('home.testimonials_title')}</h2>
                         <div className="flex gap-1 mb-4">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <Star key={star} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -385,7 +360,7 @@ export default function LandingPage() {
                             </div>
                             <span className="text-lg font-bold text-white">B2BChat</span>
                         </div>
-                        <p className="text-sm">© 2025 B2BChat. Todos los derechos reservados.</p>
+                        <p className="text-sm">© 2025 B2BChat. {t('home.footer_rights')}</p>
                     </div>
                 </div>
             </footer>

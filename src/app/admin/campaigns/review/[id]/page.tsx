@@ -95,9 +95,9 @@ export default function CampaignReviewPage(props: { params: Promise<{ id: string
                         </div>
                     </div>
                     <div className={`rounded-full px-4 py-1 text-sm font-medium ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                            campaign.status === 'PENDING_PAYMENT' ? 'bg-blue-100 text-blue-700' :
-                                campaign.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                    'bg-yellow-100 text-yellow-700'
+                        campaign.status === 'PENDING_PAYMENT' ? 'bg-blue-100 text-blue-700' :
+                            campaign.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                'bg-yellow-100 text-yellow-700'
                         }`}>
                         {campaign.status}
                     </div>
@@ -225,6 +225,31 @@ export default function CampaignReviewPage(props: { params: Promise<{ id: string
                                 </div>
                             </div>
                         </div>
+
+                        {/* Payment Proof Card */}
+                        {campaign.paymentProofUrl && (
+                            <div className="rounded-xl bg-white p-6 shadow-sm border border-orange-200">
+                                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
+                                    <DollarSign className="h-5 w-5 text-orange-600" />
+                                    Comprobante de Pago
+                                </h2>
+                                <div className="space-y-2">
+                                    <img
+                                        src={campaign.paymentProofUrl}
+                                        alt="Comprobante"
+                                        className="w-full rounded-lg border border-gray-200 cursor-pointer hover:opacity-90"
+                                        onClick={() => window.open(campaign.paymentProofUrl, '_blank')}
+                                    />
+                                    <p className="text-xs text-center text-gray-500">Click para ampliar</p>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <span className="text-xs font-bold text-gray-700">Estado Pago:</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-medium">
+                                            {campaign.paymentStatus || 'Pendiente'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Admin Action Box */}
                         <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">
