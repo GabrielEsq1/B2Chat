@@ -226,7 +226,7 @@ export default function DashboardPage() {
                         </div>
                     ) : stores.length > 0 ? (
                         <a
-                            href={`https://creatiendas.com/stores/${stores[0].slug}`}
+                            href={`https://creatiendasgit1.vercel.app/stores/${stores[0].slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                         </a>
                     ) : (
                         <a
-                            href="https://creatiendas.com"
+                            href="https://creatiendasgit1.vercel.app"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group relative overflow-hidden"

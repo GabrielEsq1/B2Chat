@@ -78,8 +78,8 @@ export default function AppNavbar() {
                 <div className="flex items-center justify-between h-full">
                     {/* Logo */}
                     <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg shadow-md" />
-                        <span className="text-xl font-bold text-gray-900">B2BChat</span>
+                        <Image src="/gnosis_logo.png" alt="GNOSIS Logo" width={40} height={40} className="rounded-lg shadow-md" />
+                        <span className="text-xl font-bold text-gray-900">GNOSIS</span>
                     </Link>
 
                     {/* Desktop Navigation */}

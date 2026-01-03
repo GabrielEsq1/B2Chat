@@ -116,8 +116,8 @@ export const es: Translation = {
         },
     },
     ecosystem: {
-        seal: 'Parte de un Enterprise Hub empresarial en crecimiento',
-        title: 'Un Enterprise Hub en crecimiento',
+        seal: 'Parte de GNOSIS, ecosistema empresarial en crecimiento',
+        title: 'GNOSIS: Ecosistema en crecimiento',
         description: 'Conectamos comunicación, ventas y ejecución comercial en un solo ecosistema.',
         diagram: {
             step1: 'B2BChat genera conversaciones calificadas.',
