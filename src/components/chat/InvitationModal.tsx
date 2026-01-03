@@ -2,6 +2,7 @@
 
 import { X, Copy, Share2, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface InvitationModalProps {
     phone: string;
@@ -9,6 +10,7 @@ interface InvitationModalProps {
 }
 
 export default function InvitationModal({ phone, onClose }: InvitationModalProps) {
+    const { t } = useLanguage();
     const [copied, setCopied] = useState(false);
 
     if (!phone) return null;
@@ -22,15 +24,7 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
     };
 
     const handleShareWhatsApp = () => {
-        const message = encodeURIComponent(
-            `🎉 ¡Únete a B2BChat!\n\n` +
-            `Te invito a conectar en B2BChat, la plataforma de mensajería profesional para empresas B2B.\n\n` +
-            `✨ Beneficios:\n` +
-            `• Chat empresarial seguro\n` +
-            `• Networking profesional\n` +
-            `• Publicidad dirigida\n\n` +
-            `🔗 Regístrate aquí: ${inviteLink}`
-        );
+        const message = encodeURIComponent(t('chat.modals.invitation.whatsapp_message', { link: inviteLink }));
         window.open(`https://wa.me/${phone.replace(/\+/g, '')}?text=${message}`, '_blank');
     };
 
@@ -43,12 +37,12 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <Share2 className="h-5 w-5 text-blue-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900">Invitar Contacto</h3>
+                        <h3 className="text-xl font-bold text-gray-900">{t('chat.modals.invitation.title')}</h3>
                     </div>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
-                        title="Cerrar"
+                        title={t('common.close', { defaultValue: 'Cerrar' })}
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -59,17 +53,17 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                     {/* Info */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <p className="text-sm text-blue-900">
-                            <strong>{phone}</strong> no está registrado en B2BChat.
+                            <strong>{phone}</strong> {t('chat.modals.invitation.not_registered')}
                         </p>
                         <p className="text-sm text-blue-700 mt-2">
-                            ¡Invítalo a unirse y empieza a conectar! 🚀
+                            {t('chat.modals.invitation.cta', { defaultValue: '¡Invítalo a unirse y empieza a conectar! 🚀' })}
                         </p>
                     </div>
 
                     {/* Link */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Link de Invitación
+                            {t('chat.modals.invitation.link_label', { defaultValue: 'Link de Invitación' })}
                         </label>
                         <div className="flex gap-2">
                             <input
@@ -84,7 +78,7 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
-                                title="Copiar link"
+                                title={t('chat.modals.invitation.copy_title', { defaultValue: 'Copiar link' })}
                             >
                                 {copied ? (
                                     <CheckCircle className="h-5 w-5" />
@@ -95,7 +89,7 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                         </div>
                         {copied && (
                             <p className="text-sm text-green-600 mt-2 animate-fadeIn">
-                                ✓ Link copiado al portapapeles
+                                {t('chat.modals.invitation.copied_success', { defaultValue: '✓ Link copiado al portapapeles' })}
                             </p>
                         )}
                     </div>
@@ -106,14 +100,14 @@ export default function InvitationModal({ phone, onClose }: InvitationModalProps
                             onClick={onClose}
                             className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                            Cancelar
+                            {t('common.cancel')}
                         </button>
                         <button
                             onClick={handleShareWhatsApp}
                             className="flex-1 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                         >
                             <Share2 className="h-4 w-4" />
-                            Enviar por WhatsApp
+                            {t('chat.window.whatsapp.title')}
                         </button>
                     </div>
                 </div>

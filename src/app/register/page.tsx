@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, User, Phone, Lock, Building2, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -24,7 +26,7 @@ export default function RegisterPage() {
         setError("");
 
         if (formData.password !== formData.confirmPassword) {
-            setError("Las contraseñas no coinciden");
+            setError(t('auth.errors.passwords_mismatch'));
             setLoading(false);
             return;
         }
@@ -45,16 +47,16 @@ export default function RegisterPage() {
             const data = await res.json();
 
             if (!data.success) {
-                setError(data.error || "Error al registrarse");
+                setError(data.error || t('auth.errors.generic'));
                 setLoading(false);
             } else {
-                setSuccess("¡Cuenta creada correctamente! Redirigiendo al login...");
+                setSuccess(t('auth.success.register_redirect'));
                 setTimeout(() => {
                     router.push("/login?registered=true");
                 }, 1500);
             }
         } catch (err) {
-            setError("Ocurrió un error de conexión");
+            setError(t('auth.errors.connection'));
             setLoading(false);
         }
     };
@@ -65,12 +67,12 @@ export default function RegisterPage() {
                 <div className="p-8">
                     <div className="text-left mb-6">
                         <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
-                            ← Volver al inicio
+                            ← {t('auth.back_to_home', { defaultValue: 'Volver al inicio' })}
                         </Link>
                     </div>
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Crear Cuenta</h1>
-                        <p className="text-gray-600">Únete a B2Chat y escala tu negocio</p>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('auth.register_title')}</h1>
+                        <p className="text-gray-600">{t('auth.register_subtitle')}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
@@ -89,28 +91,28 @@ export default function RegisterPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.name_label')}</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                     <input
                                         type="text"
                                         required
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        placeholder="Tu nombre"
+                                        placeholder={t('auth.name_label')}
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.company_label')}</label>
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                     <input
                                         type="text"
                                         required
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        placeholder="Nombre empresa"
+                                        placeholder={t('auth.company_placeholder')}
                                         value={formData.companyName}
                                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                                     />
@@ -119,14 +121,14 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.phone_label')}</label>
                             <div className="relative">
                                 <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <input
                                     type="tel"
                                     required
                                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                    placeholder="+57 300 ..."
+                                    placeholder={t('auth.phone_placeholder')}
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 />
@@ -134,14 +136,14 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.password_label')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <input
                                     type="password"
                                     required
                                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                    placeholder="Diséñala segura"
+                                    placeholder={t('auth.password_placeholder')}
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 />
@@ -149,14 +151,14 @@ export default function RegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.confirm_password_label')}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                                 <input
                                     type="password"
                                     required
                                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-medium placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                    placeholder="Repite la contraseña"
+                                    placeholder={t('auth.confirm_password_placeholder')}
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                 />
@@ -168,15 +170,15 @@ export default function RegisterPage() {
                             disabled={loading}
                             className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Crear Cuenta"}
+                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t('auth.register_btn')}
                         </button>
                     </form>
 
                     <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <p className="text-gray-500 text-xs mb-4">¿Ya tienes cuenta? <Link href="/login" className="text-green-600 hover:text-green-800 font-bold">Inicia Sesión</Link></p>
+                        <p className="text-gray-500 text-xs mb-4">{t('auth.has_account')} <Link href="/login" className="text-green-600 hover:text-green-800 font-bold">{t('auth.login_here')}</Link></p>
                         <Link href="/hub" className="inline-flex items-center gap-2 text-[10px] text-gray-400 hover:text-green-600 font-medium transition-colors">
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                            Parte de GNOSIS
+                            {t('home.footer_mockup_seal_gnosis', { defaultValue: 'Parte de GNOSIS' })}
                         </Link>
                     </div>
                 </div>

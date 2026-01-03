@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Search, X, Building2, MessageSquare } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Company {
     id: string;
@@ -22,6 +23,7 @@ interface GlobalCompanySearchProps {
 }
 
 export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalCompanySearchProps) {
+    const { t } = useLanguage();
     const [searchQuery, setSearchQuery] = useState("");
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(false);
@@ -64,14 +66,14 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                             <Building2 className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-white">Buscar Empresas</h3>
-                            <p className="text-sm text-blue-100">Encuentra empresas de todo el mundo</p>
+                            <h3 className="text-xl font-bold text-white">{t('chat.sidebar.global_network')}</h3>
+                            <p className="text-sm text-blue-100">{t('chat.sidebar.global_search_description', { defaultValue: 'Encuentra empresas de todo el mundo' })}</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
-                        title="Cerrar"
+                        title={t('common.close', { defaultValue: 'Cerrar' })}
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -84,7 +86,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Buscar por nombre de empresa..."
+                                placeholder={t('chat.sidebar.search_placeholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={handleKeyPress}
@@ -97,7 +99,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                             disabled={loading || !searchQuery.trim()}
                             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium w-full md:w-auto"
                         >
-                            {loading ? "Buscando..." : "Buscar"}
+                            {loading ? t('common.loading') : t('chat.sidebar.search_placeholder').split('...')[0]}
                         </button>
                     </div>
                 </div>
@@ -107,27 +109,21 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="text-gray-600 mt-4">Buscando empresas...</p>
+                            <p className="text-gray-600 mt-4">{t('chat.sidebar.scanning', { defaultValue: 'Buscando empresas...' })}</p>
                         </div>
                     ) : !searched ? (
                         <div className="text-center py-12">
                             <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                             <h4 className="text-lg font-medium text-gray-900 mb-2">
-                                Busca empresas globalmente
+                                {t('chat.sidebar.global_search_description')}
                             </h4>
-                            <p className="text-gray-600">
-                                Ingresa el nombre de una empresa para comenzar
-                            </p>
                         </div>
                     ) : companies.length === 0 ? (
                         <div className="text-center py-12">
                             <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                             <h4 className="text-lg font-medium text-gray-900 mb-2">
-                                No se encontraron empresas
+                                {t('chat.sidebar.no_global_results')}
                             </h4>
-                            <p className="text-gray-600">
-                                Intenta con otro término de búsqueda
-                            </p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -153,7 +149,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                                                         </h4>
                                                         {contact && (
                                                             <p className="text-sm text-gray-600">
-                                                                {contact.industry || "Industria no especificada"}
+                                                                {contact.industry || t('common.optional', { defaultValue: 'Industria no especificada' })}
                                                             </p>
                                                         )}
                                                     </div>
@@ -183,7 +179,7 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 flex-shrink-0"
                                                 >
                                                     <MessageSquare className="h-4 w-4" />
-                                                    Chatear
+                                                    {t('chat.sidebar.new_chat')}
                                                 </button>
                                             )}
                                         </div>

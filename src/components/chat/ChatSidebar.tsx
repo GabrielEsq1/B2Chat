@@ -8,6 +8,7 @@ import InvitationModal from "./InvitationModal";
 import CreateGroupModal from "./CreateGroupModal";
 import GlobalCompanySearch from "./GlobalCompanySearch";
 import FastAdsBar from "./FastAdsBar";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Conversation {
     id: string;
@@ -38,6 +39,7 @@ interface ChatSidebarProps {
 
 export default function ChatSidebar({ onSelectConversation, selectedId, isFullWidth = false }: ChatSidebarProps) {
     const router = useRouter();
+    const { t } = useLanguage();
     const { data: session } = useSession();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loading, setLoading] = useState(true);
@@ -131,7 +133,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     ...(compData.externalResults || [])
                 ].map((u: any) => ({
                     ...u,
-                    companyName: u.company || u.companyName || (u.isLocal ? "Empresa B2Chat" : u.source),
+                    companyName: u.company || u.companyName || (u.isLocal ? t('chat.sidebar.independent_user') : u.source),
                     isGlobal: true,
                     // Ensure we have a consistent ID format
                     id: u.id,
@@ -229,7 +231,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             }
         } catch (error) {
             console.error('Error searching contact:', error);
-            alert('Error al buscar contacto');
+            alert(t('common.error'));
         }
     };
 
@@ -290,7 +292,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             const data = await res.json();
 
             if (data.group) {
-                alert(`✅ Grupo "${name}" creado exitosamente`);
+                alert(`✅ ${t('chat.sidebar.group_created_success', { defaultValue: `Grupo "${name}" creado exitosamente` })}`);
                 loadConversations();
             }
         } catch (error) {
@@ -313,13 +315,13 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 setSelectedChats([]);
                 setIsSelectionMode(false);
                 loadConversations();
-                alert('Conversaciones eliminadas con éxito');
+                alert(t('chat.sidebar.delete_success'));
             } else {
-                alert('Error al eliminar conversaciones');
+                alert(t('common.error'));
             }
         } catch (error) {
             console.error('Error deleting conversations:', error);
-            alert('Error al eliminar conversaciones');
+            alert(t('common.error'));
         }
     };
 
@@ -337,7 +339,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             loadConversations();
         } catch (error) {
             console.error('Error updating conversations:', error);
-            alert('Error al actualizar conversaciones');
+            alert(t('common.error'));
         }
     };
 
@@ -347,7 +349,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             .map(c => c.otherUser!.id);
 
         if (userIds.length === 0) {
-            alert('Selecciona chats individuales para crear un grupo');
+            alert(t('chat.sidebar.select_individual_chats_error', { defaultValue: 'Selecciona chats individuales para crear un grupo' }));
             return;
         }
 
@@ -388,14 +390,14 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     <button
                         onClick={() => router.push('/dashboard')}
                         className="rounded-full p-2 hover:bg-gray-200 text-gray-600"
-                        title="Volver al dashboard"
+                        title={t('common.back')}
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </button>
                     <button
                         onClick={() => setShowProfileEdit(true)}
                         className="flex items-center gap-2 hover:bg-gray-100 rounded-lg p-1 transition-colors"
-                        title="Editar perfil"
+                        title={t('chat.sidebar.my_profile')}
                     >
                         {(session?.user as any)?.avatar || (session?.user as any)?.profilePicture ? (
                             <img
@@ -418,8 +420,8 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     <button
                         onClick={() => setShowNewChat(!showNewChat)}
                         className="rounded-full p-2 hover:bg-gray-200 text-blue-600"
-                        aria-label="Nuevo chat"
-                        title="Nuevo chat"
+                        aria-label={t('chat.sidebar.new_chat')}
+                        title={t('chat.sidebar.new_chat')}
                     >
                         <Plus className="h-5 w-5" />
                     </button>
@@ -427,7 +429,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         <button
                             onClick={() => setShowOptionsMenu(!showOptionsMenu)}
                             className="rounded-full p-2 hover:bg-gray-200 text-gray-600"
-                            aria-label="Opciones"
+                            aria-label={t('chat.window.options.more')}
                         >
                             <MoreVertical className="h-5 w-5" />
                         </button>
@@ -444,7 +446,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
                                     >
                                         <Users className="h-4 w-4 text-gray-400" />
-                                        Nuevo grupo
+                                        {t('chat.sidebar.new_group')}
                                     </button>
                                     <button
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
@@ -454,7 +456,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         }}
                                     >
                                         <User className="h-4 w-4 text-gray-400" />
-                                        Mi Perfil
+                                        {t('chat.sidebar.my_profile')}
                                     </button>
                                     <button
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
@@ -464,7 +466,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         }}
                                     >
                                         <Star className="h-4 w-4 text-gray-400" />
-                                        Mensajes destacados
+                                        {t('chat.sidebar.starred_messages_title')}
                                     </button>
                                     <button
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
@@ -474,7 +476,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                             setShowOptionsMenu(false);
                                         }}
                                     >
-                                        {isSelectionMode ? "Cancelar selección" : "Seleccionar chats"}
+                                        {isSelectionMode ? t('chat.sidebar.cancel_selection') : t('chat.sidebar.select_chats')}
                                     </button>
                                     <div className="border-t border-gray-200 my-1"></div>
                                     <button
@@ -484,7 +486,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                             window.location.href = '/dashboard/profile';
                                         }}
                                     >
-                                        Configuración
+                                        {t('chat.sidebar.settings')}
                                     </button>
                                     <button
                                         onClick={() => {
@@ -493,7 +495,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         }}
                                         className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
                                     >
-                                        Cerrar sesión
+                                        {t('chat.sidebar.sign_out')}
                                     </button>
                                 </div>
                             </div>
@@ -509,7 +511,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
                         <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl font-bold text-gray-900">Editar Perfil</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{t('chat.modals.profile.title')}</h3>
                                 <button onClick={() => setShowProfileEdit(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                     <X className="h-5 w-5 text-gray-400" />
                                 </button>
@@ -527,18 +529,18 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                     </div>
                                 </div>
                                 <div>
-                                    <label htmlFor="edit-name" className="block text-sm font-bold text-gray-700 mb-1.5">Nombre Completo</label>
+                                    <label htmlFor="edit-name" className="block text-sm font-bold text-gray-700 mb-1.5">{t('chat.modals.profile.name_label')}</label>
                                     <input
                                         id="edit-name"
                                         type="text"
                                         className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-gray-50"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
-                                        placeholder="Tu nombre"
+                                        placeholder={t('chat.modals.profile.name_label')}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Teléfono (No editable)</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">{t('chat.modals.profile.phone_label')}</label>
                                     <input
                                         type="tel"
                                         className="w-full rounded-xl border border-gray-200 px-4 py-3 bg-gray-100 text-gray-500 cursor-not-allowed"
@@ -552,7 +554,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                     onClick={() => setShowProfileEdit(false)}
                                     className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95"
                                 >
-                                    Cancelar
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     onClick={async () => {
@@ -564,12 +566,12 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                 body: JSON.stringify({ name: editName })
                                             });
                                             if (res.ok) {
-                                                alert('Perfil actualizado correctamente');
+                                                alert(t('chat.modals.profile.success'));
                                                 setShowProfileEdit(false);
                                                 window.location.reload();
                                             }
                                         } catch (error) {
-                                            alert('Error al actualizar perfil');
+                                            alert(t('common.error'));
                                         } finally {
                                             setSavingProfile(false);
                                         }
@@ -577,7 +579,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                     disabled={savingProfile}
                                     className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:bg-gray-400 transition-all shadow-lg shadow-blue-200 active:scale-95"
                                 >
-                                    {savingProfile ? 'Guardando...' : 'Guardar Cambios'}
+                                    {savingProfile ? t('common.loading') : t('common.save')}
                                 </button>
                             </div>
                         </div>
@@ -595,7 +597,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                     <div className="p-2 bg-yellow-400/10 rounded-xl">
                                         <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Mensajes Destacados</h3>
+                                    <h3 className="text-xl font-bold text-gray-900">{t('chat.sidebar.starred_messages_title')}</h3>
                                 </div>
                                 <button
                                     onClick={() => setShowStarredMessages(false)}
@@ -610,9 +612,9 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <Star className="h-10 w-10 text-gray-200" />
                                         </div>
-                                        <p className="text-lg font-semibold text-gray-400">No hay mensajes destacados</p>
+                                        <p className="text-lg font-semibold text-gray-400">{t('chat.sidebar.no_starred_messages', { defaultValue: 'No hay mensajes destacados' })}</p>
                                         <p className="text-xs mt-2 px-10">
-                                            Tus mensajes importantes aparecerán aquí para que puedas encontrarlos fácilmente.
+                                            {t('chat.sidebar.starred_hint', { defaultValue: 'Tus mensajes importantes aparecerán aquí para que puedas encontrarlos fácilmente.' })}
                                         </p>
                                     </div>
                                 ) : (
@@ -620,7 +622,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         {starredMessagesList.map((msg) => (
                                             <div key={msg.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:border-yellow-200 transition-colors">
                                                 <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    <span>Chat con {msg.otherUserName}</span>
+                                                    <span>{t('chat.sidebar.chat_with', { defaultValue: 'Chat con' })} {msg.otherUserName}</span>
                                                     <span>•</span>
                                                     <span>{new Date(msg.createdAt).toLocaleDateString()}</span>
                                                 </div>
@@ -668,7 +670,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                 {selectedChats.length}
                             </span>
                             <span className="font-bold text-sm tracking-tight">
-                                {selectedChats.length === 1 ? 'Conversación seleccionada' : 'Conversaciones seleccionadas'}
+                                {selectedChats.length === 1 ? t('chat.selection_count_single', { defaultValue: 'Conversación seleccionada' }) : t('chat.sidebar.selection_count', { count: selectedChats.length })}
                             </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -678,28 +680,28 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         onClick={() => handleBatchUpdate({ isPinned: true })}
                                         className="flex items-center gap-2 bg-blue-500 hover:bg-blue-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-blue-400"
                                     >
-                                        FIJAR
+                                        {t('chat.actions.pin')}
                                     </button>
                                     <button
                                         onClick={() => handleBatchUpdate({ isFavorite: true })}
                                         className="flex items-center gap-1 bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-yellow-400"
                                     >
                                         <Star className="h-4 w-4" />
-                                        DESTACAR
+                                        {t('chat.actions.favorite')}
                                     </button>
                                     <button
                                         onClick={handleBatchCreateGroup}
                                         className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-indigo-400"
                                     >
                                         <Plus className="h-4 w-4" />
-                                        GRUPO
+                                        {t('chat.sidebar.new_group')}
                                     </button>
                                     <button
                                         onClick={handleDeleteConversations}
                                         className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl text-[10px] font-black transition-all shadow-lg active:scale-95 border border-red-400"
                                     >
                                         <Trash2 className="h-4 w-4" />
-                                        ELIMINAR
+                                        {t('chat.actions.delete')}
                                     </button>
                                 </>
                             )}
@@ -710,7 +712,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                 }}
                                 className="text-sm font-bold hover:underline opacity-80"
                             >
-                                Cancelar
+                                {t('common.cancel')}
                             </button>
                         </div>
                     </div>
@@ -728,7 +730,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                     <input
                         type="text"
-                        placeholder="Busca tus chats o explora el marketplace..."
+                        placeholder={t('chat.sidebar.search_placeholder')}
                         className="w-full rounded-2xl border border-gray-100 bg-gray-50 py-3.5 pl-12 pr-4 text-sm font-bold text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all shadow-inner"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -749,7 +751,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cargando conversaciones...</p>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('common.loading')}</p>
                     </div>
                 ) : (
                     <>
@@ -757,7 +759,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         {showNewChat && (
                             <div className="mb-6 rounded-3xl bg-blue-50/50 p-4 border-2 border-dashed border-blue-200 animate-in zoom-in-95 duration-200">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest">Nuevo Chat Directo</h3>
+                                    <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest">{t('chat.sidebar.new_chat')}</h3>
                                     <button onClick={() => setShowNewChat(false)} className="text-blue-400 hover:text-blue-600">
                                         <X className="h-4 w-4" />
                                     </button>
@@ -767,7 +769,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" />
                                         <input
                                             type="text"
-                                            placeholder="Nombre, email o celular del contacto..."
+                                            placeholder={t('chat.sidebar.search_placeholder')}
                                             className="w-full rounded-2xl border-2 border-blue-100 bg-white py-3 pl-11 pr-4 text-sm font-bold text-gray-900 focus:border-blue-500 outline-none shadow-sm"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -778,7 +780,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         onClick={handleSearchContact}
                                         className="rounded-2xl bg-blue-600 py-3 text-sm font-black text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
                                     >
-                                        BUSCAR EN TODA LA RED
+                                        {t('chat.sidebar.global_network')}
                                     </button>
                                 </div>
 
@@ -795,7 +797,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-gray-900 truncate">{user.name}</p>
-                                                    <p className="text-[10px] text-blue-500 font-bold uppercase truncate">{user.company?.name || 'Usuario B2BChat'}</p>
+                                                    <p className="text-[10px] text-blue-500 font-bold uppercase truncate">{user.company?.name || t('chat.sidebar.independent_user')}</p>
                                                 </div>
                                                 <div className="p-2 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                                     <Plus className="h-5 w-5" />
@@ -807,10 +809,9 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                             </div>
                         )}
 
-                        {/* Local Conversations (Current Chats) */}
                         <div className="mt-2">
                             {searchTerm === "" && !showNewChat && (
-                                <h4 className="px-2 mb-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Chats Recientes</h4>
+                                <h4 className="px-2 mb-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('chat.sidebar.recent_chats')}</h4>
                             )}
                             <div className={`${isFullWidth && searchTerm === "" ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-2'}`}>
                                 {filteredConversations.map((conv) => (
@@ -863,10 +864,10 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between gap-2 mb-1">
                                                     <h3 className={`font-black tracking-tight truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900 text-lg'}`}>
-                                                        {conv.type === "GROUP" ? conv.name : (conv.otherUser?.name || 'Sin nombre')}
+                                                        {conv.type === "GROUP" ? conv.name : (conv.otherUser?.name || t('chat.sidebar.no_name', { defaultValue: 'Sin nombre' }))}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
-                                                        {conv.isPinned && <span title="Fijado" className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
+                                                        {conv.isPinned && <span title={t('chat.actions.pin')} className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
                                                         {conv.isFavorite && <Star className={`h-3 w-3 fill-yellow-400 text-yellow-500 shadow-sm`} />}
                                                         {conv.lastMessageAt && (
                                                             <span className={`text-[10px] font-black uppercase opacity-60 shrink-0 ${selectedId === conv.id ? 'text-white' : 'text-gray-400'}`}>
@@ -877,7 +878,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                 </div>
                                                 <div className="flex items-center justify-between gap-2">
                                                     <p className={`text-sm truncate font-bold leading-tight opacity-80 ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>
-                                                        {conv.type === "GROUP" && !conv.lastMessage ? `Grupo • ${conv.memberCount} miembros` : (conv.lastMessage || 'Empieza la conversación...')}
+                                                        {conv.type === "GROUP" && !conv.lastMessage ? `${t('chat.window.member')} • ${conv.memberCount} ${t('chat.sidebar.group_suffix')}` : (conv.lastMessage || t('chat.sidebar.empty_hint'))}
                                                     </p>
                                                     {conv.unreadCount !== undefined && conv.unreadCount > 0 && (
                                                         <span className="flex h-6 w-6 items-center justify-center rounded-xl bg-red-500 text-[10px] font-black text-white shadow-lg ring-2 ring-white animate-bounce-slow">
@@ -897,17 +898,17 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                             <div className="mt-8">
                                 <h4 className="px-2 mb-4 text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] flex items-center gap-2">
                                     <div className="h-1 flex-1 bg-blue-100"></div>
-                                    Red Global B2BChat (3000+)
+                                    {t('chat.sidebar.global_network')}
                                     <div className="h-1 flex-1 bg-blue-100"></div>
                                 </h4>
                                 {isSearchingGlobal ? (
                                     <div className="flex items-center justify-center py-10 gap-2">
                                         <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                                        <span className="text-xs font-bold text-gray-400">Escaneando base de datos...</span>
+                                        <span className="text-xs font-bold text-gray-400">{t('chat.sidebar.scanning')}</span>
                                     </div>
                                 ) : globalResults.length === 0 ? (
                                     <div className="px-2 py-6 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                                        <p className="text-xs font-bold text-gray-400 italic">No se encontraron más resultados globales</p>
+                                        <p className="text-xs font-bold text-gray-400 italic">{t('chat.sidebar.no_global_results')}</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -923,7 +924,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-black text-gray-900 leading-none mb-1">{user.name}</p>
                                                     <p className="text-[10px] font-black text-indigo-500 uppercase tracking-wider">
-                                                        {user.companyName || 'Usuario Independiente'}
+                                                        {user.companyName || t('chat.sidebar.independent_user')}
                                                     </p>
                                                 </div>
                                                 <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">

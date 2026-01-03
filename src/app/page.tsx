@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
     MessageSquare, Users, Zap, TrendingUp, Clock, Shield,
     Check, ArrowRight, Play, Star, Building2, Megaphone,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight, ArrowDown
 } from "lucide-react";
 import { useEffect } from "react";
 import BlogSection from "@/components/home/BlogSection";
@@ -18,95 +18,19 @@ export default function LandingPage() {
     const { t } = useLanguage();
     const [videoPlaying, setVideoPlaying] = useState(false);
 
-    const benefits = [
-        {
-            icon: <TrendingUp className="h-6 w-6" />,
-            title: "Chat Empresarial Inteligente",
-            description: "Reduce tiempos de respuesta y aumenta cierres con conversaciones enfocadas en negocios, no chats informales.",
-            metric: "+40% más cierres"
-        },
-        {
-            icon: <Users className="h-6 w-6" />,
-            title: "Conexiones Verificadas",
-            description: "Interactúa solo con empresas reales y perfiles validados por nuestra red profesional.",
-            metric: "100% Verificado"
-        },
-        {
-            icon: <Zap className="h-6 w-6" />,
-            title: "Automatización con IA",
-            description: "Tu asistente inteligente trabaja 24/7 respondiendo dudas y pre-calificando leads comerciales.",
-            metric: "Atención 24/7"
-        },
-        {
-            icon: <Megaphone className="h-6 w-6" />,
-            title: "Gestor de Anuncios B2B",
-            description: "Publica historias empresariales y llega directamente a los tomadores de decisión de tu industria.",
-            metric: "5x más alcance"
-        },
-        {
-            icon: <Building2 className="h-6 w-6" />,
-            title: "Integración Ecosistema",
-            description: "Sincroniza tu tienda y productos para cerrar ventas directamente desde el flujo del chat.",
-            metric: "Venta Directa"
-        },
-        {
-            icon: <Shield className="h-6 w-6" />,
-            title: "Seguridad y Privacidad",
-            description: "Tus conversaciones comerciales están cifradas y protegidas con estándares de nivel empresarial.",
-            metric: "Datos Protegidos"
-        }
-    ];
+    const benefits = (t('home.benefits') as unknown as any[]).map((b, i) => ({
+        ...b,
+        icon: [
+            <TrendingUp className="h-6 w-6" />,
+            <Users className="h-6 w-6" />,
+            <Zap className="h-6 w-6" />,
+            <Megaphone className="h-6 w-6" />,
+            <Building2 className="h-6 w-6" />,
+            <Shield className="h-6 w-6" />
+        ][i]
+    }));
 
-    const testimonials = [
-        {
-            name: "María Rodríguez",
-            role: "CEO, InnovateTech Colombia",
-            text: "Desde que usamos B2BChat, nuestras conversaciones con proveedores se cerraron 40% más rápido. La IA filtra los leads reales y podemos enfocarnos solo en oportunidades que generan ingresos.",
-            avatar: "MR"
-        },
-        {
-            name: "Juan Carlos Pérez",
-            role: "Director Comercial, Maquinaria Norte",
-            text: "La integración con CreaTiendas nos ha permitido vender repuestos directamente por el chat. Es la herramienta que nos faltaba para digitalizar nuestra relación con minoristas.",
-            avatar: "JP"
-        },
-        {
-            name: "Elena Gómez",
-            role: "Fundadora, BioTextiles",
-            text: "Descubrir proveedores verificados en la plataforma nos dio la seguridad que necesitábamos para expandir nuestra cadena de suministro nacional.",
-            avatar: "EG"
-        },
-        {
-            name: "Ricardo Silva",
-            role: "Gerente, Logística Global",
-            text: "El gestor de anuncios es increíble. Publicamos una historia sobre nuestro nuevo servicio de carga y en 24 horas teníamos 10 empresas interesadas chateando con nosotros.",
-            avatar: "RS"
-        },
-        {
-            name: "Sofia Mendez",
-            role: "Marketing, AgroDigital",
-            text: "Lo que más nos gusta es que es un entorno profesional. No hay spam, solo empresas que realmente quieren hacer negocios. La productividad subió un 50%.",
-            avatar: "SM"
-        },
-        {
-            name: "Carlos Ruiz",
-            role: "Gerente de Operaciones, MetalForma",
-            text: "El tiempo que ahorramos filtrando leads con la IA de B2BChat nos ha permitido duplicar nuestra capacidad de atención al cliente sin contratar más personal.",
-            avatar: "CR"
-        },
-        {
-            name: "Ana Milena",
-            role: "Directora de Compras, RetailPlus",
-            text: "Encontrar proveedores confiables solía tomarnos semanas. Ahora, con los perfiles verificados, cerramos acuerdos en días con total seguridad.",
-            avatar: "AM"
-        },
-        {
-            name: "Fernando Soto",
-            role: "Socio Fundador, TechDist",
-            text: "B2BChat es el LinkedIn de las negociaciones en tiempo real. Es directo, eficiente y las herramientas de monetización son muy justas para el valor que entregan.",
-            avatar: "FS"
-        }
-    ];
+    const testimonials = t('home.testimonials') as unknown as any[];
 
     const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
@@ -121,16 +45,31 @@ export default function LandingPage() {
     const prevTestimonial = () => setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
 
-    const steps = [
-        { number: "1", title: t('home.how_it_works_subtitle'), desc: "Sin tarjeta, sin costos ocultos" }, // Approximation
-        { number: "2", title: "Crea tu perfil empresarial", desc: "Verificación en menos de 3 minutos" },
-        { number: "3", title: "Empieza a chatear", desc: "Conecta con empresas verificadas hoy" },
-    ];
+    const steps = (t('home.steps') as unknown as any[]).map((s, i) => ({
+        ...s,
+        number: (i + 1).toString()
+    }));
 
     return (
         <div className="min-h-screen bg-white">
+            {/* Navigation Overlay (Booking Banner) */}
+            <div className="bg-gray-50 py-2 border-b border-gray-100 hidden sm:block">
+                <div className="max-w-7xl mx-auto px-4 flex justify-center">
+                    <button
+                        onClick={() => window.open('https://meet.brevo.com/gabriel-esquivia', '_blank')}
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all group"
+                    >
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t('home.booking_banner')}</span>
+                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                            <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-white" />
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             {/* Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+            <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center gap-2">
@@ -164,7 +103,7 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section - ABOVE THE FOLD */}
-            <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white">
+            <section className="pt-20 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 to-white">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left: Value Prop */}
@@ -202,15 +141,15 @@ export default function LandingPage() {
                             <div className="flex items-center gap-6 text-sm text-gray-500">
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>{t('auth.try_free')}</span>
+                                    <span>{t('home.hero_check1')}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>Setup en 3 min</span>
+                                    <span>{t('home.hero_check2')}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Check className="h-4 w-4 text-green-600" />
-                                    <span>Sin spam</span>
+                                    <span>{t('home.hero_check3')}</span>
                                 </div>
                             </div>
                         </div>
@@ -231,10 +170,10 @@ export default function LandingPage() {
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-semibold text-gray-900">TechCorp Solutions</h3>
                                                 <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                                                    ✓ Verificada
+                                                    ✓ {t('home.mockup.verified')}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-500">Software Development</p>
+                                            <p className="text-xs text-gray-500">{t('home.mockup.industry')}</p>
                                         </div>
                                     </div>
 
@@ -242,29 +181,29 @@ export default function LandingPage() {
                                     <div className="flex-1 py-4 space-y-4">
                                         <div className="flex gap-2">
                                             <div className="bg-white rounded-lg px-4 py-2 shadow-sm max-w-[80%]">
-                                                <p className="text-sm text-gray-700">Hola, vimos tu perfil. ¿Tienes disponibilidad para un proyecto de desarrollo?</p>
+                                                <p className="text-sm text-gray-700">{t('home.mockup.msg1')}</p>
                                                 <span className="text-xs text-gray-400 mt-1 block">10:23 AM</span>
                                             </div>
                                         </div>
                                         <div className="flex gap-2 justify-end">
                                             <div className="bg-blue-600 text-white rounded-lg px-4 py-2 shadow-sm max-w-[80%]">
-                                                <p className="text-sm">¡Claro! Nos especializamos en soluciones B2B. ¿Qué necesitas?</p>
+                                                <p className="text-sm">{t('home.mockup.msg2')}</p>
                                                 <span className="text-xs text-blue-100 mt-1 block">10:24 AM</span>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
                                             <div className="bg-white rounded-lg px-4 py-2 shadow-sm max-w-[80%] relative">
                                                 <div className="absolute -top-2 -right-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">
-                                                    🤖 IA
+                                                    🤖 {t('home.mockup.ai_tag')}
                                                 </div>
-                                                <p className="text-sm text-gray-700">Necesitamos integrar un CRM...</p>
-                                                <span className="text-xs text-gray-400 mt-1 block">Escribiendo...</span>
+                                                <p className="text-sm text-gray-700">...</p>
+                                                <span className="text-xs text-gray-400 mt-1 block">{t('home.mockup.typing')}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <p className="text-center text-xs text-gray-500 font-medium pt-2 border-t border-gray-200">
-                                        ✨ Así se ve cerrar un negocio desde B2BChat
+                                        {t('home.mockup.footer')}
                                     </p>
                                 </div>
                             </div>
@@ -279,15 +218,15 @@ export default function LandingPage() {
                     <div className="grid md:grid-cols-3 gap-8 text-center">
                         <div>
                             <div className="text-4xl font-bold text-blue-600 mb-2">1,000+</div>
-                            <div className="text-gray-600">Empresas Activas</div>
+                            <div className="text-gray-600">{t('home.social_proof.companies')}</div>
                         </div>
                         <div>
                             <div className="text-4xl font-bold text-blue-600 mb-2">40%</div>
-                            <div className="text-gray-600">Más Cierres Mensuales</div>
+                            <div className="text-gray-600">{t('home.social_proof.closures')}</div>
                         </div>
                         <div>
                             <div className="text-4xl font-bold text-blue-600 mb-2">75%</div>
-                            <div className="text-gray-600">Tiempo Ahorrado</div>
+                            <div className="text-gray-600">{t('home.social_proof.time')}</div>
                         </div>
                     </div>
                 </div>
@@ -306,7 +245,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {benefits.map((benefit, index) => (
+                        {benefits.map((benefit: any, index: number) => (
                             <div
                                 key={index}
                                 className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all hover:-translate-y-1"
@@ -317,7 +256,7 @@ export default function LandingPage() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-gray-900 mb-2">{benefit.title}</h3>
-                                        <p className="text-sm text-gray-600 mb-3">{benefit.description}</p>
+                                        <p className="text-sm text-gray-600 mb-3">{benefit.desc}</p>
                                         <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
                                             <TrendingUp className="h-3 w-3" />
                                             {benefit.metric}
@@ -343,7 +282,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {steps.map((step, index) => (
+                        {steps.map((step: any, index: number) => (
                             <div key={index} className="relative">
                                 <div className="text-center">
                                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 text-white text-2xl font-bold mb-4">
@@ -361,69 +300,83 @@ export default function LandingPage() {
 
                     <div className="text-center mt-12">
                         <p className="text-sm text-gray-500 mb-6">
-                            Sin tarjeta · Configuración en menos de 3 minutos
+                            {t('home.cta_final_hint')}
                         </p>
                         <button
                             onClick={() => router.push('/register')}
                             className="px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all hover:scale-105 inline-flex items-center gap-2 shadow-lg"
                         >
-                            {t('home.cta_final_title')}
+                            {t('home.cta_final_btn')}
                             <ArrowRight className="h-5 w-5" />
                         </button>
                     </div>
                 </div>
             </section>
 
-            {/* Ecosystem Section */}
-            <section className="py-20 bg-gray-900 text-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium mb-6 border border-blue-500/20">
-                            <Building2 className="w-3 h-3" />
-                            Enterprise Hub
+            {/* Ecosystem Section - CREATIENDAS BRANDING */}
+            <section className="py-24 bg-[#0F172A] text-white relative overflow-hidden">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-20">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6 border border-blue-500/20 shadow-sm backdrop-blur-sm">
+                            <Building2 className="w-4 h-4" />
+                            {t('ecosystem.seal')}
                         </div>
-                        <h2 className="text-3xl font-bold mb-4">{t('ecosystem.title')}</h2>
-                        <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+                        <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tight">
+                            GNOSIS: <span className="text-blue-500">A Growing</span> <span className="text-green-500">Ecosystem</span>
+                        </h2>
+                        <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
                             {t('ecosystem.description')}
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8 items-center max-w-5xl mx-auto">
                         {/* B2BChat */}
-                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-blue-500/50 transition-all">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <MessageSquare className="w-24 h-24" />
+                        <div className="bg-[#1E293B]/50 backdrop-blur-md rounded-3xl p-10 border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500 shadow-xl">
+                            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <MessageSquare className="w-32 h-32" />
                             </div>
-                            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
-                                <MessageSquare className="w-6 h-6 text-white" />
+                            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-600/20">
+                                <MessageSquare className="w-7 h-7 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">B2BChat</h3>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                            <h3 className="text-2xl font-bold mb-4">B2BChat</h3>
+                            <p className="text-gray-400 text-sm font-medium leading-relaxed mb-6">
                                 {t('ecosystem.diagram.step1')}
                             </p>
                         </div>
 
                         {/* Connection Arrow */}
-                        <div className="flex flex-col items-center justify-center gap-2 text-blue-500 opacity-50 md:rotate-0 rotate-90 my-4 md:my-0">
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-current to-transparent max-w-[100px]" />
-                            <ArrowRight className="w-6 h-6 animate-pulse" />
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-current to-transparent max-w-[100px]" />
+                        <div className="flex flex-col items-center justify-center gap-4 text-gray-600">
+                            <div className="hidden md:flex items-center gap-2">
+                                <div className="w-16 h-px bg-gradient-to-r from-transparent to-blue-500/50"></div>
+                                <ArrowRight className="w-8 h-8 text-blue-500 animate-pulse" />
+                                <div className="w-16 h-px bg-gradient-to-l from-transparent to-green-500/50"></div>
+                            </div>
+                            <div className="md:hidden flex flex-col items-center gap-2 py-4">
+                                <ArrowDown className="w-8 h-8 text-blue-500 animate-pulse" />
+                            </div>
                         </div>
 
                         {/* CreaTiendas */}
-                        <div className="bg-white/5 rounded-2xl p-8 border border-white/10 relative overflow-hidden group hover:border-purple-500/50 transition-all cursor-pointer" onClick={() => window.open('https://creatiendasgit1.vercel.app/', '_blank')}>
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <Building2 className="w-24 h-24" />
+                        <div
+                            className="bg-[#1E293B]/50 backdrop-blur-md rounded-3xl p-10 border border-white/5 relative overflow-hidden group hover:border-[#22C55E]/30 transition-all duration-500 shadow-xl cursor-pointer"
+                            onClick={() => window.open('https://creatiendasgit1.vercel.app/', '_blank')}
+                        >
+                            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <Building2 className="w-32 h-32" />
                             </div>
-                            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
-                                <Building2 className="w-6 h-6 text-white" />
+                            <div className="w-14 h-14 bg-[#22C55E] rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-[#22C55E]/20">
+                                <Building2 className="w-7 h-7 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">CreaTiendas</h3>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                            <h3 className="text-2xl font-bold mb-4">CreaTiendas</h3>
+                            <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8">
                                 {t('ecosystem.diagram.step2')}
                             </p>
-                            <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform">
-                                Visitar Hub <ArrowRight className="w-3 h-3" />
+                            <div className="flex items-center gap-2 text-[#22C55E] text-xs font-black uppercase tracking-widest group-hover:translate-x-2 transition-transform">
+                                {t('home.visit_hub')} <ArrowRight className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
@@ -437,7 +390,7 @@ export default function LandingPage() {
                         <h2 className="text-center font-black mb-4 text-blue-600 uppercase tracking-[0.3em] text-xs">
                             {t('home.testimonials_title')}
                         </h2>
-                        <h3 className="text-3xl font-bold text-gray-900">Credibilidad Probada</h3>
+                        <h3 className="text-3xl font-bold text-gray-900">{t('home.testimonials_subtitle')}</h3>
                     </div>
 
                     <div className="relative group">
@@ -463,7 +416,7 @@ export default function LandingPage() {
 
                                     <div className="flex items-center gap-5">
                                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-200">
-                                            {testimonials[currentTestimonial].avatar}
+                                            {testimonials[currentTestimonial].name[0]}
                                         </div>
                                         <div>
                                             <div className="font-black text-gray-900 text-lg">{testimonials[currentTestimonial].name}</div>
@@ -506,24 +459,24 @@ export default function LandingPage() {
             <section className="py-16 bg-white">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        Diseñado para empresas que venden, negocian y crecen en LATAM
+                        {t('home.about_title')}
                     </h2>
                     <div className="grid md:grid-cols-4 gap-6 mt-8">
                         <div className="flex flex-col items-center">
                             <Shield className="h-8 w-8 text-blue-600 mb-2" />
-                            <span className="text-sm font-medium text-gray-700">Seguridad Empresarial</span>
+                            <span className="text-sm font-medium text-gray-700">{t('home.about_items.security')}</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <Building2 className="h-8 w-8 text-blue-600 mb-2" />
-                            <span className="text-sm font-medium text-gray-700">100% B2B</span>
+                            <span className="text-sm font-medium text-gray-700">{t('home.about_items.b2b')}</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <Users className="h-8 w-8 text-blue-600 mb-2" />
-                            <span className="text-sm font-medium text-gray-700">Red LATAM</span>
+                            <span className="text-sm font-medium text-gray-700">{t('home.about_items.network')}</span>
                         </div>
                         <div className="flex flex-col items-center">
                             <Zap className="h-8 w-8 text-blue-600 mb-2" />
-                            <span className="text-sm font-medium text-gray-700">Integración Creatiendas</span>
+                            <span className="text-sm font-medium text-gray-700">{t('home.about_items.integration')}</span>
                         </div>
                     </div>
                 </div>
@@ -535,20 +488,20 @@ export default function LandingPage() {
             <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-700">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                        Empieza gratis hoy y convierte más conversaciones en negocios
+                        {t('home.cta_final_title')}
                     </h2>
                     <p className="text-xl text-blue-100 mb-10">
-                        Miles de empresas B2B ya están cerrando más deals. ¿A qué esperas?
+                        {t('home.cta_final_subtitle')}
                     </p>
                     <button
                         onClick={() => router.push('/register')}
                         className="px-10 py-5 rounded-xl bg-white text-blue-600 font-bold hover:bg-gray-100 transition-all hover:scale-105 inline-flex items-center gap-2 shadow-2xl text-lg"
                     >
-                        Probar B2BChat Gratis
+                        {t('home.cta_final_btn')}
                         <ArrowRight className="h-6 w-6" />
                     </button>
                     <p className="text-blue-100 text-sm mt-6">
-                        Sin costos ocultos · Sin spam · Sin tarjeta de crédito
+                        {t('home.cta_final_hint')}
                     </p>
                 </div>
             </section>
