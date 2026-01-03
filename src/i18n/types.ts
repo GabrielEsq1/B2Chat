@@ -65,6 +65,7 @@ export interface Translation {
             login_redirect: string;
             register_redirect: string;
         };
+        back_to_home: string;
     };
     home: {
         hero_title: string;
@@ -105,6 +106,7 @@ export interface Translation {
         cta_final_btn: string;
         cta_final_hint: string;
         booking_banner: string;
+        booking_btn: string;
         visit_hub: string;
         footer_rights: string;
         mockup: {
@@ -297,13 +299,31 @@ export interface Translation {
     };
     ecosystem: {
         seal: string;
-        title: string;
-        description: string;
-        diagram: {
-            step1: string;
-            step2: string;
+        title_main: string;
+        title_highlight: string;
+        subtitle: string;
+        b2bchat: {
+            title: string;
+            tagline: string;
+            benefits: string[];
+            badges: string[];
         };
-        cta_cross: string;
+        creatiendas: {
+            title: string;
+            tagline: string;
+            benefits: string[];
+            badges: string[];
+        };
+        transition_text: string;
+        footer: {
+            title_part1: string;
+            title_highlight1: string;
+            title_part2: string;
+            title_highlight2: string;
+            subtitle: string;
+            cta_store: string;
+            cta_b2b: string;
+        };
     };
     hub: {
         hero_title: string;

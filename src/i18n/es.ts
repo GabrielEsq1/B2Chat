@@ -65,6 +65,7 @@ export const es: Translation = {
             login_redirect: '¡Inicio de sesión exitoso! Redirigiendo...',
             register_redirect: '¡Cuenta creada correctamente! Redirigiendo al login...',
         },
+        back_to_home: 'Volver al inicio',
     },
     home: {
         hero_title: 'Cierra más negocios B2B desde un solo chat empresarial',
@@ -146,6 +147,7 @@ export const es: Translation = {
         cta_final_hint: 'Sin costos ocultos · Sin spam · Sin tarjeta de crédito',
         booking_banner: 'CUPOS LIMITADOS · Agenda tu Onboarding GRATIS',
         visit_hub: 'Visitar Hub',
+        booking_btn: 'Agendar Ahora',
         footer_rights: 'Todos los derechos reservados.',
         mockup: {
             verified: 'Verificada',
@@ -337,13 +339,44 @@ export const es: Translation = {
     },
     ecosystem: {
         seal: 'Parte de GNOSIS, ecosistema empresarial en crecimiento',
-        title: 'GNOSIS: Ecosistema en crecimiento',
-        description: 'Conectamos comunicación, ventas y ejecución comercial en un solo ecosistema.',
-        diagram: {
-            step1: 'B2BChat genera conversaciones calificadas.',
-            step2: 'CreaTiendas convierte esas conversaciones en ventas.',
+        title_main: "Donde nacen las",
+        title_highlight: "conversaciones que se convierten en ventas",
+        subtitle: "Creatiendas y B2BChat hacen parte de GNOSIS, un ecosistema empresarial diseñado para conectar comunicación, ventas y ejecución en un solo flujo.",
+        b2bchat: {
+            title: "B2BChat",
+            tagline: "Tu motor de conversaciones B2B",
+            benefits: [
+                "Genera conversaciones calificadas entre empresas reales",
+                "Elimina correos perdidos, LinkedIn frío y WhatsApp informal"
+            ],
+            badges: [
+                "Empresas verificadas",
+                "Conversaciones con intención real"
+            ]
         },
-        cta_cross: 'Convierte conversaciones B2B en ventas con CreaTiendas',
+        creatiendas: {
+            title: "CreaTiendas",
+            tagline: "Convierte conversaciones en ventas",
+            benefits: [
+                "Transforma chats en pedidos reales",
+                "Tienda online conectada a WhatsApp",
+                "Sin comisiones · Sin fricción · Activación inmediata"
+            ],
+            badges: [
+                "Ventas directas",
+                "Ejecución inmediata"
+            ]
+        },
+        transition_text: "De la conversación al negocio, sin fricción",
+        footer: {
+            title_part1: "La diferencia entre",
+            title_highlight1: "hablar",
+            title_part2: "y",
+            title_highlight2: "cerrar negocios",
+            subtitle: "La mayoría de las empresas ya conversa con clientes. Muy pocas convierten esas conversaciones en ventas.",
+            cta_store: "Crear mi tienda ahora",
+            cta_b2b: "Descubrir B2BChat"
+        }
     },
     hub: {
         hero_title: 'GNOSIS: El Hub que escala negocios B2B',
