@@ -4,11 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
-// The user provided: cloudinary://<key>:<secret>@dg2suxdit
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dg2suxdit',
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    api_key: process.env.CLOUDINARY_API_KEY || '355811271115119',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'cx5-xSR98J2CtB4alwPFnwQlptg',
     secure: true,
 });
 
