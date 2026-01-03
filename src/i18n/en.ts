@@ -125,4 +125,14 @@ export const en: Translation = {
         },
         cta_cross: 'Turn B2B conversations into sales with CreaTiendas',
     },
+    hub: {
+        hero_title: 'GNOSIS: The Hub That Scales B2B Businesses',
+        hero_subtitle: 'A comprehensive vision combining communication, strategy, and digital execution.',
+        ceo_name: 'Gabriel Esquivia',
+        ceo_title: 'Digital Marketer & Full Stack Marketer',
+        ceo_summary: 'Specialist in creating and closing new business deals, launching high-impact campaigns, and scaling digital ecosystems. Experience leading Paid Media, SEO, automation, and analytics strategies for global brands and startups.',
+        experience_title: 'Strategic Trajectory',
+        portfolio_title: 'Expertise in Action (Behance)',
+        view_project: 'View Project',
+    },
 };
