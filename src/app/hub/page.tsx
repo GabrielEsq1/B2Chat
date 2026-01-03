@@ -93,7 +93,7 @@ export default function HubPage() {
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                             <Building2 className="w-5 h-5 text-white" />
                         </div>
-                        <span className="font-bold text-xl tracking-tight">GNOSIS <span className="text-blue-600">HUB</span></span>
+                        <span className="font-bold text-xl tracking-tight text-gray-900">GNOSIS <span className="text-blue-600">HUB</span></span>
                     </Link>
                     <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                         {t('common.back')}
