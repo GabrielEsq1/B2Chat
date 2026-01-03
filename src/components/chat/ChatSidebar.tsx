@@ -645,6 +645,11 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                 )
             }
 
+            {/* Ads Bar */}
+            <div className="flex-shrink-0">
+                <FastAdsBar />
+            </div>
+
             {/* Search Section */}
             <div className="p-3 bg-white flex-shrink-0">
                 <div className="relative group">

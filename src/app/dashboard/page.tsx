@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
     MessageSquare,
     TrendingUp,
@@ -15,7 +16,7 @@ import {
 import StoriesRail from "@/components/ads/StoriesRail";
 import { useLanguage } from "@/context/LanguageContext";
 
-interface Store {
+interface UserStore {
     id: string;
     name: string;
     slug: string;
@@ -36,7 +37,7 @@ export default function DashboardPage() {
         socialConnections: 0,
         messages: 0,
     });
-    const [stores, setStores] = useState<Store[]>([]);
+    const [stores, setStores] = useState<UserStore[]>([]);
     const [loadingStores, setLoadingStores] = useState(true);
 
     useEffect(() => {
@@ -105,6 +106,58 @@ export default function DashboardPage() {
                 {/* Stories Rail */}
                 <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-8">
                     <StoriesRail />
+                </div>
+
+                {/* GNOSIS Hub Banner */}
+                <div className="mb-8 p-6 md:p-10 rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 border border-white/10 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32 blur-3xl group-hover:bg-white/10 transition-colors duration-700"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full translate-y-32 -translate-x-32 blur-3xl"></div>
+
+                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                        <div className="flex-shrink-0 relative">
+                            <div className="absolute inset-0 bg-blue-400 blur-2xl opacity-20 animate-pulse"></div>
+                            <Image
+                                src="/gnosis_logo.png"
+                                alt="GNOSIS Logo"
+                                width={120}
+                                height={120}
+                                className="relative rounded-3xl shadow-2xl transform group-hover:rotate-6 transition-transform duration-500 bg-white p-2"
+                            />
+                        </div>
+
+                        <div className="flex-1 text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-200 text-xs font-black uppercase tracking-[0.2em] mb-4 border border-blue-400/30">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                Ecosistema GNOSIS Hub
+                            </div>
+                            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight tracking-tight">
+                                Potencia tu negocio con el <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-200">Hub Empresarial</span>
+                            </h2>
+                            <p className="text-blue-100/90 text-lg md:text-xl font-medium mb-8 max-w-2xl leading-relaxed">
+                                Aprovecha la integración total con <span className="text-white font-bold">WhatsApp</span> y usa todas las aplicaciones del ecosistema GNOSIS para vender, cobrar y conectar como nunca antes.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <a
+                                    href="https://creatiendasgit1.vercel.app/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-3 px-8 py-4 bg-white text-blue-900 rounded-2xl font-black text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl active:scale-95 group"
+                                >
+                                    <Store className="h-6 w-6 group-hover:rotate-12 transition-transform" />
+                                    Visitar Creatiendas
+                                    <ArrowRight className="h-5 w-5" />
+                                </a>
+                                <p className="text-blue-300 text-sm font-bold flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    +5,000 empresas conectadas
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Stats Grid */}
@@ -187,7 +240,7 @@ export default function DashboardPage() {
                     </Link>
 
                     <Link
-                        href="/users"
+                        href="/contacts?tab=discover"
                         className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
                     >
                         <div className="flex items-center justify-between mb-4">

@@ -36,8 +36,8 @@ export default function Navbar() {
                 <div className="flex h-16 items-center justify-between">
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <Image src="/gnosis_logo.png" alt="GNOSIS Logo" width={40} height={40} className="rounded-lg" />
-                            <span className="text-xl font-bold text-gray-900">GNOSIS</span>
+                            <Image src="/logo.png" alt="B2BChat Logo" width={40} height={40} className="rounded-lg" />
+                            <span className="text-xl font-bold text-gray-900">B2BChat</span>
                         </Link>
                     </div>
 

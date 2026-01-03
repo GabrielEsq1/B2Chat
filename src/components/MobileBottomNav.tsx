@@ -25,8 +25,8 @@ export default function MobileBottomNav() {
             icon: MessageSquare,
         },
         {
-            href: "/users",
-            label: "Descubrir",
+            href: "/contacts",
+            label: "Red",
             icon: Users,
         },
         {
