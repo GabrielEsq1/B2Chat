@@ -115,4 +115,14 @@ export interface Translation {
             };
         };
     };
+    ecosystem: {
+        seal: string;
+        title: string;
+        description: string;
+        diagram: {
+            step1: string;
+            step2: string;
+        };
+        cta_cross: string;
+    };
 }

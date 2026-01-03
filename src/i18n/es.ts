@@ -115,4 +115,14 @@ export const es: Translation = {
             },
         },
     },
+    ecosystem: {
+        seal: 'Parte de un Enterprise Hub empresarial en crecimiento',
+        title: 'Un Enterprise Hub en crecimiento',
+        description: 'Conectamos comunicación, ventas y ejecución comercial en un solo ecosistema.',
+        diagram: {
+            step1: 'B2BChat genera conversaciones calificadas.',
+            step2: 'CreaTiendas convierte esas conversaciones en ventas.',
+        },
+        cta_cross: 'Convierte conversaciones B2B en ventas con CreaTiendas',
+    },
 };

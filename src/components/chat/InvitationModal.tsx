@@ -11,6 +11,8 @@ interface InvitationModalProps {
 export default function InvitationModal({ phone, onClose }: InvitationModalProps) {
     const [copied, setCopied] = useState(false);
 
+    if (!phone) return null;
+
     const inviteLink = `${process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/register?ref=${phone}`;
 
     const handleCopyLink = () => {

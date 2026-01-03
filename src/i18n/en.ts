@@ -115,4 +115,14 @@ export const en: Translation = {
             },
         },
     },
+    ecosystem: {
+        seal: 'Part of a growing Enterprise Hub',
+        title: 'A Growing Enterprise Hub',
+        description: 'Connecting communication, sales, and business execution in a single ecosystem.',
+        diagram: {
+            step1: 'B2BChat generates qualified conversations.',
+            step2: 'CreaTiendas turns those conversations into sales.',
+        },
+        cta_cross: 'Turn B2B conversations into sales with CreaTiendas',
+    },
 };
