@@ -65,6 +65,7 @@ export const en: Translation = {
             login_redirect: 'Login successful! Redirecting...',
             register_redirect: 'Account created successfully! Redirecting to login...',
         },
+        back_to_home: 'Back to Home',
     },
     home: {
         hero_title: 'Close more B2B deals from a single business chat',
@@ -146,6 +147,7 @@ export const en: Translation = {
         cta_final_hint: 'No hidden costs · No spam · No credit card required',
         booking_banner: 'LIMITED SPOTS · Book your FREE Onboarding',
         visit_hub: 'Visit Hub',
+        booking_btn: 'Book Now',
         footer_rights: 'All rights reserved.',
         mockup: {
             verified: 'Verified',
@@ -337,13 +339,44 @@ export const en: Translation = {
     },
     ecosystem: {
         seal: 'Part of GNOSIS, a growing enterprise ecosystem',
-        title: 'GNOSIS: A Growing Ecosystem',
-        description: 'Connecting communication, sales, and business execution in a single ecosystem.',
-        diagram: {
-            step1: 'B2BChat generates qualified conversations.',
-            step2: 'CreaTiendas turns those conversations into sales.',
+        title_main: "Where",
+        title_highlight: "conversations turn into sales",
+        subtitle: "Creatiendas and B2BChat are part of GNOSIS, an enterprise ecosystem designed to connect communication, sales, and execution in a single flow.",
+        b2bchat: {
+            title: "B2BChat",
+            tagline: "Your B2B conversation engine",
+            benefits: [
+                "Generate qualified conversations between real companies",
+                "Eliminate lost emails, cold LinkedIn, and informal WhatsApp"
+            ],
+            badges: [
+                "Verified companies",
+                "Conversations with real intent"
+            ]
         },
-        cta_cross: 'Turn B2B conversations into sales with CreaTiendas',
+        creatiendas: {
+            title: "CreaTiendas",
+            tagline: "Turn conversations into sales",
+            benefits: [
+                "Transform chats into real orders",
+                "Online store connected to WhatsApp",
+                "No commissions · No friction · Immediate activation"
+            ],
+            badges: [
+                "Direct sales",
+                "Immediate execution"
+            ]
+        },
+        transition_text: "From conversation to business, without friction",
+        footer: {
+            title_part1: "The difference between",
+            title_highlight1: "talking",
+            title_part2: "and",
+            title_highlight2: "closing deals",
+            subtitle: "Most companies already converse with customers. Very few turn those conversations into sales.",
+            cta_store: "Create my store now",
+            cta_b2b: "Discover B2BChat"
+        }
     },
     hub: {
         hero_title: 'GNOSIS: The Hub That Scales B2B Businesses',
