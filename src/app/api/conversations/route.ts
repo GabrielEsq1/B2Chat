@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
 
         console.log(`[API/Conversations] Fetching for userId: ${session.user.id}`);
 
+
         const conversations = await prisma.conversation.findMany({
             where: {
                 OR: [
@@ -52,17 +53,11 @@ export async function GET(req: NextRequest) {
                     },
                 },
                 group: {
-                    include: {
-                        members: {
-                            include: {
-                                user: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                    }
-                                }
-                            }
-                        }
+                    select: {
+                        id: true,
+                        name: true,
+                        avatar: true,
+                        // REMOVED: members include - causes massive payload
                     }
                 },
                 messages: {
@@ -75,6 +70,7 @@ export async function GET(req: NextRequest) {
             orderBy: {
                 updatedAt: "desc",
             },
+            take: 20, // CRITICAL: Strict limit to prevent 5MB overflow
         });
 
         console.log(`[API/Conversations] Found ${conversations.length} conversations for user ${session.user.id}`);
