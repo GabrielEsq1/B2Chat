@@ -122,10 +122,23 @@ export default function CreateCampaignPage() {
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Basic Client-side Validation
+        const isVideo = file.type.startsWith('video/');
+        const maxSize = 20 * 1024 * 1024; // 20MB
+
+        if (file.size > maxSize) {
+            alert('❌ El archivo es demasiado grande. Máximo 20MB.');
+            return;
+        }
+
         setFormData({ ...formData, uploading: true });
         try {
             const uploadData = new FormData();
             uploadData.append('file', file);
+            // Explicitly set type based on file type
+            uploadData.append('type', isVideo ? 'video' : 'image');
+
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: uploadData,
@@ -134,11 +147,13 @@ export default function CreateCampaignPage() {
             if (data.success) {
                 setFormData({ ...formData, creativeUrl: data.url, uploading: false });
             } else {
-                alert(data.error || 'Error al subir archivo');
+                console.error("Upload error details:", data);
+                alert(`Error al subir archivo: ${data.details || data.error || 'Desconocido'}`);
                 setFormData({ ...formData, uploading: false });
             }
         } catch (error) {
-            alert('Error al subir archivo');
+            console.error("Upload exception:", error);
+            alert('Error de conexión al subir el archivo');
             setFormData({ ...formData, uploading: false });
         }
     };
@@ -616,6 +631,8 @@ export default function CreateCampaignPage() {
                                         try {
                                             const uploadData = new FormData();
                                             uploadData.append('file', file);
+                                            uploadData.append('type', 'image'); // Explicit type
+
                                             const response = await fetch('/api/upload', {
                                                 method: 'POST',
                                                 body: uploadData,
@@ -624,10 +641,13 @@ export default function CreateCampaignPage() {
                                             if (data.success) {
                                                 setFormData({ ...formData, paymentProofUrl: data.url, uploading: false });
                                             } else {
-                                                alert(data.error || 'Error');
+                                                console.error("Proof upload error:", data);
+                                                alert(`Error: ${data.details || data.error || 'Falló la subida'}`);
                                                 setFormData({ ...formData, uploading: false });
                                             }
                                         } catch (error) {
+                                            console.error("Proof upload exception:", error);
+                                            alert("Error de conexión al subir comprobante");
                                             setFormData({ ...formData, uploading: false });
                                         }
                                     }}
