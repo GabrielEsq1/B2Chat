@@ -107,17 +107,21 @@ export async function POST(req: NextRequest) {
                 companyId: user.companyId,
                 name: data.name,
                 objective: data.objective,
-                status: "PENDING_PAYMENT", // Harmonized with frontend wizard status for payment flow
+                status: data.paymentProofUrl ? "PENDING_VERIFICATION" : "PENDING_PAYMENT",
 
                 // Segmentation
                 industry: data.industry,
                 sector: data.sector,
                 targetRoles: data.targetRoles ? JSON.stringify(data.targetRoles) : null,
 
-                // Budget
+                // Budget & Payment
                 dailyBudget: dailyBudget,
                 durationDays: durationDays,
                 totalBudget: totalBudget,
+                paymentProofUrl: data.paymentProofUrl,
+                paymentStatus: data.paymentProofUrl ? "VERIFICATION_PENDING" : "PENDING_PAYMENT",
+                paymentMethod: "NEQUI", // Simplification for now
+
                 creativeType: data.creativeType,
                 creativeUrl: data.creativeUrl || data.videoUrl,
                 creativeText: data.creativeText || data.description,

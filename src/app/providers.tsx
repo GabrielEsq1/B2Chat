@@ -2,13 +2,16 @@
 
 import { SessionProvider } from "next-auth/react";
 import { SocketProvider } from "@/components/providers/SocketProvider";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <SessionProvider>
-            <SocketProvider>
-                {children}
-            </SocketProvider>
+            <LanguageProvider>
+                <SocketProvider>
+                    {children}
+                </SocketProvider>
+            </LanguageProvider>
         </SessionProvider>
     );
 }

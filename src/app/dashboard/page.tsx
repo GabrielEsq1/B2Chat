@@ -12,6 +12,8 @@ import {
     ArrowRight,
     Store,
 } from "lucide-react";
+import StoriesRail from "@/components/ads/StoriesRail";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Store {
     id: string;
@@ -27,6 +29,7 @@ interface Store {
 export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const { t } = useLanguage();
     const [stats, setStats] = useState({
         conversations: 0,
         campaigns: 0,
@@ -92,12 +95,19 @@ export default function DashboardPage() {
                 {/* Welcome Section */}
                 <div className="mb-8">
                     <h2 className="text-3xl font-bold text-white mb-2">
-                        ¡Hola, {session?.user?.name?.split(' ')[0]}! 👋
+                        {t('dashboard.welcome', { name: session?.user?.name?.split(' ')[0] || '' })}
                     </h2>
                     <p className="text-blue-100">
-                        Gestiona tus conversaciones, campañas y conexiones empresariales
+                        {t('dashboard.subtitle')}
                     </p>
                 </div>
+
+                {/* Stories Rail */}
+                <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-8">
+                    <StoriesRail />
+                </div>
+
+                {/* Stats Grid */}
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

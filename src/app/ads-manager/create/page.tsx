@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, Play, Image as ImageIcon, Check, DollarSign, Users, Target } from "lucide-react";
 import { WHATSAPP_CONFIG } from "@/config/whatsapp";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function CreateCampaignPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -26,6 +28,7 @@ export default function CreateCampaignPage() {
         location: "",
         description: "",
         destinationUrl: "",
+        paymentProofUrl: "",
         uploading: false,
     });
 
@@ -162,7 +165,8 @@ export default function CreateCampaignPage() {
                     ageRange: formData.ageRange,
                     gender: formData.gender,
                     location: formData.location,
-                    status: 'PENDING_PAYMENT', // Marca como pendiente de pago
+                    paymentProofUrl: formData.paymentProofUrl,
+                    status: formData.paymentProofUrl ? 'PENDING_VERIFICATION' : 'PENDING_PAYMENT',
                 }),
             });
             const data = await response.json();
@@ -224,7 +228,7 @@ export default function CreateCampaignPage() {
                     </div>
                     {/* Progress Steps */}
                     <div className="mt-6 flex items-center justify-between px-10">
-                        {[1, 2, 3, 4, 5].map((s) => (
+                        {[1, 2, 3, 4, 5, 6].map((s) => (
                             <div key={s} className="flex flex-col items-center">
                                 <div
                                     className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${step >= s ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"}`}
@@ -232,11 +236,12 @@ export default function CreateCampaignPage() {
                                     {s}
                                 </div>
                                 <span className="mt-2 text-xs text-gray-500">
-                                    {s === 1 && "Detalles"}
-                                    {s === 2 && "Segmentación"}
-                                    {s === 3 && "Presupuesto"}
-                                    {s === 4 && "Creativo"}
-                                    {s === 5 && "Revisar"}
+                                    {s === 1 && t('ads.wizard.steps.details')}
+                                    {s === 2 && t('ads.wizard.steps.segmentation')}
+                                    {s === 3 && t('ads.wizard.steps.budget')}
+                                    {s === 4 && t('ads.wizard.steps.creative')}
+                                    {s === 5 && t('ads.wizard.steps.review')}
+                                    {s === 6 && t('ads.wizard.steps.payment')}
                                 </span>
                             </div>
                         ))}
@@ -536,7 +541,7 @@ export default function CreateCampaignPage() {
                 {/* Step 5: Review */}
                 {step === 5 && (
                     <div className="rounded-lg bg-white p-6 shadow-sm">
-                        <h2 className="mb-6 text-lg font-medium text-gray-900">Revisar Campaña</h2>
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">{t('ads.wizard.steps.review')}</h2>
                         <div className="space-y-4 rounded-lg bg-gray-50 p-4 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Campaña:</span>
@@ -568,31 +573,104 @@ export default function CreateCampaignPage() {
                         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
                                 <span className="text-lg">ℹ️</span>
-                                ¿Qué sucede después?
+                                {t('ads.wizard.payment.title')}
                             </h3>
                             <div className="text-xs text-blue-800 space-y-2">
                                 <p>
-                                    <strong>1.</strong> Tu campaña se guardará en B2BChat con estado <strong className="text-blue-900">"Pendiente de Pago"</strong>
+                                    <strong>1.</strong> Revisa los datos de tu campaña arriba.
                                 </p>
                                 <p>
-                                    <strong>2.</strong> Serás redirigido a WhatsApp para coordinar el pago con nuestro equipo
+                                    <strong>2.</strong> En el siguiente paso podrás subir tu comprobante de pago.
                                 </p>
-                                <p>
-                                    <strong>3.</strong> Una vez confirmado el pago por Nequi, un administrador <strong className="text-blue-900">aprobará manualmente</strong> tu campaña
-                                </p>
-                                <p>
-                                    <strong>4.</strong> Recibirás notificación cuando tu campaña esté <strong className="text-green-700">ACTIVA</strong>
-                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Step 6: Payment Proof */}
+                {step === 6 && (
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 className="mb-6 text-lg font-medium text-gray-900">{t('ads.wizard.payment.title')}</h2>
+
+                        <div className="mb-6 text-center">
+                            <p className="text-sm text-gray-600 mb-4">{t('ads.wizard.payment.instructions')}</p>
+
+                            {/* Nequi QR Placeholder */}
+                            <div className="mx-auto w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-4 border-2 border-dashed border-gray-400">
+                                <span className="text-gray-500 font-bold">QR Nequi Aquí</span>
+                            </div>
+                            <p className="text-xs text-gray-500">Cuenta Nequi: 302 668 7991</p>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center hover:bg-gray-50">
+                                <input
+                                    type="file"
+                                    id="proof-upload"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        setFormData({ ...formData, uploading: true });
+                                        try {
+                                            const uploadData = new FormData();
+                                            uploadData.append('file', file);
+                                            const response = await fetch('/api/upload', {
+                                                method: 'POST',
+                                                body: uploadData,
+                                            });
+                                            const data = await response.json();
+                                            if (data.success) {
+                                                setFormData({ ...formData, paymentProofUrl: data.url, uploading: false });
+                                            } else {
+                                                alert(data.error || 'Error');
+                                                setFormData({ ...formData, uploading: false });
+                                            }
+                                        } catch (error) {
+                                            setFormData({ ...formData, uploading: false });
+                                        }
+                                    }}
+                                    disabled={formData.uploading}
+                                />
+                                <label htmlFor="proof-upload" className="cursor-pointer">
+                                    {formData.uploading ? (
+                                        <div>
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+                                            <p className="mt-2 text-sm text-gray-600">Subiendo...</p>
+                                        </div>
+                                    ) : formData.paymentProofUrl ? (
+                                        <div>
+                                            <Check className="mx-auto h-12 w-12 text-green-500" />
+                                            <p className="mt-2 text-sm text-green-600">Comprobante subido</p>
+                                            <img src={formData.paymentProofUrl} alt="Proof" className="mx-auto mt-4 max-h-40 rounded" />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); setFormData({ ...formData, paymentProofUrl: "" }); }}
+                                                className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                                            >
+                                                Cambiar
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                            <p className="mt-2 text-sm text-gray-600">
+                                                {t('ads.wizard.payment.upload_proof')}
+                                            </p>
+                                        </div>
+                                    )}
+                                </label>
                             </div>
                         </div>
 
                         <div className="mt-6">
                             <button
                                 onClick={handleCreateCampaign}
-                                disabled={loading}
-                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400"
+                                disabled={loading || !formData.paymentProofUrl}
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Creando...' : '✅ Crear Campaña y Continuar a WhatsApp'}
+                                {loading ? 'Enviando...' : '✅ Confirmar Pago y Enviar a Revisión'}
                             </button>
                         </div>
                     </div>

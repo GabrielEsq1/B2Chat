@@ -19,6 +19,13 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
         // Verify user is part of conversation
         const conversation = await prisma.conversation.findUnique({
             where: { id: params.id },
+            include: {
+                group: {
+                    include: {
+                        members: true
+                    }
+                }
+            }
         });
 
         if (!conversation) {
@@ -28,7 +35,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
             );
         }
 
-        if (conversation.userAId !== session.user.id && conversation.userBId !== session.user.id) {
+        const isParticipant =
+            conversation.userAId === session.user.id ||
+            conversation.userBId === session.user.id ||
+            conversation.group?.members.some((m: any) => m.userId === session.user.id);
+
+        if (!isParticipant) {
             return NextResponse.json(
                 { error: "No autorizado" },
                 { status: 403 }
@@ -104,7 +116,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
             );
         }
 
-        if (conversation.userAId !== session.user.id && conversation.userBId !== session.user.id) {
+        const isParticipant =
+            conversation.userAId === session.user.id ||
+            conversation.userBId === session.user.id ||
+            conversation.group?.members.some((m: any) => m.userId === session.user.id);
+
+        if (!isParticipant) {
             return NextResponse.json(
                 { error: "No autorizado" },
                 { status: 403 }
@@ -180,7 +197,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
         if (conversation.groupId && conversation.group) {
             // Group chat: Find all bots in the group
-            conversation.group.members.forEach(member => {
+            conversation.group.members.forEach((member: any) => {
                 if (member.user.isBot && member.user.id !== session.user.id) {
                     botsToTrigger.push(member.user.id);
                 }

@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useRef, useEffect } from 'react';
-import { Send, Loader2, Bot } from 'lucide-react';
+import { Send, Loader2, Bot, ArrowLeft, X } from 'lucide-react';
 
 interface AIChatWindowProps {
     conversationId: string;
@@ -10,8 +10,6 @@ interface AIChatWindowProps {
     userName?: string;
     onBack?: () => void;
 }
-
-import { ArrowLeft } from 'lucide-react';
 
 /**
  * Componente de Chat con IA usando Vercel AI SDK
@@ -37,28 +35,37 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
     }, [messages]);
 
     return (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-[#f8fafc]">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-gradient-to-r from-blue-500 to-purple-600">
-                {onBack && (
-                    <button onClick={onBack} className="lg:hidden p-1 hover:bg-white/20 rounded-full text-white transition-colors">
-                        <ArrowLeft className="h-6 w-6" />
-                    </button>
-                )}
-                <Bot className="w-6 h-6 text-white" />
-                <div>
-                    <h2 className="font-semibold text-white">Asistente IA</h2>
-                    <p className="text-xs text-blue-100">Siempre disponible para ayudarte</p>
+            <div className="flex items-center justify-between p-4 border-b bg-white shadow-sm z-10">
+                <div className="flex items-center gap-3">
+                    {onBack && (
+                        <button onClick={onBack} className="lg:hidden p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
+                            <ArrowLeft className="h-5 w-5" />
+                        </button>
+                    )}
+                    <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <Bot className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h2 className="font-bold text-gray-900 leading-none">Asistente B2B</h2>
+                        <p className="text-[10px] text-green-600 font-bold uppercase mt-1 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                            IA Activa • 24/7
+                        </p>
+                    </div>
                 </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 {messages.length === 0 && (
-                    <div className="text-center text-gray-500 mt-8">
-                        <Bot className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium">¡Hola! Soy tu asistente de IA</p>
-                        <p className="text-sm mt-2">¿En qué puedo ayudarte hoy?</p>
+                    <div className="flex flex-col items-center justify-center h-full opacity-40">
+                        <div className="bg-indigo-50 p-6 rounded-full mb-4">
+                            <Bot className="w-12 h-12 text-indigo-400" />
+                        </div>
+                        <p className="text-sm font-bold text-indigo-900">¿Cómo puedo impulsarte hoy?</p>
+                        <p className="text-xs text-gray-500 mt-1 max-w-[200px] text-center">Resuelvo dudas, genero ideas o ayudo con tus ventas.</p>
                     </div>
                 )}
 
@@ -68,19 +75,19 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
-                            className={`max-w-[80%] rounded-lg px-4 py-2 ${message.role === 'user'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 text-gray-800 border border-gray-200'
+                            className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${message.role === 'user'
+                                ? 'bg-blue-600 text-white rounded-tr-none'
+                                : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                                 }`}
                         >
                             {message.role === 'assistant' && (
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Bot className="w-4 h-4 text-purple-600" />
-                                    <span className="text-xs font-medium text-purple-600">IA</span>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Bot className="w-4 h-4 text-indigo-600" />
+                                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">SISTEMA IA</span>
                                 </div>
                             )}
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                            <span className="text-xs opacity-70 mt-1 block" suppressHydrationWarning>
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                            <span className={`text-[9px] font-bold uppercase mt-2 block opacity-50 ${message.role === 'user' ? 'text-right' : ''}`}>
                                 {new Date(message.createdAt || Date.now()).toLocaleTimeString('es-ES', {
                                     hour: '2-digit',
                                     minute: '2-digit',
@@ -92,19 +99,22 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
 
                 {isLoading && (
                     <div className="flex justify-start">
-                        <div className="bg-gray-100 rounded-lg px-4 py-2 border border-gray-200">
-                            <div className="flex items-center gap-2">
-                                <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
-                                <span className="text-sm text-gray-600">Escribiendo...</span>
+                        <div className="bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Generando respuesta...</span>
                             </div>
                         </div>
                     </div>
                 )}
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-600">
-                            ❌ Error: {error.message || 'No se pudo conectar con el asistente'}
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                            <X className="h-4 w-4" />
+                        </div>
+                        <p className="text-xs font-bold text-red-600">
+                            No se pudo procesar la solicitud. Revisa tu conexión.
                         </p>
                     </div>
                 )}
@@ -113,19 +123,19 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
             </div>
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="p-4 border-t bg-gray-50">
-                <div className="flex gap-2">
+            <div className="p-4 border-t bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+                <form onSubmit={handleSubmit} className="flex gap-2 items-center">
                     <input
                         value={input}
                         onChange={handleInputChange}
-                        placeholder="Escribe tu mensaje..."
+                        placeholder="Pregúntame lo que necesites..."
                         disabled={isLoading}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="flex-1 px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:bg-white text-sm transition-all disabled:opacity-50"
                     />
                     <button
                         type="submit"
                         disabled={isLoading || !input.trim()}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                        className="h-11 w-11 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100 flex items-center justify-center hover:bg-indigo-700 hover:-translate-y-0.5 transition-all disabled:bg-gray-200 disabled:shadow-none disabled:translate-y-0"
                     >
                         {isLoading ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
@@ -133,11 +143,8 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                             <Send className="w-5 h-5" />
                         )}
                     </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                    Presiona Enter para enviar • Shift+Enter para nueva línea
-                </p>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

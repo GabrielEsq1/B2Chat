@@ -58,6 +58,14 @@ export async function POST(req: NextRequest) {
             },
         });
 
+        // Create the associated conversation for this group
+        await prisma.conversation.create({
+            data: {
+                type: "GROUP",
+                groupId: group.id,
+            }
+        });
+
         return NextResponse.json({ group });
     } catch (error) {
         console.error("Error creating group:", error);

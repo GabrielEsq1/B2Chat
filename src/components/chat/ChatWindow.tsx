@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile } from "lucide-react";
+import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
 
@@ -10,9 +10,12 @@ interface Message {
   id: string;
   text: string;
   senderId: string;
+  senderName?: string;
+  senderAvatar?: string;
   createdAt: Date;
   fromSelf: boolean;
   readAt?: Date;
+  isStarred?: boolean;
 }
 
 interface ChatWindowProps {
@@ -33,6 +36,9 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const notifiedMessageIds = useRef<Set<string>>(new Set());
+  const [showSearchInChat, setShowSearchInChat] = useState(false);
+  const [showChatOptions, setShowChatOptions] = useState(false);
+  const [inChatSearchQuery, setInChatSearchQuery] = useState("");
 
   // Initialize notification sound and load sound preference
   useEffect(() => {
@@ -79,8 +85,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
             id: msg.id,
             text: msg.text,
             senderId: msg.senderUserId,
+            senderName: msg.sender?.name,
+            senderAvatar: msg.sender?.avatar || msg.sender?.profilePicture,
             createdAt: new Date(msg.createdAt),
-            fromSelf: msg.senderUserId === session?.user?.id
+            fromSelf: msg.senderUserId === session?.user?.id,
+            isStarred: msg.isStarred
           }));
 
           // Only update if there are new messages (to avoid unnecessary re-renders)
@@ -153,8 +162,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         id: message.id,
         text: message.text,
         senderId: message.senderUserId || message.sender?.id,
+        senderName: message.sender?.name,
+        senderAvatar: message.sender?.avatar || message.sender?.profilePicture,
         createdAt: new Date(message.createdAt),
-        fromSelf: (message.senderUserId || message.sender?.id) === session?.user?.id
+        fromSelf: (message.senderUserId || message.sender?.id) === session?.user?.id,
+        isStarred: message.isStarred
       };
 
       setMessages(prev => {
@@ -314,6 +326,26 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       alert("Error al enviar mensaje");
     }
   };
+  const toggleStar = async (messageId: string, isCurrentlyStarred: boolean) => {
+    try {
+      // Optimistic update
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isStarred: !isCurrentlyStarred } : m));
+
+      const res = await fetch(`/api/messages/${messageId}/star`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isStarred: !isCurrentlyStarred })
+      });
+
+      if (!res.ok) {
+        // Rollback
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isStarred: isCurrentlyStarred } : m));
+        alert('Error al destacar mensaje');
+      }
+    } catch (error) {
+      console.error('Error toggling star:', error);
+    }
+  };
 
   if (!conversation) {
     return (
@@ -334,42 +366,54 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   return (
     <div className="flex flex-1 flex-col bg-[#efeae2]">
       {/* Header */}
-      <div className="flex items-center justify-between bg-gray-50 px-3 sm:px-4 py-2 border-b border-gray-200">
+      <div className="flex items-center justify-between bg-white px-3 sm:px-4 py-2 border-b border-gray-200 shadow-sm z-10">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {onBack && (
-            <button onClick={onBack} className="lg:hidden p-2 hover:bg-gray-200 rounded-full text-gray-600 flex-shrink-0">
+            <button onClick={onBack} className="lg:hidden p-2 hover:bg-gray-100 rounded-full text-gray-600 flex-shrink-0 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </button>
           )}
-          <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <span className="font-semibold text-blue-600 text-sm sm:text-base">
-              {conversation.otherUser?.name?.charAt(0).toUpperCase() || '?'}
-            </span>
+          <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${conversation.type === "GROUP" ? "bg-indigo-100 text-indigo-600" : "bg-blue-100 text-blue-600"}`}>
+            {conversation.type === "GROUP" ? (
+              <Users className="h-5 w-5" />
+            ) : (
+              <span className="font-bold text-sm sm:text-base">
+                {conversation.otherUser?.name?.charAt(0).toUpperCase() || '?'}
+              </span>
+            )}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
-              {conversation.otherUser?.name || 'Usuario'}
+            <h3 className="font-bold text-gray-900 text-sm sm:text-base truncate leading-tight">
+              {conversation.type === "GROUP" ? conversation.name : (conversation.otherUser?.name || 'Usuario')}
             </h3>
-            <div className="flex items-center gap-1 flex-wrap">
-              <p className="text-xs text-gray-500 truncate">
-                {conversation.otherUser?.phone || ''}
-              </p>
-              {isConnected ? (
-                <div className="flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="text-xs text-green-600 hidden sm:inline">Conectado</span>
-                </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {conversation.type === "GROUP" ? (
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  {conversation.memberCount} participantes
+                </p>
               ) : (
-                <div className="flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
-                  <span className="text-xs text-red-500 hidden sm:inline">Desconectado</span>
-                </div>
+                <>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase truncate max-w-[120px]">
+                    {conversation.otherUser?.phone || ''}
+                  </p>
+                  {isConnected ? (
+                    <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded-full ring-1 ring-green-100">
+                      <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                      <span className="text-[9px] font-black text-green-600 uppercase tracking-tighter">Online</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded-full">
+                      <span className="inline-block w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Offline</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
         </div>
         <div className="flex gap-1 text-gray-500 flex-shrink-0">
-          {conversation.otherUser?.phone && (
+          {conversation.type !== "GROUP" && conversation.otherUser?.phone && (
             <button
               onClick={async () => {
                 if (confirm(`¿Enviar este chat a WhatsApp de ${conversation.otherUser?.name}?`)) {
@@ -413,14 +457,56 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
               <VolumeX className="h-5 w-5 text-gray-400" />
             )}
           </button>
-          <button className="hover:bg-gray-200 p-2 rounded-full hidden sm:block">
+          <button
+            onClick={() => setShowSearchInChat(!showSearchInChat)}
+            className={`p-2 rounded-full transition-colors hidden sm:block ${showSearchInChat ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 text-gray-500'}`}
+            title="Buscar en chat"
+          >
             <Search className="h-5 w-5" />
           </button>
-          <button className="hover:bg-gray-200 p-2 rounded-full">
-            <MoreVertical className="h-5 w-5" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowChatOptions(!showChatOptions)}
+              className={`p-2 rounded-full transition-colors ${showChatOptions ? 'bg-gray-200' : 'hover:bg-gray-200 text-gray-500'}`}
+              title="Más opciones"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
+            {showChatOptions && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50">Info. del contacto</button>
+                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50">Silenciar notificaciones</button>
+                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50">Eliminar chat</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Inline Search Bar */}
+      {showSearchInChat && (
+        <div className="bg-white px-4 py-3 border-b border-gray-100 animate-in slide-in-from-top duration-300">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              autoFocus
+              type="text"
+              placeholder="Buscar mensajes..."
+              className="w-full bg-gray-50 border-none rounded-xl py-2.5 pl-10 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-100 outline-none"
+              value={inChatSearchQuery}
+              onChange={(e) => setInChatSearchQuery(e.target.value)}
+            />
+            {inChatSearchQuery && (
+              <button
+                onClick={() => setInChatSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full text-gray-400"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {toast?.show && (
@@ -461,24 +547,43 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           </div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.fromSelf ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[75%] rounded-lg px-3 py-2 shadow-sm ${msg.fromSelf
-                  ? "bg-[#d9fdd3] rounded-tr-none"
-                  : "bg-white rounded-tl-none"
-                  }`}
-              >
-                <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-                  {msg.text}
-                </p>
-                <div className={`mt-1 flex items-center gap-1 ${msg.fromSelf ? "justify-end" : "justify-start"}`}>
-                  <span className="text-[10px] text-gray-500">
-                    {msg.createdAt.toLocaleTimeString('es-ES', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
+            <div key={msg.id} className={`flex group ${msg.fromSelf ? "justify-end" : "justify-start"}`}>
+              <div className={`relative flex items-end gap-2 max-w-[85%] ${msg.fromSelf ? "flex-row-reverse" : "flex-row"}`}>
+                <div
+                  className={`rounded-2xl px-4 py-2 shadow-sm ${msg.fromSelf
+                    ? "bg-[#d9fdd3] text-gray-800 rounded-tr-none"
+                    : "bg-white text-gray-800 rounded-tl-none border border-gray-100"
+                    }`}
+                >
+                  {conversation.type === "GROUP" && !msg.fromSelf && (
+                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">
+                      {msg.senderName || 'Miembro'}
+                    </p>
+                  )}
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {msg.text}
+                  </p>
+                  <div className={`mt-1 flex items-center gap-1.5 ${msg.fromSelf ? "justify-end" : "justify-start"}`}>
+                    <span className="text-[10px] opacity-50 font-bold uppercase">
+                      {msg.createdAt.toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    {msg.isStarred && (
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    )}
+                  </div>
                 </div>
+
+                {/* Star Toggle Action */}
+                <button
+                  onClick={() => toggleStar(msg.id, !!msg.isStarred)}
+                  className={`opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-black/5 transition-all ${msg.isStarred ? 'opacity-100 text-yellow-500' : 'text-gray-300'}`}
+                  title={msg.isStarred ? "Quitar destacado" : "Destacar mensaje"}
+                >
+                  <Star className={`h-4 w-4 ${msg.isStarred ? 'fill-yellow-500' : ''}`} />
+                </button>
               </div>
             </div>
           ))
