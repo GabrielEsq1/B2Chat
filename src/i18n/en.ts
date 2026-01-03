@@ -149,6 +149,7 @@ export const en: Translation = {
         visit_hub: 'Visit Hub',
         booking_btn: 'Book Now',
         footer_rights: 'All rights reserved.',
+        footer_mockup_seal_gnosis: 'Part of GNOSIS',
         mockup: {
             verified: 'Verified',
             industry: 'Software Development',
@@ -184,6 +185,8 @@ export const en: Translation = {
             store: 'My Store',
             create_store: 'Create My Store',
         },
+        cta_cross_title: 'Sell on CreaTiendas',
+        cta_cross_text: 'Turn your chats into real sales',
     },
     chat: {
         sidebar: {
@@ -206,6 +209,7 @@ export const en: Translation = {
             selection_count: 'selected',
             group_suffix: 'members',
             empty_hint: 'Start the conversation...',
+            search_error_short: 'Please type at least 2 characters',
         },
         window: {
             online: 'Online',

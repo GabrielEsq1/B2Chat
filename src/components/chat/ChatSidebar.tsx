@@ -204,7 +204,11 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
     };
 
     const handleSearchContact = async () => {
-        if (!searchQuery.trim() || searchQuery.length < 3) return;
+        if (!searchQuery.trim()) return;
+        if (searchQuery.length < 2) {
+            alert(t('chat.sidebar.search_error_short', { defaultValue: 'Por favor escribe al menos 2 caracteres' }));
+            return;
+        }
 
         try {
             const res = await fetch(`/api/contacts/search?query=${encodeURIComponent(searchQuery)}`);
