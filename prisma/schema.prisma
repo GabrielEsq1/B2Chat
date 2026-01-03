@@ -104,6 +104,8 @@ model Conversation {
   userAId    String?
   userBId    String?
   groupId    String?
+  isPinned   Boolean   @default(false)
+  isFavorite Boolean   @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   companyA   Company?  @relation("CompanyA", fields: [companyAId], references: [id])
@@ -170,6 +172,7 @@ model Message {
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderUserId], references: [id])
+  emailLogs      EmailLog[]
 }
 
 model AdCampaign {
@@ -338,3 +341,24 @@ model CompanyInvitation {
 // Enums converted to String for SQLite compatibility
 
 // Original enums: Role, ConnectionStatus, ConversationType, PlanType, TransactionType, FriendRequestStatus
+
+model EmailLog {
+  id             String    @id @default(uuid())
+  resendId       String?   @unique
+  messageId      String?
+  senderUserId   String?
+  recipientEmail String
+  subject        String
+  status         String    @default("SENT") // SENT, DELIVERED, OPENED, CLICKED, BOUNCED, COMPLAINT
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  error          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  message        Message?  @relation(fields: [messageId], references: [id])
+
+  @@index([recipientEmail])
+  @@index([status])
+  @@index([resendId])
+}

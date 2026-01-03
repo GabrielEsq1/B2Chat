@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendNewMessageNotification } from "@/lib/email";
 
 // GET /api/conversations/[id]/messages - Get messages for a conversation
 export async function GET(req: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -185,6 +186,50 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                 },
             },
         });
+
+        // Send email notification to recipient(s)
+        try {
+            const baseUrl = process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL ||
+                (req.headers.get('origin') || 'http://localhost:3000');
+
+            if (conversation.groupId) {
+                // Group notification: Send to all members except sender
+                const otherMembers = conversation.group?.members.filter((m: any) => m.userId !== session.user.id && !m.user.isBot);
+                if (otherMembers) {
+                    for (const member of otherMembers) {
+                        if (member.user.email) {
+                            await sendNewMessageNotification({
+                                to: member.user.email,
+                                senderName: session.user.name || 'Un usuario',
+                                messageText: text || (file ? `Archivo: ${file.name}` : ''),
+                                conversationLink: `${baseUrl}/chat/${params.id}`
+                            });
+                        }
+                    }
+                }
+            } else {
+                // Direct message: Send to the other user
+                const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
+                // We need to fetch the email because it might not be in the initial conversation query (if we didn't select it)
+                // Actually conversation.userA/userB were fetched but without email. Let's ensure we have it.
+                const recipient = await prisma.user.findUnique({
+                    where: { id: otherUser?.id },
+                    select: { email: true, name: true, isBot: true }
+                });
+
+                if (recipient?.email && !recipient.isBot) {
+                    await sendNewMessageNotification({
+                        to: recipient.email,
+                        senderName: session.user.name || 'Un usuario',
+                        messageText: text || (file ? `Archivo: ${file.name}` : ''),
+                        conversationLink: `${baseUrl}/chat/${params.id}`
+                    });
+                }
+            }
+        } catch (emailError) {
+            console.error("Failed to send email notification:", emailError);
+            // Don't fail the message sending if email fails
+        }
 
         // Update conversation updatedAt
         await prisma.conversation.update({

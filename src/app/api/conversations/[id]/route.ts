@@ -45,7 +45,7 @@ export async function DELETE(
             isParticipant = conversation.userAId === session.user.id || conversation.userBId === session.user.id;
         } else if (conversation.groupId) {
             // Check if user is in the group
-            isParticipant = conversation.group?.members.some(m => m.userId === session.user.id) || false;
+            isParticipant = conversation.group?.members.some((m: any) => m.userId === session.user.id) || false;
         }
 
         if (!isParticipant) {
@@ -65,6 +65,38 @@ export async function DELETE(
         console.error("Error deleting conversation:", error);
         return NextResponse.json(
             { error: "Error al eliminar conversación" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PATCH(
+    req: NextRequest,
+    props: { params: Promise<{ id: string }> }
+) {
+    const params = await props.params;
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+        }
+
+        const body = await req.json();
+        const { isPinned, isFavorite } = body;
+
+        const conversation = await prisma.conversation.update({
+            where: { id: params.id },
+            data: {
+                ...(typeof isPinned === 'boolean' ? { isPinned } : {}),
+                ...(typeof isFavorite === 'boolean' ? { isFavorite } : {})
+            }
+        });
+
+        return NextResponse.json({ success: true, conversation });
+    } catch (error) {
+        console.error("Error updating conversation:", error);
+        return NextResponse.json(
+            { error: "Error al actualizar conversación" },
             { status: 500 }
         );
     }
