@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
             where: { id: session.user.id },
         });
 
-        if (!user || user.role !== "SUPERADMIN") {
+        if (!user || (user.role !== "SUPERADMIN" && user.role !== "ADMIN_EMPRESA")) {
             return NextResponse.json(
                 { error: "No autorizado - Solo administradores" },
                 { status: 403 }
@@ -58,15 +58,15 @@ export async function GET(req: NextRequest) {
         // Calculate aggregate stats
         const stats = {
             total: campaigns.length,
-            active: campaigns.filter(c => c.status === "ACTIVE").length,
-            draft: campaigns.filter(c => c.status === "DRAFT").length,
-            paused: campaigns.filter(c => c.status === "PAUSED").length,
-            completed: campaigns.filter(c => c.status === "COMPLETED").length,
-            totalSpent: campaigns.reduce((sum, c) => sum + c.spent, 0),
-            totalBudget: campaigns.reduce((sum, c) => sum + c.totalBudget, 0),
-            totalImpressions: campaigns.reduce((sum, c) => sum + c.impressions, 0),
-            totalClicks: campaigns.reduce((sum, c) => sum + c.clicks, 0),
-            totalConversions: campaigns.reduce((sum, c) => sum + c.conversions, 0),
+            active: campaigns.filter((c: any) => c.status === "ACTIVE").length,
+            draft: campaigns.filter((c: any) => c.status === "DRAFT").length,
+            paused: campaigns.filter((c: any) => c.status === "PAUSED").length,
+            completed: campaigns.filter((c: any) => c.status === "COMPLETED").length,
+            totalSpent: campaigns.reduce((sum: number, c: any) => sum + (c.spent || 0), 0),
+            totalBudget: campaigns.reduce((sum: number, c: any) => sum + (c.totalBudget || 0), 0),
+            totalImpressions: campaigns.reduce((sum: number, c: any) => sum + (c.impressions || 0), 0),
+            totalClicks: campaigns.reduce((sum: number, c: any) => sum + (c.clicks || 0), 0),
+            totalConversions: campaigns.reduce((sum: number, c: any) => sum + (c.conversions || 0), 0),
         };
 
         return NextResponse.json({

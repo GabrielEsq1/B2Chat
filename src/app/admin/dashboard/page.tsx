@@ -26,7 +26,7 @@ export default function AdminDashboard() {
         try {
             const [usersRes, campaignsRes] = await Promise.all([
                 fetch('/api/admin/users'),
-                fetch('/api/campaigns')
+                fetch('/api/admin/campaigns') // Fixed: use admin endpoint
             ]);
 
             const usersData = await usersRes.json();

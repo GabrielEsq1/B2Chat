@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
         const session = await getServerSession(authOptions);
 
         // Only admin can access
-        if (session?.user?.email !== "admin@b2bchat.com") {
+        if (session?.user?.role !== "SUPERADMIN" && session?.user?.role !== "ADMIN_EMPRESA") {
             return NextResponse.json(
                 { error: "No autorizado" },
                 { status: 403 }
