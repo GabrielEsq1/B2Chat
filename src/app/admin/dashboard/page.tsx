@@ -515,7 +515,7 @@ export default function AdminDashboard() {
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-2xl max-w-md w-full p-6">
                             <h3 className="text-xl font-bold text-gray-900 mb-4">¿Eliminar Usuario?</h3>
-                            <p className="mb-4">Esta acción no se puede deshacer.</p>
+                            <p className="mb-4 text-gray-700">Esta acción no se puede deshacer. Se eliminarán todas las campañas, tiendas y chats asociados.</p>
                             <div className="flex justify-end gap-3">
                                 <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 bg-gray-200 rounded">Cancelar</button>
                                 <button onClick={handleDeleteUser} className="px-4 py-2 bg-red-600 text-white rounded">Eliminar</button>

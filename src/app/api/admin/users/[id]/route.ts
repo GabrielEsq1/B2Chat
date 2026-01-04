@@ -58,9 +58,39 @@ export async function DELETE(
             return NextResponse.json({ error: "No se puede eliminar a un Super Admin" }, { status: 400 });
         }
 
-        // Cascading deletes usually handled by database, but we might want to manually clean up sensitive relations if not
-        await prisma.user.delete({
-            where: { id },
+        // Manual cascading delete for relations without database-level cascade
+        await prisma.$transaction(async (tx: any) => {
+            // 1. Delete AdCampaigns (Creatives cascade from Campaign)
+            await tx.adCampaign.deleteMany({ where: { userId: id } });
+
+            // 2. Delete Stores (Products cascade from Store)
+            await tx.store.deleteMany({ where: { ownerUserId: id } });
+
+            // 3. Delete Subscriptions
+            await tx.subscription.deleteMany({ where: { userId: id } });
+
+            // 4. Delete Messages sent by user
+            await tx.message.deleteMany({ where: { senderUserId: id } });
+
+            // 5. Delete Conversations where user is A or B
+            // Note: This is aggressive, it cleans up chats associated with the deleted user.
+            // Messages in these conversations need to be deleted first if not cascading.
+            const userConversations = await tx.conversation.findMany({
+                where: { OR: [{ userAId: id }, { userBId: id }] },
+                select: { id: true }
+            });
+            const conversationIds = userConversations.map((c: any) => c.id);
+
+            if (conversationIds.length > 0) {
+                await tx.message.deleteMany({ where: { conversationId: { in: conversationIds } } });
+                await tx.conversation.deleteMany({ where: { id: { in: conversationIds } } });
+            }
+
+            // 6. Delete Group Memberships (Handled by DB cascade but good to be explicit/safe)
+            // await tx.groupMember.deleteMany({ where: { userId: id } });
+
+            // 7. Finally delete the User
+            await tx.user.delete({ where: { id } });
         });
 
         return NextResponse.json({ success: true });
