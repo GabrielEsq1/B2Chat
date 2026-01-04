@@ -96,6 +96,102 @@ export default function AdminDashboard() {
         }
     };
 
+    // User Management State
+    const [page, setPage] = useState(1);
+    const usersPerPage = 5;
+
+    // User Action Modals State
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [resetPassModalOpen, setResetPassModalOpen] = useState(false);
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<any | null>(null);
+    const [newPassword, setNewPassword] = useState("");
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        position: "",
+        industry: "",
+        role: "USER"
+    });
+
+    const handleEditClick = (user: any) => {
+        setSelectedUser(user);
+        setFormData({
+            name: user.name || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            position: user.position || "",
+            industry: user.industry || "",
+            role: user.role || "USER"
+        });
+        setEditModalOpen(true);
+    };
+
+    const handleUpdateUser = async () => {
+        if (!selectedUser) return;
+        try {
+            const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            if (res.ok) {
+                alert('Usuario actualizado correctamente');
+                setEditModalOpen(false);
+                loadData();
+            } else {
+                alert('Error al actualizar');
+            }
+        } catch (error) {
+            console.error('Error updating:', error);
+        }
+    };
+
+    const handleResetPassword = async () => {
+        if (!selectedUser || !newPassword) return;
+        try {
+            const res = await fetch(`/api/admin/users/${selectedUser.id}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: newPassword })
+            });
+            if (res.ok) {
+                alert('Contraseña restablecida correctamente');
+                setResetPassModalOpen(false);
+                setNewPassword("");
+            } else {
+                alert('Error al restablecer contraseña');
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!selectedUser) return;
+        try {
+            const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+                method: 'DELETE'
+            });
+            if (res.ok) {
+                alert('Usuario eliminado correctamente');
+                setDeleteConfirmOpen(false);
+                loadData();
+            } else {
+                alert('Error al eliminar usuario');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
+    };
+
+    // Pagination Logic
+    const indexOfLastUser = page * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(users.length / usersPerPage);
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-slate-900 flex items-center justify-center">
@@ -105,7 +201,7 @@ export default function AdminDashboard() {
     }
 
     const pendingCampaigns = campaigns.filter(c => c.status === 'PENDING' || c.status === 'REVIEW');
-    const activeCampaigns = campaigns.filter(c => c.status === 'ACTIVE' || c.status === 'PAUSED');
+    const allOtherCampaigns = campaigns.filter(c => c.status !== 'PENDING' && c.status !== 'REVIEW');
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-slate-900 p-8">
@@ -155,8 +251,8 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-green-100 rounded-xl"><TrendingUp className="h-6 w-6 text-green-600" /></div>
                             <div>
-                                <p className="text-sm text-gray-600">Campañas Activas</p>
-                                <p className="text-2xl font-bold text-gray-900">{campaigns.filter(c => c.status === 'ACTIVE').length}</p>
+                                <p className="text-sm text-gray-600">Campañas Totales</p>
+                                <p className="text-2xl font-bold text-gray-900">{campaigns.length}</p>
                             </div>
                         </div>
                     </div>
@@ -224,14 +320,14 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Active Campaigns Management */}
+                {/* All Campaigns Management */}
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
                     <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-                        <h2 className="text-xl font-bold text-gray-900">Gestión de Campañas Activas</h2>
+                        <h2 className="text-xl font-bold text-gray-900">Todas las Campañas ({allOtherCampaigns.length})</h2>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto max-h-96">
                         <table className="w-full">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gray-50 sticky top-0">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Campaña</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
@@ -240,7 +336,7 @@ export default function AdminDashboard() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {activeCampaigns.map((campaign) => (
+                                {allOtherCampaigns.map((campaign) => (
                                     <tr key={campaign.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <div>
@@ -251,7 +347,10 @@ export default function AdminDashboard() {
                                             {campaign.user?.name}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                                                campaign.status === 'COMPLETED' ? 'bg-blue-100 text-blue-700' :
+                                                    campaign.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                                        'bg-gray-100 text-gray-700'
                                                 }`}>
                                                 {campaign.status}
                                             </span>
@@ -273,8 +372,11 @@ export default function AdminDashboard() {
 
                 {/* Users List */}
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
-                        <h2 className="text-xl font-bold text-gray-900">Usuarios Registrados</h2>
+                    <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100 flex justify-between items-center">
+                        <h2 className="text-xl font-bold text-gray-900">Usuarios Registrados ({users.length})</h2>
+                        <div className="flex gap-2 text-sm text-gray-600">
+                            Página {page} de {totalPages}
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -283,20 +385,137 @@ export default function AdminDashboard() {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Empresa</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {users.map((user) => (
+                                {currentUsers.map((user) => (
                                     <tr key={user.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600">{user.company?.name || 'N/A'}</td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEditClick(user)}
+                                                    className="p-1 px-2 bg-blue-100 text-blue-600 rounded text-xs hover:bg-blue-200"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setResetPassModalOpen(true);
+                                                        setNewPassword("");
+                                                    }}
+                                                    className="p-1 px-2 bg-yellow-100 text-yellow-600 rounded text-xs hover:bg-yellow-200"
+                                                >
+                                                    Pass
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedUser(user);
+                                                        setDeleteConfirmOpen(true);
+                                                    }}
+                                                    className="p-1 px-2 bg-red-100 text-red-600 rounded text-xs hover:bg-red-200"
+                                                >
+                                                    Borrar
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
+                    {/* Pagination Controls */}
+                    <div className="p-4 border-t border-gray-200 flex justify-center gap-4">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            Anterior
+                        </button>
+                        <span className="flex items-center px-4">Page {page} of {totalPages}</span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page === totalPages}
+                            className="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
                 </div>
+
+                {/* Modals placed at the end to avoid nesting issues */}
+
+                {/* Edit Modal */}
+                {editModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl max-w-lg w-full p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Editar Usuario</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 border-slate-300"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 border-slate-300"
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button onClick={() => setEditModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded">Cancelar</button>
+                                    <button onClick={handleUpdateUser} className="px-4 py-2 bg-blue-600 text-white rounded">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reset Password Modal */}
+                {resetPassModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl max-w-md w-full p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Cambiar Contraseña</h3>
+                            <input
+                                type="text"
+                                placeholder="Nueva contraseña"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 mb-4 border-slate-300"
+                            />
+                            <div className="flex justify-end gap-3">
+                                <button onClick={() => setResetPassModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded">Cancelar</button>
+                                <button onClick={handleResetPassword} className="px-4 py-2 bg-yellow-600 text-white rounded">Cambiar</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Modal */}
+                {deleteConfirmOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl max-w-md w-full p-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">¿Eliminar Usuario?</h3>
+                            <p className="mb-4">Esta acción no se puede deshacer.</p>
+                            <div className="flex justify-end gap-3">
+                                <button onClick={() => setDeleteConfirmOpen(false)} className="px-4 py-2 bg-gray-200 rounded">Cancelar</button>
+                                <button onClick={handleDeleteUser} className="px-4 py-2 bg-red-600 text-white rounded">Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
