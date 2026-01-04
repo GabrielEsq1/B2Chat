@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageSquare, Users, UserCircle } from "lucide-react";
+import { Home, MessageSquare, Users, UserCircle, ShieldCheck } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function MobileBottomNav() {
@@ -13,33 +13,45 @@ export default function MobileBottomNav() {
     const hideNav = !session?.user || ["/login", "/register", "/"].includes(pathname || "");
     if (hideNav) return null;
 
+    const isAdmin = session?.user?.role === "SUPERADMIN" || session?.user?.role === "ADMIN_EMPRESA";
+
     const navItems = [
         {
             href: "/dashboard",
             label: "Inicio",
             icon: Home,
+            show: true,
         },
         {
             href: "/chat",
             label: "Chat",
             icon: MessageSquare,
+            show: true,
         },
         {
             href: "/contacts",
             label: "Red",
             icon: Users,
+            show: true,
         },
         {
             href: "/profile",
             label: "Perfil",
             icon: UserCircle,
+            show: true,
+        },
+        {
+            href: "/admin/dashboard",
+            label: "Admin",
+            icon: ShieldCheck,
+            show: isAdmin,
         },
     ];
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden pb-safe">
             <div className="flex items-center justify-around h-16">
-                {navItems.map((item) => {
+                {navItems.filter(item => item.show).map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
 
