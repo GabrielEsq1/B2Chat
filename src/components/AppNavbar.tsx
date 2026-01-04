@@ -13,6 +13,7 @@ import {
     Menu,
     X,
     UserCircle,
+    ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 import CreditBalance from "./monetization/CreditBalance";
@@ -58,8 +59,8 @@ export default function AppNavbar() {
         },
         {
             href: "/admin/dashboard",
-            label: "Admin",
-            icon: Megaphone,
+            label: "Panel Admin",
+            icon: ShieldCheck,
             show: isAdmin,
         },
     ];
