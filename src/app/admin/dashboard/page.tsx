@@ -14,9 +14,12 @@ export default function AdminDashboard() {
     const [processingId, setProcessingId] = useState<string | null>(null);
 
     useEffect(() => {
-        // Solo admin puede acceder
-        if (session?.user?.email !== "admin@b2bchat.com" && session?.user?.email !== "superadmin@b2bchat.com") {
-            router.push('/dashboard');
+        // Check role based access
+        if (session?.user?.role !== "SUPERADMIN" && session?.user?.role !== "ADMIN_EMPRESA") {
+            // Optional: Show a "Not Authorized" message or redirect
+            // For now, if they are not admin, redirect. 
+            // Better constraint: check if session exists first.
+            if (session) router.push('/dashboard');
             return;
         }
         loadData();
@@ -214,7 +217,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
-                            <p className="text-blue-100">Admin: {session?.user?.email}</p>
+                            <p className="text-blue-100">{session?.user?.name} ({session?.user?.role})</p>
                         </div>
                     </div>
                     <div className="flex gap-4">
@@ -429,23 +432,27 @@ export default function AdminDashboard() {
                         </table>
                     </div>
                     {/* Pagination Controls */}
-                    <div className="p-4 border-t border-gray-200 flex justify-center gap-4">
-                        <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                            className="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            Anterior
-                        </button>
-                        <span className="flex items-center px-4">Page {page} of {totalPages}</span>
-                        <button
-                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                            disabled={page === totalPages}
-                            className="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            Siguiente
-                        </button>
-                    </div>
+                    {totalPages > 1 && (
+                        <div className="p-4 border-t border-gray-200 flex justify-center gap-4 bg-gray-50">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                            >
+                                ← Anterior
+                            </button>
+                            <span className="flex items-center px-4 font-medium text-gray-700">
+                                Página {page} de {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Siguiente →
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Modals placed at the end to avoid nesting issues */}

@@ -13,7 +13,7 @@ export async function POST(
     try {
         const session = await getServerSession(authOptions);
 
-        if (session?.user?.role !== "SUPERADMIN" && session?.user?.email !== "admin@b2bchat.com") {
+        if (session?.user?.role !== "SUPERADMIN" && session?.user?.role !== "ADMIN_EMPRESA") {
             return NextResponse.json({ error: "No autorizado" }, { status: 403 });
         }
 
