@@ -487,10 +487,58 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
               <MoreVertical className="h-5 w-5" />
             </button>
             {showChatOptions && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
-                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50">{t('chat.window.options.info')}</button>
-                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50">{t('chat.window.options.mute')}</button>
-                <button className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50">{t('chat.window.options.delete')}</button>
+              <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                <button
+                  onClick={() => {
+                    const info = conversation.type === 'GROUP'
+                      ? `Grupo: ${conversation.name}\nMiembros: ${conversation.memberCount}`
+                      : `Contacto: ${conversation.otherUser?.name || 'Usuario'}\nTeléfono: ${conversation.otherUser?.phone || 'Sin teléfono'}\nID: ${conversation.otherUser?.id || 'N/A'}`;
+                    alert(info);
+                    setShowChatOptions(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4 text-gray-400" />
+                  {t('chat.window.options.info', { defaultValue: 'Info. del contacto' })}
+                </button>
+                <button
+                  onClick={() => {
+                    toggleSound();
+                    setShowChatOptions(false);
+                    // Slight delay to verify state change visually if we had an indicator, for now just alert
+                    // setTimeout(() => alert(soundEnabled ? 'Sonido desactivado' : 'Sonido activado'), 100);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  {soundEnabled ? <Volume2 className="h-4 w-4 text-blue-500" /> : <VolumeX className="h-4 w-4 text-gray-400" />}
+                  {soundEnabled ? t('chat.window.options.mute', { defaultValue: 'Silenciar notificaciones' }) : t('chat.window.options.unmute', { defaultValue: 'Activar sonido' })}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm(t('chat.delete_confirm', { defaultValue: '¿Estás seguro de que deseas eliminar este chat? Esta acción no se puede deshacer.' }))) {
+                      try {
+                        const res = await fetch('/api/conversations', {
+                          method: 'DELETE',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ conversationIds: [conversation.id] })
+                        });
+                        if (res.ok) {
+                          window.location.href = '/dashboard';
+                        } else {
+                          alert(t('common.error', { defaultValue: 'Error al eliminar' }));
+                        }
+                      } catch (error) {
+                        console.error('Error deleting:', error);
+                        alert(t('common.error', { defaultValue: 'Error al eliminar' }));
+                      }
+                    }
+                    setShowChatOptions(false);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4 text-red-400" />
+                  {t('chat.window.options.delete', { defaultValue: 'Eliminar chat' })}
+                </button>
               </div>
             )}
           </div>
