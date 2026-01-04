@@ -12,6 +12,7 @@ import {
     Megaphone,
     ArrowRight,
     Store,
+    ShieldCheck,
 } from "lucide-react";
 import StoriesRail from "@/components/ads/StoriesRail";
 import BookingBanner from "@/components/dashboard/BookingBanner";
@@ -256,6 +257,25 @@ export default function DashboardPage() {
                             Crea y gestiona tus campañas publicitarias
                         </p>
                     </Link>
+
+                    {/* Admin Dashboard Card */}
+                    {(session?.user?.role === "SUPERADMIN" || session?.user?.role === "ADMIN_EMPRESA") && (
+                        <Link
+                            href="/admin/dashboard"
+                            className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all transform hover:scale-[1.02] group"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
+                                    <ShieldCheck className="h-6 w-6 text-white" />
+                                </div>
+                                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-red-600 transition-colors" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Panel Administrativo</h3>
+                            <p className="text-gray-600 text-sm">
+                                Gestiona usuarios, campañas y configuración del sistema
+                            </p>
+                        </Link>
+                    )}
 
                     {loadingStores ? (
                         <div className="bg-white rounded-2xl shadow-xl p-6">
