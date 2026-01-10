@@ -204,7 +204,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                                 to: member.user.email,
                                 senderName: session.user.name || 'Un usuario',
                                 messageText: text || (file ? `Archivo: ${file.name}` : ''),
-                                conversationLink: `${baseUrl}/chat/${params.id}`
+                                conversationLink: "https://b2bchat.co/chat"
                             });
                             if (result.success) emailSent = true;
                         }
@@ -303,7 +303,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                         to: recipient.email,
                         senderName: session.user.name || 'Un usuario',
                         messageText: text || (file ? `Archivo: ${file.name}` : ''),
-                        conversationLink: `${baseUrl}/chat/${params.id}`
+                        conversationLink: "https://b2bchat.co/chat"
                     });
                     if (result.success) emailSent = true;
                 }

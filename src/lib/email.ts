@@ -126,8 +126,8 @@ export async function sendExternalGhostMessage({
           </p>
           
           <div style="text-align: center; margin-top: 30px;">
-             <a href="https://b2bchat.co/guest/chat/${conversationId}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-               Ver mensaje en B2BChat
+             <a href="https://b2bchat.co" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+               Unirse a B2BChat para responder
              </a>
           </div>
 

@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
                     to: otherUser.email,
                     senderName: session.user.name || 'Un usuario',
                     messageText: text,
-                    conversationLink: `${baseUrl}/chat/${conversationId}`
+                    conversationLink: "https://b2bchat.co/chat"
                 });
                 emailSent = true;
             }
