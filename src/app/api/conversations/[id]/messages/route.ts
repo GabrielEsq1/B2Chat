@@ -200,13 +200,17 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                 if (otherMembers) {
                     for (const member of otherMembers) {
                         if (member.user.email) {
-                            await sendNewMessageNotification({
+                            const result = await sendNewMessageNotification({
                                 to: member.user.email,
                                 senderName: session.user.name || 'Un usuario',
                                 messageText: text || (file ? `Archivo: ${file.name}` : ''),
                                 conversationLink: `${baseUrl}/chat/${params.id}`
                             });
-                            emailSent = true;
+                            if (result.success) {
+                                emailSent = true;
+                            } else {
+                                console.error("[Messages API] Group email failed:", result.error);
+                            }
                         }
                     }
                 }
@@ -219,13 +223,18 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                 });
 
                 if (recipient?.email && !recipient.isBot) {
-                    await sendNewMessageNotification({
+                    const result = await sendNewMessageNotification({
                         to: recipient.email,
                         senderName: session.user.name || 'Un usuario',
                         messageText: text || (file ? `Archivo: ${file.name}` : ''),
                         conversationLink: `${baseUrl}/chat/${params.id}`
                     });
-                    emailSent = true;
+
+                    if (result.success) {
+                        emailSent = true;
+                    } else {
+                        console.error("[Messages API] Direct email failed:", result.error);
+                    }
                 }
             }
         } catch (emailError) {
