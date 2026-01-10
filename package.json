@@ -8,6 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "onboard": "tsx scripts/bulk-onboard-users.ts",
     "test:apis": "node scripts/check-api-health.js",
     "health": "node scripts/check-api-health.js"
