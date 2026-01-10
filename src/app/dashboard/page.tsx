@@ -146,14 +146,16 @@ export default function DashboardPage() {
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <Link
-                                    href="/"
+                                <a
+                                    href="http://creatiendas.co"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="inline-flex items-center gap-3 px-8 py-4 bg-white text-blue-900 rounded-2xl font-black text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl active:scale-95 group"
                                 >
                                     <Store className="h-6 w-6 group-hover:rotate-12 transition-transform" />
                                     Visitar Creatiendas
                                     <ArrowRight className="h-5 w-5" />
-                                </Link>
+                                </a>
                                 <p className="text-blue-300 text-sm font-bold flex items-center gap-2">
                                     <Users className="h-4 w-4" />
                                     +5,000 empresas conectadas
