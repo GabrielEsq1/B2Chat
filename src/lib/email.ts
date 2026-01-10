@@ -74,3 +74,79 @@ export async function sendNewMessageNotification({
     return { success: false, error };
   }
 }
+
+interface SendExternalGhostMessageProps {
+  to: string;
+  senderName: string;
+  companyName: string;
+  messageText: string;
+  conversationId: string; // Required for reply routing
+  replyLink?: string;
+}
+
+export async function sendExternalGhostMessage({
+  to,
+  senderName,
+  companyName,
+  messageText,
+  conversationId,
+}: SendExternalGhostMessageProps) {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY is not defined. External message skipped.');
+    return { success: false, error: 'API Key missing' };
+  }
+
+  try {
+    const resend = getResend();
+    if (!resend) {
+      return { success: false, error: 'Resend client not initialized' };
+    }
+
+    // Unique Reply-To for inbound routing: reply-{conversationId}@inbound.b2bchat.co
+    // Note: User must configure this domain in their DNS and Email Provider (e.g. Resend/Mailgun)
+    const replyToAddress = `reply-${conversationId}@inbound.b2bchat.co`;
+
+    const { data, error } = await resend.emails.send({
+      from: 'B2BChat <notifications@b2bchat.co>',
+      replyTo: replyToAddress,
+      to: [to],
+      subject: `${senderName} de ${companyName} te envió un mensaje`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #333;">Hola, tienes un nuevo mensaje comercial</h2>
+          <p style="font-size: 16px; color: #555;">
+            <strong>${senderName}</strong> (de ${companyName}) quiere contactar contigo a través de B2BChat:
+          </p>
+          <div style="background-color: #f0f7ff; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0;">
+            "${messageText}"
+          </div>
+          <p style="font-size: 14px; color: #666; margin-top: 20px;">
+            Este mensaje fue enviado desde nuestra plataforma. 
+            <strong>Puedes responder directamente a este correo</strong> para continuar la conversación.
+          </p>
+          
+          <div style="text-align: center; margin-top: 30px;">
+             <a href="https://b2bchat.co/guest/chat/${conversationId}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+               Ver mensaje en B2BChat
+             </a>
+          </div>
+
+          <hr style="margin-top: 40px; border: 0; border-top: 1px solid #eee;" />
+          <p style="font-size: 11px; color: #999; text-align: center;">
+            B2BChat conecta empresas. Si no eres el destinatario correcto, por favor ignora este mensaje.
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Error sending external email via Resend:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Unexpected error sending external email:', error);
+    return { success: false, error };
+  }
+}

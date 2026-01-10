@@ -9,8 +9,11 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 
+import { useSession } from "next-auth/react";
+
 export default function HubPage() {
     const { t } = useLanguage();
+    const { status } = useSession();
 
     const experience = [
         {
@@ -95,9 +98,16 @@ export default function HubPage() {
                         </div>
                         <span className="font-bold text-xl tracking-tight text-gray-900">GNOSIS <span className="text-blue-600">HUB</span></span>
                     </Link>
-                    <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-                        {t('common.back')}
-                    </Link>
+                    {status === "authenticated" ? (
+                        <Link href="/dashboard" className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                            <Briefcase className="w-4 h-4" />
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+                            {t('common.back')}
+                        </Link>
+                    )}
                 </div>
             </nav>
 

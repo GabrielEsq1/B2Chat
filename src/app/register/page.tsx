@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, User, Phone, Lock, Building2, CheckCircle } from "lucide-react";
@@ -9,6 +10,7 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function RegisterPage() {
     const router = useRouter();
     const { t } = useLanguage();
+    const { status } = useSession();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -19,6 +21,12 @@ export default function RegisterPage() {
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/dashboard");
+        }
+    }, [status, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Phone, Lock, ArrowRight, Mail, User, CheckCircle } from "lucide-react";
@@ -11,6 +11,7 @@ function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { t } = useLanguage();
+    const { status } = useSession();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         phone: "",
@@ -18,6 +19,12 @@ function LoginContent() {
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/dashboard");
+        }
+    }, [status, router]);
 
     useEffect(() => {
         if (searchParams?.get("registered") === "true") {

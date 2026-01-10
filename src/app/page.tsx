@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
     MessageSquare, Users, Zap, TrendingUp, Clock, Shield,
@@ -16,7 +17,14 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function LandingPage() {
     const router = useRouter();
     const { t } = useLanguage();
+    const { status } = useSession();
     const [videoPlaying, setVideoPlaying] = useState(false);
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/dashboard");
+        }
+    }, [status, router]);
 
     // Cast benefits to array to avoid TypeScript errors if type inference fails
     const benefits = (t('home.benefits') as unknown as any[]).map((b, i) => ({

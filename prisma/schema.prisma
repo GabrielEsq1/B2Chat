@@ -22,6 +22,19 @@ model Company {
   isActivated            Boolean             @default(false)
   lastInvitationSent     DateTime?
   publicInfo             Json?
+  
+  // Fields for external discovery (Discovery 2.0)
+  isProvisional          Boolean             @default(false)
+  externalSource         String?             // e.g. "GOOGLE_PLACES", "YELP", "HUNTER"
+  externalId             String?             @unique // ID in the external source
+  enrichmentData         Json?               // Raw data from external API
+
+  // Economic Profile (Block 3)
+  purchasingPower        String?             // LOW, MEDIUM, HIGH, ENTERPRISE
+  dealVelocity           String?             // FAST, NORMAL, SLOW
+  avgResponseTime        Int?                // Minutes
+  reputationScore        Int                 @default(100)
+
   adCampaigns            AdCampaign[]
   connectionsAsA         CompanyConnection[] @relation("CompanyA")
   connectionsAsB         CompanyConnection[] @relation("CompanyB")
@@ -47,6 +60,12 @@ model User {
   profilePicture         String?
   isBot                  Boolean             @default(false)
   botPersonality         String?
+  
+  // Fields for external discovery (Discovery 2.0)
+  isGhost                Boolean             @default(false)
+  ghostEmail             String?             // Real external email
+  ghostPhone             String?             // Real external WhatsApp
+
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
   resetCode              String?
@@ -67,7 +86,7 @@ model User {
   groupMemberships       GroupMember[]
   sentMessages           Message[]
   stores                 Store[]
-  subscription           Subscription?
+  // subscription           Subscription? // Moved to Company level
   walletTransactions     Transaction[]       @relation("UserTransactions")
   company                Company?            @relation(fields: [companyId], references: [id])
 }
@@ -114,6 +133,18 @@ model Conversation {
   userA      User?     @relation("UserA", fields: [userAId], references: [id])
   userB      User?     @relation("UserB", fields: [userBId], references: [id])
   messages   Message[]
+  
+  // Economic & Intent Signals (Evolution Plan Block 1)
+  intentScore     Int       @default(0) // 0-100
+  estimatedValue  Float?
+  currency        String    @default("USD")
+  stage           String    @default("DISCOVERY") // DISCOVERY, QUALIFIED, PROPOSAL, CLOSING, CLOSED
+  lastAiAnalysis  DateTime?
+  aiSummary       String?
+  nextSteps       Json?
+  
+  // WhatsApp Bridge (Back-to-Back)
+  lastChannel     String    @default("INTERNAL") // INTERNAL, EMAIL, WHATSAPP
 }
 
 model Group {
@@ -172,6 +203,10 @@ model Message {
   emailLogs      EmailLog[]
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   sender         User         @relation(fields: [senderUserId], references: [id])
+
+  // WhatsApp/Email Bridge
+  channel        String       @default("INTERNAL") // INTERNAL, EMAIL, WHATSAPP, SYSTEM
+  externalId     String?      // ID from Twilio/SendGrid
 }
 
 model AdCampaign {
@@ -258,19 +293,81 @@ model ExternalStore {
   updatedAt   DateTime @updatedAt
 }
 
+// --- SAAS BILLING ENGINE (Fase 1: Data Model) ---
+
+model Plan {
+  id            String         @id @default(uuid())
+  code          String         @unique // FREE, STARTER, PRO, ENTERPRISE
+  name          String
+  description   String?
+  priceMonthly  Float
+  currency      String         @default("USD")
+  
+  // Feature Gating
+  maxUsers      Int            @default(1)
+  canUseAI      Boolean        @default(false)
+  canUseWhatsApp Boolean       @default(false) // Included whatsapp?
+  whatsappLimit Int            @default(0)     // Included messages/convs
+  historyDays   Int?           // null = infinite
+  
+  // Payment Gateways
+  stripePriceId String?
+  paypalPlanId  String?        // P-XXXXXXXXXXXXXXXXXXXX
+
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
 model Subscription {
   id                   String    @id @default(uuid())
-  userId               String    @unique
-  companyId            String?   @unique
+  companyId            String    @unique // One plan per company
+  planId               String
+  
+  status               String    @default("ACTIVE") // ACTIVE, PAST_DUE, CANCELED
+  currentPeriodStart   DateTime  @default(now())
+  currentPeriodEnd     DateTime? 
+  
+  // Usage tracking reset monthly
+  usageRecords         UsageRecord[]
+  addons               AddonPurchase[]
+  
+  billingProvider      String?   // STRIPE, PAYPAL
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  status               String    @default("active")
-  currentPeriodEnd     DateTime?
+  paypalSubscriptionId String?   // I-XXXXXXXXXXXXXXXX
+
+  plan                 Plan      @relation(fields: [planId], references: [id])
+  company              Company   @relation(fields: [companyId], references: [id])
+  
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
-  plan                 String    @default("FREE")
-  company              Company?  @relation(fields: [companyId], references: [id])
-  user                 User      @relation(fields: [userId], references: [id])
+}
+
+model UsageRecord {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  metric         String       // WHATSAPP_CONVERSATIONS, EMAILS_SENT, AI_QUERIES
+  count          Int          @default(0)
+  periodStart    DateTime
+  periodEnd      DateTime
+  
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  
+  @@unique([subscriptionId, metric, periodStart])
+}
+
+model AddonPurchase {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  type           String       // WHATSAPP_CREDITS_100
+  amount         Int          // 100
+  remaining      Int          // 100 -> 0
+  purchasedAt    DateTime     @default(now())
+  expiresAt      DateTime?
+  paypalOrderId  String?      // Capture ID
+  
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
 }
 
 model Store {

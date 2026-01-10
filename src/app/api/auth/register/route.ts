@@ -34,14 +34,40 @@ export async function POST(request: Request) {
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // Create company if provided
-        let company = null;
-        if (companyName) {
+        // Create Company (Mandatory for SaaS Model)
+        let company;
+        try {
+            const companyNameFinal = companyName || `${name.split(' ')[0]}'s Workspace`;
+
+            // Fetch FREE Plan
+            const freePlan = await prisma.plan.findUnique({
+                where: { code: 'FREE' }
+            });
+
+            if (!freePlan) {
+                console.error("CRITICAL: FREE Plan not found in DB. Run seed-plans.ts");
+                throw new Error("System configuration error");
+            }
+
             company = await prisma.company.create({
                 data: {
-                    name: companyName,
+                    name: companyNameFinal,
+                    subscription: {
+                        create: {
+                            planId: freePlan.id,
+                            status: 'ACTIVE',
+                            currentPeriodStart: new Date(),
+                            currentPeriodEnd: new Date(new Date().setFullYear(new Date().getFullYear() + 1)) // 1 year free
+                        }
+                    }
                 }
             });
+        } catch (e) {
+            console.error("Error creating company/subscription:", e);
+            return NextResponse.json(
+                { success: false, error: "Error de configuración de cuenta" },
+                { status: 500 }
+            );
         }
 
         // Create user
@@ -51,18 +77,19 @@ export async function POST(request: Request) {
                 email: email || null, // Handle empty string as null
                 phone,
                 passwordHash,
-                role: "USUARIO",
-                companyId: company?.id,
+                role: "ADMIN", // First user is Admin of their Tenant
+                companyId: company.id,
             }
         });
 
         return NextResponse.json({
             success: true,
-            message: "Usuario creado exitosamente",
+            message: "Usuario y Organización creados exitosamente",
             user: {
                 id: user.id,
                 name: user.name,
                 phone: user.phone,
+                companyId: user.companyId
             }
         });
     } catch (error: any) {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X, Mail } from "lucide-react";
+import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X, Mail, Zap, DollarSign, Check } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
 import FastAdsBar from "./FastAdsBar";
@@ -20,8 +20,23 @@ interface Message {
   isStarred?: boolean;
 }
 
+interface EconomicSignals {
+  intentScore: number;
+  estimatedValue?: number;
+  currency?: string;
+  stage: string;
+}
+
+interface ConversationWithSignals extends Record<string, any> {
+  // Extending base conversation with our signals (prop drilled or fetched)
+  intentScore?: number;
+  estimatedValue?: number;
+  currency?: string;
+  stage?: string;
+}
+
 interface ChatWindowProps {
-  conversation?: any;
+  conversation?: ConversationWithSignals;
   onBack?: () => void;
 }
 
@@ -41,6 +56,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const notifiedMessageIds = useRef<Set<string>>(new Set());
   const [showSearchInChat, setShowSearchInChat] = useState(false);
   const [showChatOptions, setShowChatOptions] = useState(false);
+  const [showContactInfo, setShowContactInfo] = useState(false);
   const [inChatSearchQuery, setInChatSearchQuery] = useState("");
 
   // Initialize notification sound and load sound preference
@@ -414,10 +430,30 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                   {conversation.memberCount} {t('chat.window.member')}
                 </p>
               ) : (
+
                 <>
                   <p className="text-[10px] font-bold text-gray-400 uppercase truncate max-w-[120px]">
                     {conversation.otherUser?.phone || ''}
                   </p>
+
+                  {/* Economic Signals (Block 1 - Momento AHA) */}
+                  {(conversation.intentScore && conversation.intentScore > 50) ? (
+                    <div className="flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-200" title="Alta probabilidad de cierre">
+                      <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                      <span className="text-[9px] font-black text-amber-700 uppercase tracking-tighter">HOT LEAD</span>
+                    </div>
+                  ) : null}
+
+                  {(conversation.estimatedValue) ? (
+                    <div className="flex items-center gap-1 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-200" title="Valor estimado del negocio">
+                      <DollarSign className="h-3 w-3 text-emerald-600" />
+                      <span className="text-[9px] font-black text-emerald-700 uppercase tracking-tighter">
+                        {conversation.currency || '$'} {conversation.estimatedValue.toLocaleString()}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Fallback to Online status only if no hot signals or just always show presence? let's keep presence but minimal */}
                   {isConnected ? (
                     <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded-full ring-1 ring-green-100">
                       <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
@@ -498,10 +534,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
               <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-2xl border border-gray-100 py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
                 <button
                   onClick={() => {
-                    const info = conversation.type === 'GROUP'
-                      ? `Grupo: ${conversation.name}\nMiembros: ${conversation.memberCount}`
-                      : `Contacto: ${conversation.otherUser?.name || 'Usuario'}\nTeléfono: ${conversation.otherUser?.phone || 'Sin teléfono'}`;
-                    alert(info);
+                    setShowContactInfo(true);
                     setShowChatOptions(false);
                   }}
                   className="w-full px-4 py-2.5 text-left text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -559,76 +592,132 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       </div>
       */}
 
-      {/* Inline Search Bar */}
-      {showSearchInChat && (
-        <div className="bg-white px-4 py-3 border-b border-gray-100 animate-in slide-in-from-top duration-300">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              autoFocus
-              type="text"
-              placeholder={t('chat.window.options.search')}
-              className="w-full bg-gray-50 border-none rounded-xl py-2.5 pl-10 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-100 outline-none"
-              value={inChatSearchQuery}
-              onChange={(e) => setInChatSearchQuery(e.target.value)}
-            />
-            {inChatSearchQuery && (
+      {/* Smart Actions (Block 4 - Playbooks Invisibles) */}
+      {conversation.stage !== 'CLOSED' && (
+        <div className="bg-slate-50 px-4 py-2 border-b border-gray-200 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <span className="text-[10px] uppercase font-bold text-gray-400 whitespace-nowrap">Sugerencias:</span>
+
+          {/* Contextual Suggestions based on Stage/Intent */}
+          {(!conversation.stage || conversation.stage === 'DISCOVERY') && (
+            <>
               <button
-                onClick={() => setInChatSearchQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full text-gray-400"
+                onClick={() => setNewMessage("Hola, ¿en qué te puedo ayudar hoy?")}
+                className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors whitespace-nowrap"
+              >
+                👋 Saludar
+              </button>
+              <button
+                onClick={() => setNewMessage("cuéntame más sobre lo que necesitas")}
+                className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors whitespace-nowrap"
+              >
+                🔍 Indagar necesidad
+              </button>
+            </>
+          )}
+
+          {(conversation.stage === 'QUALIFIED' || (conversation.intentScore || 0) > 30) && (
+            <button
+              onClick={() => {
+                alert("Próximamente: Generador de Cotizaciones PDF");
+                // Future: Open Quote Builder Modal
+              }}
+              className="flex items-center gap-1 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs font-bold text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-colors whitespace-nowrap"
+            >
+              <DollarSign className="h-3 w-3" />
+              Enviar Cotización
+            </button>
+          )}
+
+          {(conversation.stage === 'CLOSING' || (conversation.intentScore || 0) > 60) && (
+            <button
+              onClick={() => {
+                setNewMessage("Perfecto. ¿Prefieres pagar por Nequi o Transferencia?");
+              }}
+              className="flex items-center gap-1 px-3 py-1 bg-green-50 border border-green-200 rounded-full text-xs font-bold text-green-700 hover:bg-green-100 hover:border-green-300 transition-colors whitespace-nowrap"
+            >
+              <Check className="h-3 w-3" />
+              Cerrar Venta
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Inline Search Bar */}
+      {
+        showSearchInChat && (
+          <div className="bg-white px-4 py-3 border-b border-gray-100 animate-in slide-in-from-top duration-300">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                autoFocus
+                type="text"
+                placeholder={t('chat.window.options.search')}
+                className="w-full bg-gray-50 border-none rounded-xl py-2.5 pl-10 pr-10 text-sm font-bold focus:ring-2 focus:ring-blue-100 outline-none"
+                value={inChatSearchQuery}
+                onChange={(e) => setInChatSearchQuery(e.target.value)}
+              />
+              {inChatSearchQuery && (
+                <button
+                  onClick={() => setInChatSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full text-gray-400"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )
+      }
+
+      {/* Toast Notification for incoming messages */}
+      {
+        toast?.show && (
+          <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
+            <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 min-w-[300px] max-w-md">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <span className="font-semibold text-blue-600">
+                    {toast.senderName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 text-sm">{toast.senderName}</p>
+                  <p className="text-gray-600 text-sm truncate mt-1">{toast.message}</p>
+                </div>
+                <button
+                  onClick={() => setToast(null)}
+                  className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Email Sent Notification */}
+      {
+        emailToast?.show && (
+          <div className="absolute bottom-24 right-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-blue-600 text-white rounded-xl shadow-xl px-5 py-3 border border-blue-500/30 flex items-center gap-3 backdrop-blur-sm">
+              <div className="bg-white/20 p-1.5 rounded-lg">
+                <Mail className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider opacity-80">{t('chat.window.email_toast.title')}</p>
+                <p className="text-sm font-medium">{t('chat.window.email_toast.body', { email: emailToast.recipientEmail })}</p>
+              </div>
+              <button
+                onClick={() => setEmailToast(null)}
+                className="ml-2 hover:bg-white/10 p-1 rounded-md transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification for incoming messages */}
-      {toast?.show && (
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
-          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 min-w-[300px] max-w-md">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <span className="font-semibold text-blue-600">
-                  {toast.senderName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm">{toast.senderName}</p>
-                <p className="text-gray-600 text-sm truncate mt-1">{toast.message}</p>
-              </div>
-              <button
-                onClick={() => setToast(null)}
-                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Email Sent Notification */}
-      {emailToast?.show && (
-        <div className="absolute bottom-24 right-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="bg-blue-600 text-white rounded-xl shadow-xl px-5 py-3 border border-blue-500/30 flex items-center gap-3 backdrop-blur-sm">
-            <div className="bg-white/20 p-1.5 rounded-lg">
-              <Mail className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider opacity-80">{t('chat.window.email_toast.title')}</p>
-              <p className="text-sm font-medium">{t('chat.window.email_toast.body', { email: emailToast.recipientEmail })}</p>
-            </div>
-            <button
-              onClick={() => setEmailToast(null)}
-              className="ml-2 hover:bg-white/10 p-1 rounded-md transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -687,11 +776,13 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       </div>
 
       {/* Typing Indicator */}
-      {isTyping && (
-        <div className="px-4 py-2 text-xs text-gray-500 italic">
-          {t('chat.window.typing')}
-        </div>
-      )}
+      {
+        isTyping && (
+          <div className="px-4 py-2 text-xs text-gray-500 italic">
+            {t('chat.window.typing')}
+          </div>
+        )
+      }
 
       {/* Input */}
       <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 relative">
@@ -725,6 +816,84 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         </form>
       </div>
 
+      {/* Contact Info Modal (Block 3 - Identidad Económica) */}
+      {showContactInfo && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200 relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+
+            <button
+              onClick={() => setShowContactInfo(false)}
+              className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="relative mt-8 flex flex-col items-center">
+              <div className="h-24 w-24 rounded-full bg-white p-1 shadow-xl">
+                <div className="h-full w-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                  {conversation.otherUser?.avatar ? (
+                    <img src={conversation.otherUser.avatar} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-3xl font-black text-gray-400">
+                      {conversation.otherUser?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <h3 className="mt-4 text-xl font-bold text-gray-900 text-center">
+                {conversation.otherUser?.name || 'Usuario'}
+              </h3>
+              <p className="text-sm text-gray-500 font-medium">{conversation.otherUser?.phone}</p>
+
+              {/* Economic Scorecard */}
+              <div className="mt-6 w-full bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 text-center">Perfil Económico</h4>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Reputación</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      <span className="font-black text-gray-800">4.9</span>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Capacidad</span>
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4 text-emerald-500" />
+                      <span className="font-black text-gray-800">ALTA</span>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Velocidad</span>
+                    <div className="flex items-center gap-1">
+                      <Zap className="h-4 w-4 text-amber-500" />
+                      <span className="font-black text-gray-800">RÁPIDA</span>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Cierres</span>
+                    <span className="font-black text-gray-800">12</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 w-full flex gap-3">
+                <button className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                  Ver Perfil
+                </button>
+                <button className="flex-1 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all">
+                  Reportar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Animation Styles */}
       <style jsx>{`
         @keyframes slideDown {
@@ -741,6 +910,6 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           animation: slideDown 0.3s ease-out;
         }
       `}</style>
-    </div>
+    </div >
   );
 }

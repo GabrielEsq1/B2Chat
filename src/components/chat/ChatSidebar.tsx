@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2, Loader2, Check, Star, Users, VolumeX } from "lucide-react";
+import { Search, Plus, MessageSquare, User, MoreVertical, X, ArrowLeft, Globe, Trash2, Loader2, Check, Star, Users, VolumeX, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import InvitationModal from "./InvitationModal";
 import CreateGroupModal from "./CreateGroupModal";
@@ -29,6 +29,10 @@ interface Conversation {
         avatar?: string;
         profilePicture?: string;
     };
+    // Economic Identity (Block 2)
+    intentScore?: number;
+    estimatedValue?: number;
+    stage?: string;
 }
 
 interface ChatSidebarProps {
@@ -187,12 +191,32 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         memberCount: conv.memberCount,
                         isPinned: conv.isPinned,
                         isFavorite: conv.isFavorite,
+                        intentScore: conv.intentScore || 0,
+                        estimatedValue: conv.estimatedValue,
+                        stage: conv.stage
                     };
                 });
 
                 const sorted = processedConversations.sort((a: any, b: any) => {
                     if (a.isPinned && !b.isPinned) return -1;
                     if (!a.isPinned && b.isPinned) return 1;
+
+                    // Smart Ranking (Block 2): Intent * 0.6 + Recency * 0.4
+                    // Normalize intent (0-100) and Recency (hours since now?)
+                    // For simpler implementation now:
+                    // 1. Pinned
+                    // 2. High Intent (>50) AND Unread -> Top Priority
+                    // 3. Recency
+
+                    const scoreA = (a.intentScore || 0) + (a.unreadCount > 0 ? 50 : 0);
+                    const scoreB = (b.intentScore || 0) + (b.unreadCount > 0 ? 50 : 0);
+
+                    // If sufficient difference in 'Value/Urgency', sort by Score
+                    if (Math.abs(scoreA - scoreB) > 20) {
+                        return scoreB - scoreA;
+                    }
+
+                    // Otherwise sort by recency as standard
                     const dateA = new Date(a.lastMessageAt).getTime();
                     const dateB = new Date(b.lastMessageAt).getTime();
                     return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
@@ -904,11 +928,26 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                     <p className={`text-sm truncate font-bold leading-tight opacity-80 ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>
                                                         {conv.type === "GROUP" && !conv.lastMessage ? `${t('chat.window.member')} • ${conv.memberCount} ${t('chat.sidebar.group_suffix')}` : (conv.lastMessage || t('chat.sidebar.empty_hint'))}
                                                     </p>
-                                                    {conv.unreadCount !== undefined && conv.unreadCount > 0 && (
-                                                        <span className="flex h-6 w-6 items-center justify-center rounded-xl bg-red-500 text-[10px] font-black text-white shadow-lg ring-2 ring-white animate-bounce-slow">
-                                                            {conv.unreadCount}
-                                                        </span>
-                                                    )}
+                                                    <div className="flex flex-col items-end gap-1 min-w-[30px]">
+                                                        {conv.unreadCount !== undefined && conv.unreadCount > 0 && (
+                                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm animate-pulse">
+                                                                {conv.unreadCount}
+                                                            </span>
+                                                        )}
+
+                                                        <div className="flex flex-col items-end gap-0.5 mt-1">
+                                                            {(conv.intentScore && conv.intentScore > 50) && (
+                                                                <span title="Hot Lead">
+                                                                    <Zap className="h-3 w-3 text-amber-500 fill-amber-500 animate-bounce-slow" />
+                                                                </span>
+                                                            )}
+                                                            {(conv.estimatedValue) && (
+                                                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded-sm border border-emerald-100 whitespace-nowrap">
+                                                                    ${conv.estimatedValue.toLocaleString()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 {/* Context Menu Trigger */}
                                                 <div className="absolute top-0 right-0 -mt-1 -mr-2">

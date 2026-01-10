@@ -131,7 +131,18 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                                 {companies.length} empresa{companies.length !== 1 ? "s" : ""} encontrada{companies.length !== 1 ? "s" : ""}
                             </p>
                             {companies.map((company) => {
-                                const contact = company.users[0];
+                                // For local users, we have a direct contact in users[0]
+                                // For external companies, we don't have users array populated yet in the same way, 
+                                // or we might have structured it differently in search/route.ts.
+                                // Let's normalize it.
+
+                                const isExternal = !company.users || company.users.length === 0 || (company as any).isLocal === false;
+                                // In search/route.ts we map external results to have an 'id' that is external (e.g. gmb-...)
+                                // and isLocal: false.
+
+                                // Local results have users populated.
+                                const contact = !isExternal ? company.users[0] : null;
+
                                 return (
                                     <div
                                         key={company.id}
@@ -147,13 +158,13 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                                                         <h4 className="font-semibold text-gray-900 text-lg">
                                                             {company.name}
                                                         </h4>
-                                                        {contact && (
-                                                            <p className="text-sm text-gray-600">
-                                                                {contact.industry || t('common.optional', { defaultValue: 'Industria no especificada' })}
-                                                            </p>
-                                                        )}
+                                                        <p className="text-sm text-gray-600">
+                                                            {contact ? (contact.industry || t('common.optional', { defaultValue: 'Industria no especificada' })) : ((company as any).industry || (company as any).source)}
+                                                        </p>
                                                     </div>
                                                 </div>
+
+                                                {/* Details for Local */}
                                                 {contact && (
                                                     <div className="ml-15 space-y-1">
                                                         <p className="text-sm text-gray-700">
@@ -164,24 +175,65 @@ export default function GlobalCompanySearch({ onClose, onStartChat }: GlobalComp
                                                                 {contact.position}
                                                             </p>
                                                         )}
-                                                        <p className="text-sm text-gray-600">
-                                                            {contact.phone}
-                                                        </p>
                                                     </div>
                                                 )}
+
+                                                {/* Details for External */}
+                                                {isExternal && (
+                                                    <div className="ml-15 space-y-1">
+                                                        <p className="text-sm text-gray-700 italic">
+                                                            Empresa externa ({(company as any).source})
+                                                        </p>
+                                                        {(company as any).address && (
+                                                            <p className="text-sm text-gray-500">
+                                                                {(company as any).address}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+
                                             </div>
-                                            {contact && (
-                                                <button
-                                                    onClick={() => {
+
+                                            <button
+                                                onClick={async () => {
+                                                    if (isExternal) {
+                                                        // Create provisional company first
+                                                        try {
+                                                            const res = await fetch('/api/companies/provisional', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({
+                                                                    externalId: company.id, // e.g. gmb-ChIJ...
+                                                                    source: (company as any).source,
+                                                                    name: company.name,
+                                                                    address: (company as any).address,
+                                                                    phone: (company as any).phone, // Sometimes undefined for GMB search results unless details fetched
+                                                                    email: (company as any).email,
+                                                                    industry: (company as any).industry,
+                                                                    enrichmentData: company
+                                                                })
+                                                            });
+                                                            const data = await res.json();
+                                                            if (data.success && data.userId) {
+                                                                onStartChat(data.userId, company.name);
+                                                                onClose();
+                                                            } else {
+                                                                alert("Error al conectar con empresa externa");
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            alert("Error de conexión");
+                                                        }
+                                                    } else if (contact) {
                                                         onStartChat(contact.id, company.name);
                                                         onClose();
-                                                    }}
-                                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 flex-shrink-0"
-                                                >
-                                                    <MessageSquare className="h-4 w-4" />
-                                                    {t('chat.sidebar.new_chat')}
-                                                </button>
-                                            )}
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 flex-shrink-0"
+                                            >
+                                                <MessageSquare className="h-4 w-4" />
+                                                {t('chat.sidebar.new_chat')}
+                                            </button>
                                         </div>
                                     </div>
                                 );
