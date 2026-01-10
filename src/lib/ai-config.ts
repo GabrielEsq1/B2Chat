@@ -4,16 +4,17 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 /**
  * Configuración del modelo de IA usando Groq (Llama 3.1)
  * Groq ofrece inferencia extremadamente rápida para modelos Llama
+ * IMPORTANT: API keys must be set via environment variables
  */
 const groq = createGroq({
-    apiKey: process.env.B2BCHAT_AI_GROQ_KEY_PROD || process.env.GROQ_API_KEY || '[REMOVED_GROQ_KEY]',
+    apiKey: process.env.B2BCHAT_AI_GROQ_KEY_PROD || process.env.GROQ_API_KEY || '',
 });
 
 // Usamos Llama 3.3 70B para un balance óptimo entre inteligencia y velocidad
 // Google Generative AI Configuration
 export const googleConfig = {
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '[REMOVED_GOOGLE_KEY]',
-    geminiKey: process.env.GEMINI_API_KEYb2b || 'https://makersuite.google.com/app/apikey',
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || '',
+    geminiKey: process.env.GEMINI_API_KEY || '',
 };
 
 const google = createGoogleGenerativeAI({
