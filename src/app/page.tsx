@@ -296,7 +296,7 @@ export default function LandingPage() {
                         {/* CreaTiendas Card */}
                         <div
                             className="flex-1 bg-white rounded-3xl p-10 lg:p-12 border border-slate-200 shadow-xl lg:ml-[-20px] lg:z-10 hover:z-30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer group relative overflow-hidden"
-                            onClick={() => window.open('https://creatiendasgit1.vercel.app/', '_blank')}
+                            onClick={() => window.open('https://creatiendas.co', '_blank')}
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-bl-[100px] -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
 
@@ -348,7 +348,7 @@ export default function LandingPage() {
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <button
-                                onClick={() => window.open('https://creatiendasgit1.vercel.app/', '_blank')}
+                                onClick={() => window.open('https://creatiendas.co', '_blank')}
                                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#22C55E] text-white font-bold hover:bg-green-600 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center gap-2"
                             >
                                 <Building2 className="w-5 h-5" />

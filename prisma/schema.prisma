@@ -60,6 +60,7 @@ model User {
   profilePicture         String?
   isBot                  Boolean             @default(false)
   botPersonality         String?
+  coverPhoto             String?
   
   // Fields for external discovery (Discovery 2.0)
   isGhost                Boolean             @default(false)

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(
     req: NextRequest,
@@ -41,8 +43,19 @@ export async function PATCH(
 ) {
     const { id } = await params;
     try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        }
+
+        // Security check: Only the user themselves or an admin can update the profile
+        if (session.user.id !== id && (session.user as any).role !== 'ADMIN') {
+            return NextResponse.json({ error: "No tienes permiso para editar este perfil" }, { status: 403 });
+        }
+
         const body = await req.json();
-        const { name, position, industry, bio, website, avatar, phone } = body;
+        const { name, position, industry, bio, website, avatar, coverPhoto, phone } = body;
 
         const updatedUser = await prisma.user.update({
             where: { id: id },
@@ -53,6 +66,7 @@ export async function PATCH(
                 ...(bio !== undefined && { bio }),
                 ...(website !== undefined && { website }),
                 ...(avatar !== undefined && { avatar, profilePicture: avatar }),
+                ...(coverPhoto !== undefined && { coverPhoto }),
                 ...(phone !== undefined && { phone }),
             },
         });

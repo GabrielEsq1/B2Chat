@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X, Mail, Zap, DollarSign, Check } from "lucide-react";
+import { Send, ArrowLeft, Search, MoreVertical, Volume2, VolumeX, Smile, Star, Users, X, Mail, Zap, DollarSign, Check, Paperclip, FileText, Image, Film, Loader2, User, Plus } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { useSocket } from "@/components/providers/SocketProvider";
 import FastAdsBar from "./FastAdsBar";
@@ -18,6 +18,7 @@ interface Message {
   fromSelf: boolean;
   readAt?: Date;
   isStarred?: boolean;
+  attachmentUrl?: string;
 }
 
 interface EconomicSignals {
@@ -58,6 +59,41 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const [showChatOptions, setShowChatOptions] = useState(false);
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [inChatSearchQuery, setInChatSearchQuery] = useState("");
+  const [emailToast, setEmailToast] = useState<{ show: boolean, recipientEmail: string } | null>(null);
+  const [addingMember, setAddingMember] = useState(false);
+
+  const handleAddMember = async () => {
+    if (!conversation?.groupId) return;
+
+    const identifier = prompt(t('chat.window.add_member_prompt', { defaultValue: 'Introduce el email o teléfono del usuario a añadir:' }));
+    if (!identifier) return;
+
+    setAddingMember(true);
+    try {
+      const res = await fetch(`/api/groups/${conversation.groupId}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(t('chat.window.add_member_success', { defaultValue: 'Usuario añadido con éxito' }));
+        // Show email notification toast
+        setEmailToast({ show: true, recipientEmail: identifier });
+        setTimeout(() => setEmailToast(null), 5000);
+      } else {
+        alert(data.error || t('common.error'));
+      }
+    } catch (error) {
+      console.error("Error adding member:", error);
+      alert(t('common.error'));
+    } finally {
+      setAddingMember(false);
+    }
+  };
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize notification sound and load sound preference
   useEffect(() => {
@@ -158,8 +194,12 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     // Initial load
     fetchMessages(false);
 
-    // We rely on Socket.IO for real-time updates now.
-    // Polling is removed to prevent history flicker/reset.
+    // Polling as a robust fallback (every 3 seconds) as requested by user
+    const interval = setInterval(() => {
+      fetchMessages(true);
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [conversation?.id, session?.user?.id]);
 
   // Socket.IO Logic
@@ -271,12 +311,53 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     setShowEmojiPicker(false);
   };
 
-  const [emailToast, setEmailToast] = useState<{ show: boolean, recipientEmail: string } | null>(null);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (file.size > 20 * 1024 * 1024) {
+      alert("Archivo demasiado grande. Máximo 20MB.");
+      return;
+    }
 
-    if (!newMessage.trim() || !session?.user?.id || !conversation?.id) return;
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // Automatically send message with attachment
+        await handleSendMessage(undefined, data.url);
+      } else {
+        alert(data.error || "Error al subir archivo");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Error al conectar con el servidor de carga");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent, attachmentUrl?: string) => {
+    if (e) e.preventDefault();
+
+    if (!newMessage.trim() && !attachmentUrl) return;
+    if (!session?.user?.id || !conversation?.id) return;
 
     const messageText = newMessage.trim();
     const tempId = `temp-${Date.now()}`;
@@ -288,7 +369,8 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       senderId: session.user.id,
       senderName: session.user.name || undefined,
       createdAt: new Date(),
-      fromSelf: true
+      fromSelf: true,
+      attachmentUrl: attachmentUrl
     };
 
     setMessages(prev => [...prev, tempMessage]);
@@ -298,16 +380,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     if (socket) {
       socket.emit("stop_typing", { conversationId: conversation.id, userId: session.user.id });
 
-      // Emit the message to others right away using the temp data
-      // The server will broadcast this. Note that other clients will see the temp ID initially if we don't normalize it,
-      // but for "speed" this is key. Ideally, the server should assign the ID and broadcast.
-      // However, to satisfy "immediate to receptor", we act as if validated.
-      // A better pattern: Client sends -> Server Broadcasts (Optimistic) -> Server Saves (Async).
-      // Here we emit directly to simulate speed, relying on eventual consistency.
       socket.emit("send_message_client", {
         conversationId: conversation.id,
-        id: tempId, // Recipient will see this ID until refresh, but functionality works
+        id: tempId,
         text: messageText,
+        attachmentUrl: attachmentUrl,
         senderUserId: session.user.id,
         sender: {
           name: session.user.name,
@@ -325,7 +402,8 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversationId: conversation.id,
-          text: messageText
+          text: messageText,
+          attachmentUrl: attachmentUrl
         }),
       });
 
@@ -355,13 +433,10 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         }
 
       } else {
-        // Error handling
         console.error("Failed to save message to DB");
-        // Optionally mark message as error in UI
       }
     } catch (error) {
       console.error("Send error:", error);
-      // Keep message but maybe show error indicator
     }
   };
   const toggleStar = async (messageId: string, isCurrentlyStarred: boolean) => {
@@ -471,29 +546,21 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           </div>
         </div>
         <div className="flex gap-1 text-gray-500 flex-shrink-0">
-          {conversation.type !== "GROUP" && conversation.otherUser?.phone && (
+          {conversation.type === "GROUP" && (
             <button
-              onClick={async () => {
-                if (confirm(t('chat.window.whatsapp.confirm', { name: conversation.otherUser?.name || 'Usuario' }))) {
-                  try {
-                    const lastMessage = messages[messages.length - 1];
-                    const res = await fetch('/api/whatsapp/send', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        conversationId: conversation.id,
-                        text: lastMessage?.text || t('chat.window.whatsapp.default_text'),
-                        recipientPhone: conversation.otherUser.phone
-                      })
-                    });
-                    if (res.ok) {
-                      alert(`✅ ${t('chat.window.whatsapp.success')}`);
-                    } else {
-                      alert(`❌ ${t('chat.window.whatsapp.error')}`);
-                    }
-                  } catch (error) {
-                    alert(`❌ ${t('chat.window.whatsapp.error')}`);
-                  }
+              onClick={handleAddMember}
+              className="hover:bg-blue-50 hover:text-blue-600 p-2 rounded-full transition-all group/add"
+              title={t('chat.sidebar.new_group')}
+            >
+              <Plus className="h-5 w-5 group-hover/add:scale-110" />
+            </button>
+          )}
+          {conversation.type !== "GROUP" && (
+            <button
+              onClick={() => {
+                const phone = conversation.otherUser?.phone?.replace(/\D/g, '');
+                if (phone) {
+                  window.open(`https://wa.me/${phone}`, '_blank');
                 }
               }}
               className="hover:bg-gray-200 p-2 rounded-full transition-colors hidden sm:block"
@@ -585,6 +652,26 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           </div>
         </div>
       </div>
+
+      {/* Email Notification Toast */}
+      {emailToast?.show && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top duration-300">
+          <div className="bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl border border-blue-100 flex items-center gap-3">
+            <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+              <Mail className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-slate-900">{t('chat.window.email_toast_title', { defaultValue: 'Copia enviada' })}</p>
+              <p className="text-[10px] text-slate-500 font-medium">
+                {t('chat.window.email_toast_body', { defaultValue: `Se ha enviado una copia a ${emailToast.recipientEmail}`, email: emailToast.recipientEmail })}
+              </p>
+            </div>
+            <button onClick={() => setEmailToast(null)} className="ml-2 text-slate-300 hover:text-slate-600 transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Ads Bar - Hidden in active chat for focus
       <div className="flex-shrink-0">
@@ -747,6 +834,35 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                   <p className="text-sm whitespace-pre-wrap break-words">
                     {msg.text}
                   </p>
+                  {msg.attachmentUrl && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-gray-100/50 bg-black/5">
+                      {msg.attachmentUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
+                        <img
+                          src={msg.attachmentUrl}
+                          alt="Attachment"
+                          className="max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                        />
+                      ) : msg.attachmentUrl.match(/\.(mp4|webm)/i) ? (
+                        <video controls className="max-w-full h-auto">
+                          <source src={msg.attachmentUrl} />
+                        </video>
+                      ) : (
+                        <div
+                          className="flex items-center gap-3 p-3 cursor-pointer hover:bg-black/5 transition-colors"
+                          onClick={() => window.open(msg.attachmentUrl, '_blank')}
+                        >
+                          <div className="p-2 bg-white/20 rounded-lg">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold truncate">Documento</p>
+                            <p className="text-[10px] opacity-70 uppercase tracking-tighter">Abrir archivo</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className={`mt-1 flex items-center gap-1.5 ${msg.fromSelf ? "justify-end" : "justify-start"}`}>
                     <span className="text-[10px] opacity-50 font-bold uppercase">
                       {msg.createdAt.toLocaleTimeString('es-ES', {
@@ -799,12 +915,32 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           >
             <Smile className="h-6 w-6" />
           </button>
+          <button
+            type="button"
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors relative"
+          >
+            {isUploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            ) : (
+              <Paperclip className="h-6 w-6" />
+            )}
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileUpload}
+            accept="image/*,video/mp4,video/webm,application/pdf"
+          />
           <input
             type="text"
             placeholder={t('chat.window.input_placeholder')}
             className="flex-1 rounded-lg border-none bg-white py-2 px-4 text-sm text-gray-900 font-medium placeholder-gray-500 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             value={newMessage}
             onChange={handleTyping}
+            onKeyDown={handleKeyDown}
           />
           <button
             type="submit"
@@ -882,10 +1018,22 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
               </div>
 
               <div className="mt-6 w-full flex gap-3">
-                <button className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                <button
+                  onClick={() => {
+                    const id = conversation.otherUser?.id;
+                    if (id) window.open(`/hub/companies/${id}`, '_blank');
+                  }}
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
+                >
                   Ver Perfil
                 </button>
-                <button className="flex-1 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all">
+                <button
+                  onClick={() => {
+                    const text = encodeURIComponent(`Hola, quiero reportar al usuario ${conversation.otherUser?.name || 'anónimo'} con ID: ${conversation.otherUser?.id}`);
+                    window.open(`https://wa.me/573026687991?text=${text}`, '_blank');
+                  }}
+                  className="flex-1 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all"
+                >
                   Reportar
                 </button>
               </div>

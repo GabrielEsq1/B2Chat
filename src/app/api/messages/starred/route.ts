@@ -6,13 +6,12 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
+
         if (!session?.user?.id) {
-            return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
         }
 
-        // Find messages where isStarred is true and the user is either the sender or receiver
-        // Note: isStarred is a flag per message. For now, we show all starred messages in conversations the user is part of.
-        const starredMessages = await prisma.message.findMany({
+        const messages = await prisma.message.findMany({
             where: {
                 isStarred: true,
                 conversation: {
@@ -25,15 +24,19 @@ export async function GET(req: NextRequest) {
             include: {
                 sender: {
                     select: {
-                        id: true,
                         name: true,
-                        avatar: true
+                        avatar: true,
+                        profilePicture: true
                     }
                 },
                 conversation: {
                     include: {
-                        userA: true,
-                        userB: true
+                        userA: {
+                            select: { id: true, name: true }
+                        },
+                        userB: {
+                            select: { id: true, name: true }
+                        }
                     }
                 }
             },
@@ -42,22 +45,22 @@ export async function GET(req: NextRequest) {
             }
         });
 
-        const formatted = starredMessages.map(msg => {
-            const conversation = msg.conversation;
-            const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
+        // Map to include other user name for display
+        const mappedMessages = messages.map((msg: any) => {
+            const otherUser = msg.conversation.userAId === session.user.id
+                ? msg.conversation.userB
+                : msg.conversation.userA;
+
             return {
-                id: msg.id,
-                text: msg.text,
-                createdAt: msg.createdAt,
-                sender: msg.sender,
-                conversationId: msg.conversationId,
-                otherUserName: otherUser?.name
+                ...msg,
+                otherUserName: otherUser?.name || "Usuario"
             };
         });
 
-        return NextResponse.json({ success: true, messages: formatted });
-    } catch (error) {
+        return NextResponse.json({ messages: mappedMessages });
+
+    } catch (error: any) {
         console.error("Error fetching starred messages:", error);
-        return NextResponse.json({ error: "Error al obtener mensajes destacados" }, { status: 500 });
+        return NextResponse.json({ error: "No se pudieron cargar los mensajes destacados" }, { status: 500 });
     }
 }

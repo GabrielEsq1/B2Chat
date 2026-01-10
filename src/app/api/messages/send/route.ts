@@ -20,29 +20,39 @@ export async function POST(req: NextRequest) {
 
         // 2. Get data
         const body = await req.json();
-        const { conversationId, text } = body;
+        const { conversationId, text, attachmentUrl } = body;
 
-        if (!conversationId || !text) {
-            return NextResponse.json({ error: "conversationId y text requeridos" }, { status: 400 });
+        if (!conversationId || (!text && !attachmentUrl)) {
+            return NextResponse.json({ error: "conversationId y texto/adjunto requeridos" }, { status: 400 });
         }
 
-        // 3. Verify conversation
+        // 3. Verify conversation and permissions (User must be part of the chat or group)
         const conversation = await prisma.conversation.findFirst({
             where: {
                 id: conversationId,
                 OR: [
                     { userAId: session.user.id },
-                    { userBId: session.user.id }
+                    { userBId: session.user.id },
+                    {
+                        group: {
+                            members: {
+                                some: {
+                                    userId: session.user.id
+                                }
+                            }
+                        }
+                    }
                 ]
             },
             include: {
                 userA: { select: { id: true, email: true, name: true, isBot: true } },
-                userB: { select: { id: true, email: true, name: true, isBot: true } }
+                userB: { select: { id: true, email: true, name: true, isBot: true } },
+                group: { include: { members: { include: { user: { select: { email: true, name: true } } } } } }
             }
         });
 
         if (!conversation) {
-            return NextResponse.json({ error: "Conversación no encontrada" }, { status: 404 });
+            return NextResponse.json({ error: "Conversación no encontrada o sin permisos" }, { status: 404 });
         }
 
         // 4. Create message
@@ -50,7 +60,8 @@ export async function POST(req: NextRequest) {
             data: {
                 conversationId,
                 senderUserId: session.user.id,
-                text
+                text: text || "",
+                attachmentUrl
             },
             include: {
                 sender: {
@@ -72,21 +83,40 @@ export async function POST(req: NextRequest) {
         // 6. Send email notification
         let emailSent = false;
         try {
-            const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
-            if (otherUser?.email && !otherUser.isBot) {
-                const baseUrl = process.env.B2BCHAT_AUTH_APP_BASEURL_PROD || process.env.NEXTAUTH_URL ||
-                    (req.headers.get('origin') || 'http://localhost:3000');
+            const recipients: { email: string, name: string }[] = [];
 
-                await sendNewMessageNotification({
-                    to: otherUser.email,
-                    senderName: session.user.name || 'Un usuario',
-                    messageText: text,
-                    conversationLink: "https://b2bchat.co/chat"
+            if (conversation.type === "GROUP" && conversation.group) {
+                // Get all members except sender
+                conversation.group.members.forEach((m: any) => {
+                    if (m.userId !== session.user.id && m.user.email) {
+                        recipients.push({ email: m.user.email, name: m.user.name || "Usuario" });
+                    }
                 });
-                emailSent = true;
+            } else {
+                const otherUser = conversation.userAId === session.user.id ? conversation.userB : conversation.userA;
+                if (otherUser?.email && !otherUser.isBot) {
+                    recipients.push({ email: otherUser.email, name: otherUser.name || "Usuario" });
+                }
+            }
+
+            if (recipients.length > 0) {
+                // Send notifications (parallel)
+                await Promise.all(recipients.map(async (recipient) => {
+                    try {
+                        await sendNewMessageNotification({
+                            to: recipient.email,
+                            senderName: session.user.name || 'Un usuario',
+                            messageText: text || 'Ha enviado un adjunto',
+                            conversationLink: "https://b2bchat.co/chat"
+                        });
+                        emailSent = true;
+                    } catch (err) {
+                        console.error(`[SEND] Email failed for ${recipient.email}:`, err);
+                    }
+                }));
             }
         } catch (emailErr) {
-            console.error('[SEND] Email failed:', emailErr);
+            console.error('[SEND] Email process failed:', emailErr);
         }
 
         // 7. Handle AI Bot Response

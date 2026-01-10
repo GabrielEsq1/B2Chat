@@ -33,7 +33,7 @@ export default function EditProfilePage() {
 
             if (data.user) {
                 // Verify ownership
-                if (session?.user?.email !== data.user.email) {
+                if (!session?.user?.id || !data.user.id || String(session.user.id) !== String(data.user.id)) {
                     router.push(`/profile/${params?.id}`);
                     return;
                 }

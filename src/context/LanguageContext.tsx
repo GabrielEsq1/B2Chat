@@ -33,23 +33,32 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         return lang === 'en' ? en : es;
     };
 
-    const t = (path: string, params?: Record<string, string | number>): string => {
+    const t = (path: string, params?: Record<string, any>): string => {
         const keys = path.split('.');
         let current: any = getTranslation(language);
 
+        let found = true;
         for (const key of keys) {
-            if (current[key] === undefined) {
-                console.warn(`Translation missing for key: ${path} in language: ${language}`);
-                return path;
+            if (!current || current[key] === undefined) {
+                found = false;
+                break;
             }
             current = current[key];
+        }
+
+        if (!found) {
+            if (params?.defaultValue) return params.defaultValue;
+            console.warn(`Translation missing for key: ${path} in language: ${language}`);
+            return path;
         }
 
         let translation = current as string;
 
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
-                translation = translation.replace(`{${key}}`, String(value));
+                if (key !== 'defaultValue') {
+                    translation = translation.replace(`{${key}}`, String(value));
+                }
             });
         }
 

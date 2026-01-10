@@ -25,9 +25,9 @@ export default function MyProfilePage() {
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/auth/login");
+            router.push("/login"); // Use /login instead of /auth/login as per system logs
         } else if (status === "authenticated" && session?.user?.id) {
-            fetchUser(session.user.id);
+            router.replace(`/profile/${session.user.id}`);
         }
     }, [status, session, router]);
 
@@ -97,7 +97,7 @@ export default function MyProfilePage() {
 
                                     {/* BUILD STORE BUTTON - Requested Feature */}
                                     <a
-                                        href="https://creatiendasgit1.vercel.app/"
+                                        href="https://creatiendas.co"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 font-medium flex items-center justify-center gap-2 shadow-md transition-all transform hover:scale-105"
@@ -169,7 +169,7 @@ export default function MyProfilePage() {
                             Crea tu propia tienda online en minutos y conecta con miles de compradores B2B.
                         </p>
                         <a
-                            href="https://creatiendasgit1.vercel.app/"
+                            href="https://creatiendas.co"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors"

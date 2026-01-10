@@ -78,6 +78,11 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
         loadConversations();
         loadContacts();
 
+        // Polling as fallback (every 3 seconds) for real-time responsiveness
+        const interval = setInterval(() => {
+            loadConversations();
+        }, 3000);
+
         // Initialize Pusher for Presence
         import('@/lib/pusher-client').then(({ getPusherClient }) => {
             const pusher = getPusherClient();
@@ -105,8 +110,11 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
 
             return () => {
                 pusher.unsubscribe('presence-global');
+                clearInterval(interval);
             };
         });
+
+        return () => clearInterval(interval);
     }, [session?.user?.id]);
 
     useEffect(() => {
@@ -1013,7 +1021,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                         <p className="text-sm font-bold text-gray-900 mb-1">No tienes chats recientes</p>
                                         <p className="text-xs text-gray-500 mb-6">Explora el marketplace para conectar con empresas y agentes.</p>
                                         <button
-                                            onClick={() => router.push('/hub')}
+                                            onClick={() => window.open('https://b2bchat.co/contacts', '_blank')}
                                             className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
                                         >
                                             Explorar Marketplace

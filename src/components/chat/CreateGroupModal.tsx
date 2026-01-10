@@ -99,7 +99,7 @@ export default function CreateGroupModal({ onClose, onCreateGroup, initialSelect
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="w-full max-w-2xl max-h-[90vh] rounded-2xl bg-white shadow-2xl flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -108,8 +108,8 @@ export default function CreateGroupModal({ onClose, onCreateGroup, initialSelect
                             <Users className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">{t('chat.sidebar.new_group')}</h3>
-                            <p className="text-sm text-gray-500">{t('chat.modals.group.description_label', { defaultValue: 'Crea un grupo para conectar con tu equipo' })}</p>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">{t('chat.modals.group.title', { defaultValue: 'Nuevo Grupo' })}</h3>
+                            <p className="text-sm text-slate-500 font-medium">{t('chat.modals.group.subtitle', { defaultValue: 'Crea un grupo para conectar con tu equipo' })}</p>
                         </div>
                     </div>
                     <button
@@ -126,30 +126,30 @@ export default function CreateGroupModal({ onClose, onCreateGroup, initialSelect
                     {/* Group Info */}
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="group-name" className="block text-sm font-medium text-gray-700 mb-2">
-                                {t('chat.modals.group.name_label')} *
+                            <label htmlFor="group-name" className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                                {t('chat.modals.group.name_label')}
                             </label>
                             <input
                                 id="group-name"
                                 type="text"
                                 value={groupName}
                                 onChange={(e) => setGroupName(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none"
-                                placeholder={t('chat.modals.group.name_label')}
+                                className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-slate-900 font-bold placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none transition-all"
+                                placeholder={t('chat.modals.group.name_placeholder', { defaultValue: 'Ej: Equipo de Ventas' })}
                                 maxLength={50}
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="group-description" className="block text-sm font-medium text-gray-700 mb-2">
-                                {t('chat.modals.group.description_label')} ({t('common.optional', { defaultValue: 'opcional' })})
+                            <label htmlFor="group-description" className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                                {t('chat.modals.group.desc_label')}
                             </label>
                             <textarea
                                 id="group-description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 font-medium placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
-                                placeholder={t('chat.modals.group.description_label')}
+                                className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50 px-6 py-4 text-slate-900 font-medium placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none resize-none transition-all"
+                                placeholder={t('chat.modals.group.desc_placeholder', { defaultValue: 'Describe el propósito del grupo...' })}
                                 rows={3}
                                 maxLength={200}
                             />
@@ -159,8 +159,8 @@ export default function CreateGroupModal({ onClose, onCreateGroup, initialSelect
                     {/* Contact Selection */}
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-medium text-gray-700">
-                                {t('chat.selection_count', { count: selectedContacts.length })} *
+                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
+                                {t('chat.modals.group.participants', { defaultValue: 'Participantes' })} ({selectedContacts.length})
                             </label>
                         </div>
 
@@ -230,11 +230,14 @@ export default function CreateGroupModal({ onClose, onCreateGroup, initialSelect
                         className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         {creating ? (
-                            <>{t('common.loading')}</>
+                            <div className="flex items-center gap-2">
+                                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                {t('chat.modals.group.creating', { defaultValue: 'Creando...' })}
+                            </div>
                         ) : (
                             <>
                                 <Plus className="h-4 w-4" />
-                                {t('chat.sidebar.new_group')}
+                                {t('chat.modals.group.create_btn', { defaultValue: 'Crear Grupo' })}
                             </>
                         )}
                     </button>

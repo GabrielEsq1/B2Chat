@@ -187,7 +187,7 @@ export default function CreateCampaignPage() {
             const data = await response.json();
             if (data.success && data.campaign) {
                 // Generate campaign review URL for admin
-                const appUrl = process.env.NEXT_PUBLIC_B2BCHAT_AUTH_APP_BASEURL_PROD || 'https://creatiendasgit1.vercel.app';
+                const appUrl = process.env.NEXT_PUBLIC_B2BCHAT_AUTH_APP_BASEURL_PROD || 'https://creatiendas.co';
                 const reviewUrl = `${appUrl}/admin/campaigns/review/${data.campaign.id}`;
 
                 // Prepare WhatsApp message with campaign details

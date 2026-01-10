@@ -251,6 +251,47 @@ export default function HubPage() {
                         </a>
                     </div>
                 </section>
+
+                {/* Projects Banner */}
+                <section className="bg-slate-900 overflow-hidden relative border-y border-white/5 py-24">
+                    {/* Decorative Background */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-600/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+                    <div className="max-w-7xl mx-auto px-4 relative z-10 text-center md:text-left">
+                        <div className="grid md:grid-cols-2 gap-16 items-center">
+                            <div>
+                                <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-6">
+                                    Potenciando el <span className="text-blue-500">comercio B2B</span> en LATAM
+                                </h2>
+                                <p className="text-lg text-slate-400 mb-10 leading-relaxed font-medium">
+                                    Ambos proyectos, <span className="text-white font-bold">B2BChat</span> y <span className="text-white font-bold">CreaTiendas</span>, son concebidos, desarrollados y administrados íntegramente por <span className="text-blue-400 font-black">Gabriel Esquivia</span>. Una visión única para unificar conversaciones comerciales y ejecución de ventas en un ecosistema profesional real.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {/* B2BChat Card */}
+                                <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/20 hover:bg-white/10 transition-all group">
+                                    <div className="w-12 h-12 bg-blue-600 rounded-2xl mb-6 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">💬</div>
+                                    <h3 className="text-xl font-black text-white mb-2">B2BChat</h3>
+                                    <p className="text-sm text-slate-400 mb-6 font-medium leading-relaxed">Red profesional para empresas verificadas y cierres comerciales.</p>
+                                    <Link href="/" className="inline-flex items-center gap-2 text-xs font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors">
+                                        Visitar B2BChat <ArrowRight className="w-4 h-4" />
+                                    </Link>
+                                </div>
+
+                                {/* CreaTiendas Card */}
+                                <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/20 hover:bg-white/10 transition-all group">
+                                    <div className="w-12 h-12 bg-emerald-600 rounded-2xl mb-6 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🛍️</div>
+                                    <h3 className="text-xl font-black text-white mb-2">CreaTiendas</h3>
+                                    <p className="text-sm text-slate-400 mb-6 font-medium leading-relaxed">El ecosistema de tiendas conectadas para vender sin fricción.</p>
+                                    <a href="https://creatiendas.co" target="_blank" className="inline-flex items-center gap-2 text-xs font-black text-emerald-400 uppercase tracking-widest hover:text-white transition-colors">
+                                        Visitar CreaTiendas <ArrowRight className="w-4 h-4" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             {/* Footer Contact */}
