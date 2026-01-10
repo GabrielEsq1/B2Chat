@@ -188,8 +188,33 @@ export async function POST(req: NextRequest) {
         });
 
         if (existingConversation) {
+            // Fetch user data for the existing conversation
+            const conversationWithUsers = await prisma.conversation.findUnique({
+                where: { id: existingConversation.id },
+                include: {
+                    userA: {
+                        select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                            avatar: true,
+                            isBot: true,
+                        },
+                    },
+                    userB: {
+                        select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                            avatar: true,
+                            isBot: true,
+                        },
+                    },
+                },
+            });
+
             return NextResponse.json({
-                conversation: existingConversation,
+                conversation: conversationWithUsers,
                 message: "Conversación ya existe",
             });
         }
@@ -208,6 +233,7 @@ export async function POST(req: NextRequest) {
                         name: true,
                         phone: true,
                         avatar: true,
+                        isBot: true,
                     },
                 },
                 userB: {
@@ -216,6 +242,7 @@ export async function POST(req: NextRequest) {
                         name: true,
                         phone: true,
                         avatar: true,
+                        isBot: true,
                     },
                 },
             },
