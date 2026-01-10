@@ -370,6 +370,22 @@ model AddonPurchase {
   subscription   Subscription @relation(fields: [subscriptionId], references: [id])
 }
 
+// Webhook Idempotency & Security
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  provider    String   // PAYPAL, STRIPE, MAILGUN, etc.
+  eventId     String   // External provider event ID
+  eventType   String   // BILLING.SUBSCRIPTION.ACTIVATED, etc.
+  payload     Json     // Full webhook payload
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@unique([provider, eventId])
+  @@index([provider, eventType])
+}
+
+
 model Store {
   id          String    @id @default(uuid())
   name        String
