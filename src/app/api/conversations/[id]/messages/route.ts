@@ -223,6 +223,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                 });
 
                 if (recipient?.email && !recipient.isBot) {
+                    console.log(`[Messages API] Attempting to send email to: ${recipient.email}`);
                     const result = await sendNewMessageNotification({
                         to: recipient.email,
                         senderName: session.user.name || 'Un usuario',
@@ -231,10 +232,13 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
                     });
 
                     if (result.success) {
+                        console.log(`[Messages API] Email sent successfully to ${recipient.email}`);
                         emailSent = true;
                     } else {
                         console.error("[Messages API] Direct email failed:", result.error);
                     }
+                } else {
+                    console.log(`[Messages API] Email skipped. Recipient Email: ${recipient?.email}, IsBot: ${recipient?.isBot}`);
                 }
             }
         } catch (emailError) {
