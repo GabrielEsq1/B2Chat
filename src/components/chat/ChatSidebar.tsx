@@ -462,16 +462,7 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                         {showOptionsMenu && (
                             <div className="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-xl border border-gray-200 z-[9999]">
                                 <div className="py-1">
-                                    <button
-                                        onClick={() => {
-                                            setShowNewGroup(true);
-                                            setShowOptionsMenu(false);
-                                        }}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
-                                    >
-                                        <Users className="h-4 w-4 text-gray-400" />
-                                        {t('chat.sidebar.new_group')}
-                                    </button>
+                                    {/* Group Chat Disabled for Enterprise Focus */}
                                     <button
                                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
                                         onClick={() => {

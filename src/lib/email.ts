@@ -35,7 +35,7 @@ export async function sendNewMessageNotification({
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'B2BChat <notifications@b2bchat.io>', // Note: Needs verified domain in production
+      from: 'B2BChat <notifications@b2bchat.co>', // Verified domain
       to: [to],
       subject: `Nuevo mensaje de ${senderName} en B2BChat`,
       html: `

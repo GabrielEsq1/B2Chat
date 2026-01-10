@@ -11,31 +11,34 @@ export async function POST(req: Request) {
     try {
         const { messages, userId, conversationId } = await req.json();
 
-        // Validar datos requeridos
         if (!messages || !userId || !conversationId) {
             return NextResponse.json(
-                { error: 'Missing required fields: messages, userId, conversationId' },
+                { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        // Verificar que la conversación existe
+        // Get User and Company Context
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { company: true }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Verify conversation exists
         const conversation = await prisma.conversation.findUnique({
             where: { id: conversationId },
-            include: {
-                userA: true,
-                userB: true,
-            },
+            include: { userA: true, userB: true },
         });
 
         if (!conversation) {
-            return NextResponse.json(
-                { error: 'Conversation not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
         }
 
-        // Guardar mensaje del usuario en la base de datos
+        // Save User Message
         const userMessage = messages[messages.length - 1].content;
         await prisma.message.create({
             data: {
@@ -45,58 +48,63 @@ export async function POST(req: Request) {
             },
         });
 
-        // Procesar con Olivia (Local AI)
-        const { olivia } = await import('@/lib/olivia');
-        const aiResponseText = olivia.process(userMessage);
+        // Prepare History for AI (Last 10 messages to keep context)
+        // We use the 'messages' array from the client which usually has the history
+        const history = messages.slice(0, -1).map((m: any) => ({
+            role: m.role,
+            text: m.content
+        }));
 
-        // Simular streaming para compatibilidad con el cliente
+        // Generate Contextual Response (Mohny)
+        const { generateBotResponse } = await import('@/lib/ai-service');
+
+        const aiResponseText = await generateBotResponse(
+            "MOHNY",
+            userMessage,
+            history,
+            undefined, // Use default system prompt for Mohny
+            {
+                userName: user.name || undefined,
+                companyName: user.company?.name,
+                userRole: user.role,
+                industry: user.company?.industry || undefined
+            }
+        );
+
+        // Simulate Stream
         const stream = new ReadableStream({
             async start(controller) {
                 const encoder = new TextEncoder();
 
-                // Simular delay de "pensamiento"
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Chunk the response to simulate typing
+                const chunks = aiResponseText.match(/.{1,20}/g) || [aiResponseText];
 
-                // Enviar respuesta
-                controller.enqueue(encoder.encode(aiResponseText));
+                for (const chunk of chunks) {
+                    await new Promise(r => setTimeout(r, 30)); // Slight delay
+                    controller.enqueue(encoder.encode(chunk));
+                }
 
-                // Guardar respuesta en BD
                 try {
-                    // Identificar el bot correcto para la conversación
-                    // Si el usuario A es el humano, el B es el bot, y viceversa
-                    const botUser = conversation.userAId === userId ? conversation.userB : conversation.userA;
+                    // Find or Assign Bot User
+                    // If conversation is USER-USER, one might be the bot. If not, find the global system bot.
+                    let botUserId = conversation.userA.isBot ? conversation.userA.id : (conversation.userB.isBot ? conversation.userB.id : null);
 
-                    if (botUser && botUser.isBot) {
+                    if (!botUserId) {
+                        const systemBot = await prisma.user.findFirst({ where: { isBot: true } });
+                        if (systemBot) botUserId = systemBot.id;
+                    }
+
+                    if (botUserId) {
                         await prisma.message.create({
                             data: {
                                 conversationId,
-                                senderUserId: botUser.id,
+                                senderUserId: botUserId,
                                 text: aiResponseText,
                             },
                         });
-                    } else {
-                        // Fallback: buscar cualquier bot si la conversación no tiene uno claro (raro)
-                        const aiBot = await prisma.user.findFirst({
-                            where: { isBot: true },
-                        });
-                        if (aiBot) {
-                            await prisma.message.create({
-                                data: {
-                                    conversationId,
-                                    senderUserId: aiBot.id,
-                                    text: aiResponseText,
-                                },
-                            });
-                        }
                     }
-
-                    console.log('Olivia response saved:', {
-                        conversationId,
-                        textLength: aiResponseText.length,
-                    });
-
                 } catch (error) {
-                    console.error('Error saving Olivia response:', error);
+                    console.error('Error saving AI response:', error);
                 }
 
                 controller.close();
@@ -106,6 +114,7 @@ export async function POST(req: Request) {
         return new Response(stream, {
             headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
+
     } catch (error: any) {
         console.error('Error in AI chat endpoint:', error);
         return NextResponse.json(

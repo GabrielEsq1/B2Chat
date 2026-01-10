@@ -2,7 +2,7 @@ import { generateText } from "ai";
 import { aiModel } from "./ai-config";
 
 // Bot personalities with system prompts
-const BOT_PERSONALITIES = {
+export const BOT_PERSONALITIES = {
     BUSINESS_ADVISOR: {
         name: "Sofia",
         systemPrompt: `Eres Sofia, una asesora de negocios B2B experta. Ayudas a empresarios con:
@@ -52,23 +52,60 @@ Sé amigable, motivador y conversacional. Responde en español.`
 - Tendencias industriales
 
 Sé analítica, detallada y profesional. Responde en español.`
+    },
+    MOHNY: {
+        name: "Mohny",
+        systemPrompt: `Eres Mohny, el asistente ejecutivo de inteligencia artificial de la plataforma B2B.
+Tu objetivo es ayudar a las empresas a cerrar negocios, encontrar proveedores y optimizar su gestión.
+Actúas como una memoria comercial inteligente.
+
+CARACTERÍSTICAS:
+- Profesional pero cercano
+- Orientado a resultados
+- Proactivo en sugerir acciones
+- Mantiene el contexto de la empresa y usuario
+
+Si tienes información de contexto (Usuario, Empresa, Rol), úsala para personalizar tus respuestas.
+Responde siempre en español profesional.`
     }
 };
+
+interface AIContext {
+    userName?: string;
+    companyName?: string;
+    userRole?: string;
+    industry?: string;
+}
 
 export async function generateBotResponse(
     botPersonality: string,
     userMessage: string,
-    conversationHistory: { role: string; text: string }[] = []
+    conversationHistory: { role: string; text: string }[] = [],
+    systemPromptOverride?: string,
+    context?: AIContext
 ): Promise<string> {
     try {
         const personality = BOT_PERSONALITIES[botPersonality as keyof typeof BOT_PERSONALITIES];
         if (!personality) {
-            // Fallback to a default personality if not found
             console.warn(`Unknown bot personality: ${botPersonality}, using default.`);
         }
 
-        const systemPrompt = personality ? personality.systemPrompt : "Eres un asistente útil.";
+        let systemPrompt = systemPromptOverride || (personality ? personality.systemPrompt : "Eres un asistente útil.");
         const botName = personality ? personality.name : "Bot";
+
+        // Inject Context if available
+        if (context) {
+            const contextString = `
+\n--- CONTEXTO DE LA SESIÓN ---
+Usuario: ${context.userName || 'No especificado'}
+Empresa: ${context.companyName || 'No especificada'}
+Rol: ${context.userRole || 'No especificado'}
+Industria: ${context.industry || 'General'}
+-----------------------------
+Usa este contexto para dar respuestas más precisas y personalizadas.
+`;
+            systemPrompt += contextString;
+        }
 
         // Build conversation context for the prompt
         const contextMessages = conversationHistory.map(msg => ({
@@ -89,7 +126,7 @@ export async function generateBotResponse(
         return text;
     } catch (error) {
         console.error("AI Error:", error);
-        return "Lo siento, estoy teniendo problemas para procesar tu solicitud en este momento. ¿Podrías intentarlo de nuevo?";
+        return "Lo siento, estoy teniendo problemas para procesar tu solicitud en este momento. Intenta de nuevo en unos segundos.";
     }
 }
 

@@ -65,6 +65,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
             orderBy: {
                 createdAt: "asc",
             },
+            take: 50, // Load last 50 messages for context
         });
 
         return NextResponse.json({ messages });

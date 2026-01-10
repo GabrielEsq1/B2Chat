@@ -16,16 +16,41 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid bot user" }, { status: 400 });
         }
 
-        // Get conversation history
+        // Get conversation history with enhanced sender info for context
         const messages = await prisma.message.findMany({
             where: { conversationId },
             orderBy: { createdAt: "desc" },
             take: 5,
-            include: { sender: { select: { name: true } } }
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        name: true,
+                        role: true,
+                        industry: true,
+                        company: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
         });
 
-        const history = messages.reverse().map(msg => ({
-            role: msg.sender.name || "User",
+        // Identify the user context from the last human message
+        // Since we order by desc, the first message is the latest one (the trigger)
+        const lastUserMessage = messages.find((m: any) => m.sender.id !== botUserId);
+
+        const context = lastUserMessage ? {
+            userName: lastUserMessage.sender.name,
+            companyName: lastUserMessage.sender.company?.name,
+            userRole: lastUserMessage.sender.role,
+            industry: lastUserMessage.sender.industry || 'General' // Fallback if user doesn't have specific industry
+        } : undefined;
+
+        const history = messages.reverse().map((msg: any) => ({
+            role: msg.sender.id === botUserId ? (botUser.name || "Bot") : "User",
             text: msg.text
         }));
 
@@ -33,7 +58,8 @@ export async function POST(req: NextRequest) {
         const aiResponse = await generateBotResponse(
             botUser.botPersonality,
             userMessage,
-            history
+            history,
+            context
         );
 
         // Save bot's response

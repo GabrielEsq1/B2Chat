@@ -18,6 +18,32 @@ interface AIChatWindowProps {
  */
 export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onBack }: AIChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [initialMessages, setInitialMessages] = useState<any[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(true);
+
+    // Load history
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}/messages`);
+                const data = await res.json();
+                if (data.messages) {
+                    const history = data.messages.map((m: any) => ({
+                        id: m.id,
+                        role: m.sender?.isBot ? 'assistant' : 'user',
+                        content: m.text,
+                        createdAt: new Date(m.createdAt)
+                    }));
+                    setInitialMessages(history);
+                }
+            } catch (error) {
+                console.error("Error loading history:", error);
+            } finally {
+                setLoadingHistory(false);
+            }
+        };
+        loadHistory();
+    }, [conversationId]);
 
     const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
         api: '/api/chat/ai',
@@ -25,6 +51,7 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
             conversationId,
             userId,
         },
+        initialMessages,
         onError: (error: Error) => {
             console.error('Error en chat con IA:', error);
         },
@@ -33,7 +60,15 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
     // Auto-scroll al último mensaje
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+    }, [messages, loadingHistory]);
+
+    if (loadingHistory) {
+        return (
+            <div className="flex items-center justify-center h-full bg-[#f8fafc]">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-full bg-[#f8fafc]">
@@ -46,13 +81,13 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                         </button>
                     )}
                     <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                        <Bot className="w-6 h-6 text-white" />
+                        <span className="text-white font-black">M</span>
                     </div>
                     <div>
-                        <h2 className="font-bold text-gray-900 leading-none">Asistente B2B</h2>
+                        <h2 className="font-bold text-gray-900 leading-none">Mohny</h2>
                         <p className="text-[10px] text-green-600 font-bold uppercase mt-1 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                            IA Activa • 24/7
+                            AI Enterprise • Activo
                         </p>
                     </div>
                 </div>
@@ -70,8 +105,8 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                         <div className="bg-indigo-50 p-6 rounded-full mb-4">
                             <Bot className="w-12 h-12 text-indigo-400" />
                         </div>
-                        <p className="text-sm font-bold text-indigo-900">¿Cómo puedo impulsarte hoy?</p>
-                        <p className="text-xs text-gray-500 mt-1 max-w-[200px] text-center">Resuelvo dudas, genero ideas o ayudo con tus ventas.</p>
+                        <p className="text-sm font-bold text-indigo-900">Hola {userName}</p>
+                        <p className="text-xs text-gray-500 mt-1 max-w-[200px] text-center">Soy Mohny, tu memoria comercial. ¿En qué trabajamos hoy?</p>
                     </div>
                 )}
 
@@ -82,23 +117,17 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                     >
                         <div
                             className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${message.role === 'user'
-                                ? 'bg-blue-600 text-white rounded-tr-none'
+                                ? 'bg-indigo-600 text-white rounded-tr-none'
                                 : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
                                 }`}
                         >
                             {message.role === 'assistant' && (
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Bot className="w-4 h-4 text-indigo-600" />
-                                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">SISTEMA IA</span>
+                                    <Bot className="w-3 h-3 text-indigo-500" />
+                                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">MOHNY</span>
                                 </div>
                             )}
                             <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                            <span className={`text-[9px] font-bold uppercase mt-2 block opacity-50 ${message.role === 'user' ? 'text-right' : ''}`}>
-                                {new Date(message.createdAt || Date.now()).toLocaleTimeString('es-ES', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
-                            </span>
                         </div>
                     </div>
                 ))}
@@ -108,7 +137,7 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                         <div className="bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm animate-pulse">
                             <div className="flex items-center gap-3">
                                 <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Generando respuesta...</span>
+                                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Analizando...</span>
                             </div>
                         </div>
                     </div>
@@ -120,7 +149,7 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                             <X className="h-4 w-4" />
                         </div>
                         <p className="text-xs font-bold text-red-600">
-                            No se pudo procesar la solicitud. Revisa tu conexión.
+                            Error de conexión. Intenta de nuevo.
                         </p>
                     </div>
                 )}
@@ -134,7 +163,7 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
                     <input
                         value={input}
                         onChange={handleInputChange}
-                        placeholder="Pregúntame lo que necesites..."
+                        placeholder={`Escribe a Mohny...`}
                         disabled={isLoading}
                         className="flex-1 px-5 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:bg-white text-sm transition-all disabled:opacity-50"
                     />
