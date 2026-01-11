@@ -1,147 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, MessageSquare, Users, UserCircle, LayoutDashboard, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquare, Users, UserCircle, LayoutDashboard, Home } from "lucide-react";
+import Image from "next/image";
 
-const appFeatures = [
+const appScreens = [
     {
         id: 1,
         title: "Dashboard Inteligente",
-        description: "Gestiona tus conversaciones, campañas y conexiones empresariales desde un solo lugar.",
+        description: "Gestiona tus conversaciones, campañas y conexiones empresariales desde un solo lugar. Ve tu balance, accede rápidamente a todas las funciones.",
         icon: LayoutDashboard,
         color: "from-blue-500 to-blue-600",
-        mockup: (
-            <div className="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-[280px] mx-auto">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 mb-4">
-                    <p className="text-white/80 text-xs">Bienvenido</p>
-                    <h3 className="text-white font-bold text-lg">¡Hola, Usuario! 👋</h3>
-                </div>
-                <div className="bg-green-50 rounded-xl p-3 border border-green-200 mb-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-green-700 font-bold text-sm">Balance</span>
-                        <span className="text-green-600 font-black text-xl">$10.00</span>
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <div className="h-3 bg-gray-100 rounded-full w-full"></div>
-                    <div className="h-3 bg-gray-100 rounded-full w-3/4"></div>
-                </div>
-            </div>
-        )
+        image: "/screenshots/dashboard.png"
     },
     {
         id: 2,
         title: "Chat Empresarial",
-        description: "Mensajería instantánea con notificaciones en tiempo real y copias automáticas por email.",
+        description: "Mensajería instantánea con empresas verificadas. Busca contactos, explora el marketplace y gestiona todas tus conversaciones.",
         icon: MessageSquare,
         color: "from-green-500 to-emerald-600",
-        mockup: (
-            <div className="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-[280px] mx-auto">
-                <div className="flex items-center gap-3 mb-4 pb-3 border-b">
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">G</div>
-                    <div>
-                        <p className="font-bold text-gray-900">GABO</p>
-                        <p className="text-xs text-green-500">En línea</p>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 max-w-[80%]">
-                        <p className="text-sm text-gray-700">¡Hola! ¿Cómo va el proyecto?</p>
-                    </div>
-                    <div className="bg-blue-500 rounded-2xl rounded-tr-sm p-3 max-w-[80%] ml-auto">
-                        <p className="text-sm text-white">¡Excelente! Avanzando bien 🚀</p>
-                    </div>
-                    <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3 max-w-[80%]">
-                        <p className="text-sm text-gray-700">¡Perfecto! Agendamos llamada</p>
-                    </div>
-                </div>
-            </div>
-        )
+        image: "/screenshots/chat.png"
     },
     {
         id: 3,
         title: "Red de Contactos",
-        description: "Descubre empresas, conecta con profesionales y gestiona tu red de negocios B2B.",
+        description: "Descubre empresas, conecta con profesionales B2B y gestiona tu red de negocios. Filtra por industria, envía solicitudes de conexión.",
         icon: Users,
         color: "from-purple-500 to-indigo-600",
-        mockup: (
-            <div className="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-[280px] mx-auto">
-                <h4 className="font-bold text-gray-900 mb-3">Gestión de Contactos</h4>
-                <div className="flex gap-1 mb-4 text-xs">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-bold">Mis Contactos</span>
-                    <span className="px-2 py-1 text-gray-500">Descubrir</span>
-                    <span className="px-2 py-1 text-gray-500">Empresas</span>
-                </div>
-                <div className="space-y-3">
-                    {["GABO", "María López", "Carlos Tech"].map((name, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-pink-500' : 'bg-green-500'}`}>
-                                {name[0]}
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-sm text-gray-900">{name}</p>
-                                <p className="text-[10px] text-gray-500">Profesional B2B</p>
-                            </div>
-                            <button className="px-2 py-1 bg-blue-500 text-white text-[10px] rounded-lg font-bold">Chat</button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )
+        image: "/screenshots/contacts.png"
     },
     {
         id: 4,
         title: "Perfil Profesional",
-        description: "Crea tu perfil empresarial, muestra tu marca y conecta con clientes potenciales.",
+        description: "Crea tu perfil empresarial con foto, portada y datos de tu empresa. Muestra tu marca y conecta con clientes potenciales.",
         icon: UserCircle,
         color: "from-orange-500 to-red-500",
-        mockup: (
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-[280px] mx-auto">
-                <div className="h-16 bg-gradient-to-r from-blue-400 to-purple-500"></div>
-                <div className="px-4 pb-4 -mt-8">
-                    <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center text-3xl mb-2">
-                        👤
-                    </div>
-                    <h4 className="font-black text-gray-900 text-lg">Tu Nombre</h4>
-                    <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full mb-3">SOCIO B2BCHAT</span>
-                    <div className="space-y-2">
-                        <div className="h-2 bg-gray-100 rounded-full w-full"></div>
-                        <div className="h-2 bg-gray-100 rounded-full w-2/3"></div>
-                    </div>
-                    <button className="w-full mt-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm">
-                        Editar Perfil
-                    </button>
-                </div>
-            </div>
-        )
+        image: "/screenshots/profile.png"
     },
     {
         id: 5,
-        title: "IA Integrada",
-        description: "Asistente inteligente que te ayuda a responder, analizar conversaciones y cerrar negocios.",
-        icon: Sparkles,
-        color: "from-pink-500 to-rose-600",
-        mockup: (
-            <div className="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-[280px] mx-auto">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                        <p className="font-bold text-sm text-gray-900">Asistente IA</p>
-                        <p className="text-[10px] text-green-500">Siempre disponible</p>
-                    </div>
-                </div>
-                <div className="space-y-3">
-                    <div className="bg-gray-100 rounded-2xl rounded-tl-sm p-3">
-                        <p className="text-sm text-gray-700">¿Cómo puedo mejorar mis ventas?</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl rounded-tr-sm p-3">
-                        <p className="text-sm text-white">Te sugiero optimizar tu perfil, conectar con 5 empresas del sector...</p>
-                    </div>
-                </div>
-            </div>
-        )
+        title: "Página de Inicio",
+        description: "Una interfaz moderna y profesional que te guía a todas las funciones. Diseño limpio enfocado en productividad empresarial.",
+        icon: Home,
+        color: "from-cyan-500 to-blue-600",
+        image: "/screenshots/landing.png"
     }
 ];
 
@@ -153,20 +55,20 @@ export default function AppShowcaseCarousel() {
         if (!isAutoPlaying) return;
 
         const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % appFeatures.length);
-        }, 4000);
+            setCurrentSlide((prev) => (prev + 1) % appScreens.length);
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [isAutoPlaying]);
 
     const nextSlide = () => {
         setIsAutoPlaying(false);
-        setCurrentSlide((prev) => (prev + 1) % appFeatures.length);
+        setCurrentSlide((prev) => (prev + 1) % appScreens.length);
     };
 
     const prevSlide = () => {
         setIsAutoPlaying(false);
-        setCurrentSlide((prev) => (prev - 1 + appFeatures.length) % appFeatures.length);
+        setCurrentSlide((prev) => (prev - 1 + appScreens.length) % appScreens.length);
     };
 
     const goToSlide = (index: number) => {
@@ -174,25 +76,25 @@ export default function AppShowcaseCarousel() {
         setCurrentSlide(index);
     };
 
-    const feature = appFeatures[currentSlide];
-    const Icon = feature.icon;
+    const screen = appScreens[currentSlide];
+    const Icon = screen.icon;
 
     return (
         <section className="py-16 md:py-24 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-bold mb-4">
                         ✨ Descubre B2BChat
                     </span>
                     <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
-                        Todo lo que necesitas para<br />
+                        Conoce todas las funciones<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                            escalar tu negocio B2B
+                            en acción
                         </span>
                     </h2>
                     <p className="text-gray-600 max-w-xl mx-auto">
-                        Una plataforma completa para gestionar conversaciones, contactos y campañas empresariales.
+                        Explora las principales pantallas de la aplicación con capturas reales.
                     </p>
                 </div>
 
@@ -203,58 +105,100 @@ export default function AppShowcaseCarousel() {
                     onMouseLeave={() => setIsAutoPlaying(true)}
                 >
                     <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-                        {/* Left: Phone Mockup */}
+                        {/* Left: Phone Frame with Real Screenshot */}
                         <div className="relative flex-shrink-0 order-2 lg:order-1">
                             {/* Phone Frame */}
-                            <div className="relative w-[320px] h-[600px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                            <div className="relative w-[320px] h-[640px] bg-gray-900 rounded-[3rem] p-2 shadow-2xl">
                                 {/* Notch */}
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-10"></div>
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-20"></div>
 
-                                {/* Screen */}
-                                <div className={`w-full h-full rounded-[2.5rem] bg-gradient-to-br ${feature.color} overflow-hidden flex items-center justify-center p-6 transition-all duration-500`}>
-                                    <div className="transform transition-all duration-500 hover:scale-105">
-                                        {feature.mockup}
-                                    </div>
+                                {/* Screen with Real Image */}
+                                <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-white relative">
+                                    <Image
+                                        src={screen.image}
+                                        alt={screen.title}
+                                        fill
+                                        className="object-cover object-top transition-all duration-500"
+                                        priority
+                                    />
+                                    {/* Gradient overlay at bottom */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/20 to-transparent"></div>
                                 </div>
                             </div>
 
-                            {/* Floating Elements */}
-                            <div className="absolute -top-4 -right-4 w-12 h-12 bg-white rounded-2xl shadow-lg flex items-center justify-center animate-bounce">
-                                <Icon className="w-6 h-6 text-blue-600" />
+                            {/* Floating Badge */}
+                            <div className={`absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-r ${screen.color} rounded-2xl shadow-lg flex items-center justify-center animate-bounce`}>
+                                <Icon className="w-7 h-7 text-white" />
                             </div>
-                            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl shadow-lg flex items-center justify-center">
-                                <span className="text-white font-black text-xl">B2B</span>
+
+                            {/* B2B Badge */}
+                            <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
+                                <span className="text-white font-black text-sm">B2BChat</span>
                             </div>
                         </div>
 
                         {/* Right: Content */}
                         <div className="flex-1 text-center lg:text-left order-1 lg:order-2">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md mb-6">
-                                <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center`}>
+                                <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${screen.color} flex items-center justify-center`}>
                                     <Icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-sm font-bold text-gray-700">Función {currentSlide + 1} de {appFeatures.length}</span>
+                                <span className="text-sm font-bold text-gray-700">Pantalla {currentSlide + 1} de {appScreens.length}</span>
                             </div>
 
                             <h3 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 transition-all duration-300">
-                                {feature.title}
+                                {screen.title}
                             </h3>
 
                             <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto lg:mx-0">
-                                {feature.description}
+                                {screen.description}
                             </p>
+
+                            {/* Feature Pills */}
+                            <div className="flex flex-wrap gap-2 mb-8 justify-center lg:justify-start">
+                                {currentSlide === 0 && (
+                                    <>
+                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Balance en USD</span>
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Onboarding Gratis</span>
+                                    </>
+                                )}
+                                {currentSlide === 1 && (
+                                    <>
+                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Mensajes en Tiempo Real</span>
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Búsqueda Inteligente</span>
+                                    </>
+                                )}
+                                {currentSlide === 2 && (
+                                    <>
+                                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">Descubrir Empresas</span>
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Solicitudes de Conexión</span>
+                                    </>
+                                )}
+                                {currentSlide === 3 && (
+                                    <>
+                                        <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">Foto de Perfil</span>
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Socio B2BChat</span>
+                                    </>
+                                )}
+                                {currentSlide === 4 && (
+                                    <>
+                                        <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-xs font-bold">Diseño Moderno</span>
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Interfaz Intuitiva</span>
+                                    </>
+                                )}
+                            </div>
 
                             {/* Navigation Arrows */}
                             <div className="flex items-center justify-center lg:justify-start gap-4 mb-8">
                                 <button
                                     onClick={prevSlide}
-                                    className="w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl flex items-center justify-center text-gray-600 hover:text-blue-600 transition-all hover:scale-110 active:scale-95"
+                                    className="w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl flex items-center justify-center text-gray-600 hover:text-blue-600 transition-all hover:scale-110 active:scale-95 border border-gray-100"
                                 >
                                     <ChevronLeft className="w-6 h-6" />
                                 </button>
                                 <button
                                     onClick={nextSlide}
-                                    className="w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl flex items-center justify-center text-gray-600 hover:text-blue-600 transition-all hover:scale-110 active:scale-95"
+                                    className="w-12 h-12 rounded-full bg-white shadow-lg hover:shadow-xl flex items-center justify-center text-gray-600 hover:text-blue-600 transition-all hover:scale-110 active:scale-95 border border-gray-100"
                                 >
                                     <ChevronRight className="w-6 h-6" />
                                 </button>
@@ -262,12 +206,12 @@ export default function AppShowcaseCarousel() {
 
                             {/* Dots */}
                             <div className="flex items-center justify-center lg:justify-start gap-2">
-                                {appFeatures.map((_, index) => (
+                                {appScreens.map((_, index) => (
                                     <button
                                         key={index}
                                         onClick={() => goToSlide(index)}
                                         className={`transition-all duration-300 rounded-full ${index === currentSlide
-                                                ? 'w-8 h-3 bg-blue-600'
+                                                ? 'w-10 h-3 bg-blue-600'
                                                 : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
                                             }`}
                                     />
