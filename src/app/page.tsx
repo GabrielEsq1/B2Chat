@@ -10,6 +10,7 @@ import {
     ChevronLeft, ChevronRight, ArrowDown
 } from "lucide-react";
 import BlogSection from "@/components/home/BlogSection";
+import AppShowcaseCarousel from "@/components/home/AppShowcaseCarousel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BookingBanner from "@/components/dashboard/BookingBanner";
 import { useLanguage } from "@/context/LanguageContext";
@@ -220,6 +221,9 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            {/* App Showcase Carousel */}
+            <AppShowcaseCarousel />
 
             {/* Ecosystem Section - NEW DESIGN */}
             <section className="py-32 bg-white relative overflow-hidden">
