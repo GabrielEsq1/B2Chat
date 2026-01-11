@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -15,7 +15,8 @@ import {
     ChevronLeft,
     Star,
     ShieldCheck,
-    ArrowRight
+    ArrowRight,
+    Loader2
 } from "lucide-react";
 
 interface UserProfile {
@@ -40,6 +41,8 @@ export default function ProfilePage() {
     const { data: session } = useSession();
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [uploadingCover, setUploadingCover] = useState(false);
+    const coverInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (params?.id) {
@@ -99,6 +102,43 @@ export default function ProfilePage() {
     const isOwnProfile = !!(session?.user?.id && user?.id && String(session.user.id) === String(user.id));
     const avatarUrl = user.avatar || user.profilePicture;
 
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        setUploadingCover(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'b2bchat_profiles');
+
+            const cloudinaryRes = await fetch(
+                `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dg2suxdit'}/image/upload`,
+                { method: 'POST', body: formData }
+            );
+
+            if (cloudinaryRes.ok) {
+                const cloudinaryData = await cloudinaryRes.json();
+                const coverUrl = cloudinaryData.secure_url;
+
+                // Update user profile with new cover
+                const updateRes = await fetch(`/api/users/${user.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ coverPhoto: coverUrl })
+                });
+
+                if (updateRes.ok) {
+                    setUser(prev => prev ? { ...prev, coverPhoto: coverUrl } : null);
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading cover:', error);
+        } finally {
+            setUploadingCover(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white pb-20">
             {/* Premium Header / Cover Photo */}
@@ -133,12 +173,30 @@ export default function ProfilePage() {
                 </div>
 
                 {isOwnProfile && (
-                    <button
-                        onClick={() => router.push(`/profile/${user.id}/edit`)}
-                        className="absolute bottom-40 right-10 z-20 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all font-bold flex items-center gap-2"
-                    >
-                        <Camera className="w-5 h-5" /> Cambiar Portada
-                    </button>
+                    <>
+                        <input
+                            ref={coverInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverUpload}
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => coverInputRef.current?.click()}
+                            disabled={uploadingCover}
+                            className="absolute bottom-40 right-10 z-20 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-2xl backdrop-blur-md border border-white/20 transition-all font-bold flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {uploadingCover ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" /> Subiendo...
+                                </>
+                            ) : (
+                                <>
+                                    <Camera className="w-5 h-5" /> Cambiar Portada
+                                </>
+                            )}
+                        </button>
+                    </>
                 )}
             </div>
 
