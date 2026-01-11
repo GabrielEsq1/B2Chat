@@ -32,8 +32,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
                 // Use window.location.origin to connect to the same server
                 const socketUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_B2BCHAT_APP_BASEURL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001');
 
-                console.log('[SocketProvider] Connecting to:', socketUrl);
-
                 socketInstance = new (ClientIO as any)(socketUrl, {
                     path: "/api/socket/io",
                     addTrailingSlash: false,
@@ -49,29 +47,27 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
                 if (!socketInstance) return;
 
                 socketInstance.on("connect", () => {
-                    console.log("✅ Socket connected successfully");
                     if (mounted) {
                         setIsConnected(true);
                     }
                 });
 
-                socketInstance.on("disconnect", (reason) => {
-                    console.log("⚠️ Socket disconnected:", reason);
+                socketInstance.on("disconnect", () => {
                     if (mounted) {
                         setIsConnected(false);
                     }
                 });
 
-                socketInstance.on("connect_error", (error) => {
-                    console.error("❌ Socket connection error:", error.message);
+                socketInstance.on("connect_error", () => {
+                    // Silent error handling
                 });
 
                 if (mounted) {
                     setSocket(socketInstance);
                 }
 
-            } catch (error) {
-                console.error("❌ Failed to initialize socket:", error);
+            } catch {
+                // Silent error handling
             }
         };
 
@@ -84,7 +80,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             mounted = false;
             clearTimeout(timer);
             if (socketInstance) {
-                console.log("[SocketProvider] Disconnecting socket...");
                 socketInstance.disconnect();
             }
         };

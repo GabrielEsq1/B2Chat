@@ -191,7 +191,6 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
 
     // Listen for new messages
     const handleNewMessage = (message: any) => {
-      console.log('[ChatWindow] New message via Socket:', message);
 
       const formattedMessage: Message = {
         id: message.id,
@@ -210,7 +209,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       });
 
       if (!formattedMessage.fromSelf && audioRef.current) {
-        audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+        audioRef.current.play().catch(() => { });
       }
     };
 

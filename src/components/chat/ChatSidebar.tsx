@@ -292,7 +292,6 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
     };
 
     const handleStartChat = async (userId: string) => {
-        console.log('[ChatSidebar] Starting chat with userId:', userId);
         try {
             const res = await fetch('/api/conversations', {
                 method: 'POST',
@@ -301,7 +300,6 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
             });
 
             const data = await res.json();
-            console.log('[ChatSidebar] Conversation response:', data);
 
             if (data.conversation) {
                 // Get the full conversation with user data
@@ -322,8 +320,6 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                     },
                     participants: []
                 };
-
-                console.log('[ChatSidebar] Formatted conversation:', formattedConversation);
 
                 setShowNewChat(false);
                 setSearchQuery("");
