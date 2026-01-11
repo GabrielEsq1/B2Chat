@@ -105,35 +105,22 @@ export default function AppShowcaseCarousel() {
                     onMouseLeave={() => setIsAutoPlaying(true)}
                 >
                     <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-                        {/* Left: Phone Frame with Real Screenshot */}
-                        <div className="relative flex-shrink-0 order-2 lg:order-1">
-                            {/* Phone Frame */}
-                            <div className="relative w-[320px] h-[640px] bg-gray-900 rounded-[3rem] p-2 shadow-2xl">
-                                {/* Notch */}
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-gray-900 rounded-b-2xl z-20"></div>
-
-                                {/* Screen with Real Image */}
-                                <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-white relative">
-                                    <Image
-                                        src={screen.image}
-                                        alt={screen.title}
-                                        fill
-                                        className="object-cover object-top transition-all duration-500"
-                                        priority
-                                    />
-                                    {/* Gradient overlay at bottom */}
-                                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/20 to-transparent"></div>
-                                </div>
+                        {/* Left: Screenshot Image - Full Size without Frame */}
+                        <div className="relative flex-shrink-0 order-2 lg:order-1 w-full max-w-[500px]">
+                            {/* Image Container with Shadow and Rounded Corners */}
+                            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-200 bg-white">
+                                <Image
+                                    src={screen.image}
+                                    alt={screen.title}
+                                    fill
+                                    className="object-cover object-top transition-all duration-500"
+                                    priority
+                                />
                             </div>
 
                             {/* Floating Badge */}
-                            <div className={`absolute -top-4 -right-4 w-14 h-14 bg-gradient-to-r ${screen.color} rounded-2xl shadow-lg flex items-center justify-center animate-bounce`}>
-                                <Icon className="w-7 h-7 text-white" />
-                            </div>
-
-                            {/* B2B Badge */}
-                            <div className="absolute -bottom-4 -left-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-                                <span className="text-white font-black text-sm">B2BChat</span>
+                            <div className={`absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-r ${screen.color} rounded-xl shadow-lg flex items-center justify-center`}>
+                                <Icon className="w-6 h-6 text-white" />
                             </div>
                         </div>
 
