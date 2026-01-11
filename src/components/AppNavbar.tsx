@@ -27,8 +27,8 @@ export default function AppNavbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Don't show navbar on landing page, login, or register
-    // const hideNavbar = pathname ? ["/", "/login", "/register"].includes(pathname) : false;
-    // if (hideNavbar) return null;
+    const hideNavbar = pathname ? ["/", "/login", "/register", "/forgot-password"].includes(pathname) : false;
+    if (hideNavbar) return null;
 
     const isAdmin = session?.user?.role === "SUPERADMIN" || session?.user?.role === "ADMIN_EMPRESA";
 
