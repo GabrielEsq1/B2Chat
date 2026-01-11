@@ -144,7 +144,8 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
             senderAvatar: msg.sender?.avatar || msg.sender?.profilePicture,
             createdAt: new Date(msg.createdAt),
             fromSelf: msg.senderUserId === session?.user?.id,
-            isStarred: msg.isStarred
+            isStarred: msg.isStarred,
+            attachmentUrl: msg.attachmentUrl
           }));
 
           // Only update if there are new messages (to avoid unnecessary re-renders)
@@ -200,7 +201,8 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         senderAvatar: message.sender?.avatar || message.sender?.profilePicture,
         createdAt: new Date(message.createdAt),
         fromSelf: (message.senderUserId || message.sender?.id) === session?.user?.id,
-        isStarred: message.isStarred
+        isStarred: message.isStarred,
+        attachmentUrl: message.attachmentUrl
       };
 
       setMessages(prev => {
