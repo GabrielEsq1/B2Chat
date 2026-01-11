@@ -174,10 +174,10 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     // Initial load
     fetchMessages(false);
 
-    // Polling as a robust fallback (every 3 seconds) as requested by user
+    // Polling less aggressively (every 10 seconds) to avoid interrupting user interactions
     const interval = setInterval(() => {
       fetchMessages(true);
-    }, 3000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [conversation?.id, session?.user?.id]);

@@ -78,10 +78,13 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
         loadConversations();
         loadContacts();
 
-        // Polling as fallback (every 3 seconds) for real-time responsiveness
+        // Polling less aggressively (every 15 seconds) to avoid interrupting user interactions
         const interval = setInterval(() => {
-            loadConversations();
-        }, 3000);
+            // Only poll if user is not actively searching
+            if (!searchTerm) {
+                loadConversations();
+            }
+        }, 15000);
 
         // Initialize Pusher for Presence
         import('@/lib/pusher-client').then(({ getPusherClient }) => {
