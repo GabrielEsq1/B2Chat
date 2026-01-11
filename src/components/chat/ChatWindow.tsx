@@ -155,33 +155,13 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
             return formattedMessages;
           });
 
-          // Notify for new messages (sound + visual)
+          // Silent update - no notifications during polling
+          // Just track new message IDs to prevent duplicate notifications later
           if (isPolling && formattedMessages.length > messages.length) {
             const newMessages = formattedMessages.filter(
               (msg: Message) => !notifiedMessageIds.current.has(msg.id) && !msg.fromSelf
             );
-
-            if (newMessages.length > 0) {
-              const lastNewMessage = newMessages[newMessages.length - 1];
-
-              // Mark as notified
-              newMessages.forEach((msg: Message) => notifiedMessageIds.current.add(msg.id));
-
-              // Play sound if enabled
-              if (soundEnabled && audioRef.current) {
-                audioRef.current.play().catch(e => console.log('Audio play failed:', e));
-              }
-
-              // Show visual toast notification
-              setToast({
-                show: true,
-                message: lastNewMessage.text,
-                senderName: conversation.otherUser?.name || 'Usuario'
-              });
-
-              // Hide toast after 4 seconds
-              setTimeout(() => setToast(null), 4000);
-            }
+            newMessages.forEach((msg: Message) => notifiedMessageIds.current.add(msg.id));
           }
         }
       } catch (error) {
