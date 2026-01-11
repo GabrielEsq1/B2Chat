@@ -104,9 +104,9 @@ export default function AppShowcaseCarousel() {
                     onMouseEnter={() => setIsAutoPlaying(false)}
                     onMouseLeave={() => setIsAutoPlaying(true)}
                 >
-                    <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+                    <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16">
                         {/* Left: Screenshot Image - Full Size without Frame */}
-                        <div className="relative flex-shrink-0 order-2 lg:order-1 w-full max-w-[500px]">
+                        <div className="relative flex-shrink-0 order-2 lg:order-1 w-full max-w-[450px] mx-auto lg:mx-0">
                             {/* Image Container with Shadow and Rounded Corners */}
                             <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-200 bg-white">
                                 <Image
@@ -125,7 +125,7 @@ export default function AppShowcaseCarousel() {
                         </div>
 
                         {/* Right: Content */}
-                        <div className="flex-1 text-center lg:text-left order-1 lg:order-2">
+                        <div className="flex-1 max-w-lg text-center lg:text-left order-1 lg:order-2">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md mb-6">
                                 <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${screen.color} flex items-center justify-center`}>
                                     <Icon className="w-4 h-4 text-white" />
@@ -198,8 +198,8 @@ export default function AppShowcaseCarousel() {
                                         key={index}
                                         onClick={() => goToSlide(index)}
                                         className={`transition-all duration-300 rounded-full ${index === currentSlide
-                                                ? 'w-10 h-3 bg-blue-600'
-                                                : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                                            ? 'w-10 h-3 bg-blue-600'
+                                            : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
                                             }`}
                                     />
                                 ))}
