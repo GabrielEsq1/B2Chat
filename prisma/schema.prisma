@@ -466,3 +466,45 @@ model EmailLog {
   @@index([status])
   @@index([resendId])
 }
+
+// --- B2B BUSINESS DISCOVERY (Google Maps + Email Scraping) ---
+
+model ScrapedBusiness {
+  id          String          @id @default(uuid())
+  placeId     String          @unique // Google Place ID
+  name        String
+  address     String
+  phone       String?
+  website     String?
+  rating      Float?
+  lat         Float
+  lng         Float
+  types       String[]        // Business types from Google
+  
+  // Scraping metadata
+  lastScraped DateTime        @default(now())
+  scrapedCount Int            @default(1) // Times we've scraped this
+  
+  emails      BusinessEmail[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([lat, lng])
+  @@index([types])
+}
+
+model BusinessEmail {
+  id         String          @id @default(uuid())
+  email      String
+  businessId String
+  verified   Boolean         @default(false)
+  source     String          // "scraped", "manual", "api", "guessed"
+  confidence Float           @default(0.5) // 0.0 - 1.0
+  
+  business   ScrapedBusiness @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt  DateTime        @default(now())
+
+  @@index([email])
+  @@index([businessId])
+}
+
