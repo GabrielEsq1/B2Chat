@@ -7,7 +7,7 @@ export default function IconSidebar() {
     const router = useRouter();
 
     return (
-        <div className="flex w-[60px] h-full flex-col bg-slate-800 border-r border-slate-700 flex-shrink-0">
+        <div className="hidden md:flex w-[60px] h-full flex-col bg-slate-800 border-r border-slate-700 flex-shrink-0">
             {/* Profile at top */}
             <button
                 onClick={() => router.push('/profile')}
