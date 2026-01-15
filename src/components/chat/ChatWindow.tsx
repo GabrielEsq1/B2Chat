@@ -252,6 +252,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     };
   }, [socket, conversation?.id, session?.user?.id]);
 
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   // Mark messages as read when viewing conversation
   useEffect(() => {
     if (!socket || !conversation?.id || !session?.user?.id || messages.length === 0) return;

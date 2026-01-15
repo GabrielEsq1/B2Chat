@@ -66,7 +66,7 @@ function ChatContent() {
             <div className="w-full h-full flex flex-col md:flex-row relative">
                 {/* 1. LEFT: CHATS list (Full width if no selection, Sidebar if selection) */}
                 <div
-                    className={`${selectedConversation ? 'hidden md:flex md:w-[350px] lg:w-[400px]' : 'flex w-full'} h-full flex-col border-r border-gray-200 bg-white z-20 transition-all duration-300 ease-in-out`}
+                    className="hidden md:flex md:w-[350px] lg:w-[400px] h-full flex-col border-r border-gray-200 bg-white z-20"
                 >
                     <ChatSidebar
                         onSelectConversation={setSelectedConversation}
