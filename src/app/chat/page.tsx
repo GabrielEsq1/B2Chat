@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import { AIChatWindow } from "@/components/chat/AIChatWindow";
+import IconSidebar from "@/components/chat/IconSidebar";
 
 
 function ChatContent() {
@@ -63,8 +64,11 @@ function ChatContent() {
 
     return (
         <div className="h-[calc(100vh-64px)] w-full bg-[#f0f2f5] overflow-hidden flex">
-            <div className="w-full h-full flex flex-col md:flex-row relative">
-                {/* 1. LEFT: CHATS list (Full width if no selection, Sidebar if selection) */}
+            <div className="w-full h-full flex relative">
+                {/* 1. LEFT: Icon Sidebar (WhatsApp style) */}
+                <IconSidebar />
+
+                {/* 2. MIDDLE: Chat List */}
                 <div
                     className={`${selectedConversation ? 'hidden md:flex' : 'flex'} md:w-[350px] lg:w-[400px] h-full flex-col border-r border-gray-200 bg-white z-20`}
                 >
@@ -75,7 +79,7 @@ function ChatContent() {
                     />
                 </div>
 
-                {/* 2. RIGHT: MESSAGES window (Hidden if no selection) */}
+                {/* 3. RIGHT: Chat Window */}
                 <main
                     className={`${!selectedConversation && !initializing && !error ? 'hidden' : 'flex'} flex-1 h-full flex-col bg-[#efeae2] relative overflow-hidden transition-all duration-300 ease-in-out`}
                 >
