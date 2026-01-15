@@ -72,7 +72,7 @@ function ChatContent() {
 
                 {/* 2. MIDDLE: Chat List */}
                 <div
-                    className={`${selectedConversation ? 'hidden md:flex' : 'flex'} md:w-[350px] lg:w-[400px] h-full flex-col border-r border-gray-200 bg-white z-20`}
+                    className={`${selectedConversation ? 'hidden md:flex' : 'flex'} md:w-[280px] lg:w-[320px] h-full flex-col border-r border-gray-200 bg-white z-20`}
                 >
                     <ChatSidebar
                         onSelectConversation={setSelectedConversation}
