@@ -45,65 +45,70 @@ export async function GET(req: NextRequest) {
         console.log(`[API/Conversations] Found ${conversations.length} conversations for user ${session.user.id}`);
 
         // Fetch user and message data separately for each conversation
-        const formattedConversations = await Promise.all(conversations.map(async (conv: any) => {
-            const isGroup = conv.type === "GROUP";
+        const formattedConversations = (await Promise.all(conversations.map(async (conv: any) => {
+            try {
+                const isGroup = conv.type === "GROUP";
 
-            // Fetch other user data if USER_USER conversation
-            let otherUser = null;
-            if (!isGroup) {
-                const otherUserId = conv.userAId === session.user.id ? conv.userBId : conv.userAId;
-                otherUser = await prisma.user.findUnique({
-                    where: { id: otherUserId },
-                    select: {
-                        id: true,
-                        name: true,
-                        phone: true,
-                        avatar: true,
-                        isBot: true,
-                    }
-                });
-            }
-
-            // Fetch last message
-            const lastMessage = await prisma.message.findFirst({
-                where: { conversationId: conv.id },
-                orderBy: { createdAt: "desc" },
-                select: {
-                    text: true,
-                    createdAt: true,
-                    readAt: true,
+                // Fetch other user data if USER_USER conversation
+                let otherUser = null;
+                if (!isGroup) {
+                    const otherUserId = conv.userAId === session.user.id ? conv.userBId : conv.userAId;
+                    otherUser = await prisma.user.findUnique({
+                        where: { id: otherUserId },
+                        select: {
+                            id: true,
+                            name: true,
+                            phone: true,
+                            avatar: true,
+                            isBot: true,
+                        }
+                    });
                 }
-            });
 
-            // Fetch group data if GROUP conversation
-            let groupData = null;
-            if (isGroup && conv.groupId) {
-                groupData = await prisma.group.findUnique({
-                    where: { id: conv.groupId },
+                // Fetch last message
+                const lastMessage = await prisma.message.findFirst({
+                    where: { conversationId: conv.id },
+                    orderBy: { createdAt: "desc" },
                     select: {
-                        id: true,
-                        name: true,
-                        avatar: true,
+                        text: true,
+                        createdAt: true,
+                        readAt: true,
                     }
                 });
-            }
 
-            return {
-                id: conv.id,
-                type: conv.type,
-                otherUser,
-                name: groupData?.name,
-                avatar: groupData?.avatar,
-                lastMessage: lastMessage ? {
-                    text: lastMessage.text,
-                    createdAt: lastMessage.createdAt,
-                    isRead: lastMessage.readAt !== null,
-                } : null,
-                updatedAt: conv.updatedAt,
-                isPinned: conv.isPinned,
-                isFavorite: conv.isFavorite,
-            };
-        }));
+                // Fetch group data if GROUP conversation
+                let groupData = null;
+                if (isGroup && conv.groupId) {
+                    groupData = await prisma.group.findUnique({
+                        where: { id: conv.groupId },
+                        select: {
+                            id: true,
+                            name: true,
+                            avatar: true,
+                        }
+                    });
+                }
+
+                return {
+                    id: conv.id,
+                    type: conv.type,
+                    otherUser,
+                    name: groupData?.name,
+                    avatar: groupData?.avatar,
+                    lastMessage: lastMessage ? {
+                        text: lastMessage.text,
+                        createdAt: lastMessage.createdAt,
+                        isRead: lastMessage.readAt !== null,
+                    } : null,
+                    updatedAt: conv.updatedAt,
+                    isPinned: conv.isPinned,
+                    isFavorite: conv.isFavorite,
+                };
+            } catch (innerError) {
+                console.error(`[API/Conversations] Error processing conversation ${conv.id}:`, innerError);
+                return null;
+            }
+        }))).filter(Boolean); // Filter out failed conversations
 
         return NextResponse.json({ conversations: formattedConversations });
     } catch (error) {

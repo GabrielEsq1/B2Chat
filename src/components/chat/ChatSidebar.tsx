@@ -805,7 +805,11 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                             <X className="h-8 w-8" />
                         </div>
                         <p className="text-sm font-bold text-red-900 mb-1">No se pudieron cargar los chats</p>
-                        <p className="text-xs text-red-500 mb-6">{error === 'No autenticado' ? 'Tu sesión ha expirado.' : 'Hubo un error al conectar con el servidor.'}</p>
+                        <p className="text-xs text-red-500 mb-6 px-4 break-words">
+                            {error === 'No autenticado'
+                                ? 'Tu sesión ha expirado.'
+                                : error || 'Hubo un error al conectar con el servidor.'}
+                        </p>
                         <button
                             onClick={() => loadConversations()}
                             className="px-6 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100"
