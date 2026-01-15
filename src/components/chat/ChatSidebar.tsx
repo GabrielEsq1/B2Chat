@@ -926,38 +926,28 @@ export default function ChatSidebar({ onSelectConversation, selectedId, isFullWi
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0 relative">
-                                                <div className="flex items-center justify-between gap-2 mb-1 pr-6">
-                                                    <h3 className={`font-black tracking-tight truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900 text-lg'}`}>
+                                                <div className="flex items-center justify-between gap-2 mb-1">
+                                                    <h3 className={`font-bold text-sm truncate ${selectedId === conv.id ? 'text-white' : 'text-gray-900'}`}>
                                                         {conv.type === "GROUP" ? conv.name : (conv.otherUser?.name || t('chat.sidebar.no_name', { defaultValue: 'Sin nombre' }))}
                                                     </h3>
-                                                    <div className="flex items-center gap-2">
-                                                        {conv.isPinned && <span title={t('chat.actions.pin')} className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
-                                                        {conv.isFavorite && <Star className={`h-3 w-3 fill-yellow-400 text-yellow-500 shadow-sm`} />}
-                                                    </div>
+                                                    {conv.lastMessageAt && (
+                                                        <span className="text-[10px] font-medium whitespace-nowrap ${selectedId === conv.id ? 'text-blue-100' : 'text-gray-400'}">
+                                                            {new Date(conv.lastMessageAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center justify-between gap-2">
-                                                    <p className={`text-sm truncate font-bold leading-tight opacity-80 ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>
+                                                    <p className={`text-xs truncate leading-tight ${selectedId === conv.id ? 'text-blue-50' : 'text-gray-500'}`}>
                                                         {conv.type === "GROUP" && !conv.lastMessage ? `${t('chat.window.member')} • ${conv.memberCount} ${t('chat.sidebar.group_suffix')}` : (conv.lastMessage || t('chat.sidebar.empty_hint'))}
                                                     </p>
-                                                    <div className="flex flex-col items-end gap-1 min-w-[30px]">
+                                                    <div className="flex items-center gap-1.5">
+                                                        {conv.isPinned && <span title={t('chat.actions.pin')} className={`${selectedId === conv.id ? 'text-white' : 'text-blue-500'}`}><Plus className="h-3 w-3 rotate-45" /></span>}
+                                                        {conv.isFavorite && <Star className={`h-3 w-3 fill-yellow-400 text-yellow-500 shadow-sm`} />}
                                                         {conv.unreadCount !== undefined && conv.unreadCount > 0 && (
-                                                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm animate-pulse">
-                                                                {conv.unreadCount}
+                                                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-green-500 px-1.5 text-[10px] font-black text-white shadow-sm">
+                                                                {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
                                                             </span>
                                                         )}
-
-                                                        <div className="flex flex-col items-end gap-0.5 mt-1">
-                                                            {(conv.intentScore && conv.intentScore > 50) && (
-                                                                <span title="Hot Lead">
-                                                                    <Zap className="h-3 w-3 text-amber-500 fill-amber-500 animate-bounce-slow" />
-                                                                </span>
-                                                            )}
-                                                            {(conv.estimatedValue) && (
-                                                                <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1 rounded-sm border border-emerald-100 whitespace-nowrap">
-                                                                    ${conv.estimatedValue.toLocaleString()}
-                                                                </span>
-                                                            )}
-                                                        </div>
                                                     </div>
                                                 </div>
                                                 {/* Context Menu Trigger */}
