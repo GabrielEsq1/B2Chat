@@ -458,7 +458,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-[#efeae2]">
+    <div className="flex h-full flex-col bg-[#efeae2]">
       {/* Header */}
       <div className="flex items-center justify-between bg-white px-3 sm:px-4 py-2 border-b border-gray-200 shadow-sm z-10">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
