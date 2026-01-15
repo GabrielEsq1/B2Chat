@@ -882,7 +882,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
       }
 
       {/* Input */}
-      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 relative">
+      <div className="sticky bottom-0 bg-gray-50 px-4 py-3 border-t border-gray-200 z-10">
         {showEmojiPicker && (
           <div className="absolute bottom-16 left-4 z-50">
             <EmojiPicker onEmojiClick={onEmojiClick} width={300} height={400} />

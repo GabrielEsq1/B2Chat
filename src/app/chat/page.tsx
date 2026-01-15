@@ -45,6 +45,8 @@ function ChatContent() {
                     const conv = data.conversation;
                     const otherUser = conv.userAId === session?.user?.id ? conv.userB : conv.userA;
                     setSelectedConversation({ ...conv, otherUser });
+                } else {
+                    setError("La respuesta del servidor no contenía los datos del chat.");
                 }
             } else {
                 setError(data.error || "No se pudo conectar con el usuario.");

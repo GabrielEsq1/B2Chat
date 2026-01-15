@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Send, Loader2, Bot, ArrowLeft, X } from 'lucide-react';
 import FastAdsBar from './FastAdsBar';
 
@@ -158,7 +158,7 @@ export function AIChatWindow({ conversationId, userId, userName = 'Usuario', onB
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+            <div className="sticky bottom-0 p-4 border-t bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.03)] z-10">
                 <form onSubmit={handleSubmit} className="flex gap-2 items-center">
                     <input
                         value={input}
