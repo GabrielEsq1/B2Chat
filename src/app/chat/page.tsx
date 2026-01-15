@@ -65,8 +65,10 @@ function ChatContent() {
     return (
         <div className="h-[calc(100vh-64px)] w-full bg-[#f0f2f5] overflow-hidden flex">
             <div className="w-full h-full flex relative">
-                {/* 1. LEFT: Icon Sidebar (WhatsApp style) */}
-                <IconSidebar />
+                {/* 1. LEFT: Icon Sidebar (WhatsApp style) - Hidden on mobile */}
+                <div className="hidden md:flex">
+                    <IconSidebar />
+                </div>
 
                 {/* 2. MIDDLE: Chat List */}
                 <div
